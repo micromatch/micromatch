@@ -7,14 +7,18 @@
 
 'use strict';
 
-var braces = require('braces')
+var braces = require('braces');
+
+var dotfile = '[^\\/]+';
+var matchBase = '[\\s\\S]+';
 
 var tokens = [
   ['\\\\', {re: /\\{2}/g, to: '\\/'}],
   ['/',    {re: /\//g, to: '\\/'}],
-  ['.',    {re: /[.]/g,  to: '\.'}],
+  ['.',    {re: /[.]/g,  to: '\\.'}],
   ['**',   {re: /[*]{2}/g,  to: '[\\s\\S]+'}],
-  ['*',    {re: /[*]/g,  to: '[^\\/]+', matchBase: '[\\s\\S]+'}]
+  ['*',    {re: /[*]/g,  to: '[^\\/]+', matchBase: matchBase, dotfiles: dotfile}],
+  ['?',    {re: /\?/g, to: '.'}],
 ];
 
 module.exports.makeRe = function makeRe(str, options) {
@@ -32,11 +36,23 @@ module.exports.makeRe = function makeRe(str, options) {
     var token = group[0];
     var re = group[1].re;
     var to = group[1].to;
-    if (token === '*' && opts.matchBase) {
-      to = group[1].matchBase;
+
+    for (var key in opts) {
+      if (group[1].hasOwnProperty(key)) {
+        to = group[1][key];
+      }
     }
+
     str = str.replace(re, to);
   }
+
+  // if (/\?/.test(str)) {
+  //   var qu = /(\?+)/.exec(str);
+  //   while (str.indexOf('?') !== -1) {
+  //     var num = qu[1].length;
+  //     str = str.replace(qu[0], '.' + '{' + num + '}');
+  //   }
+  // }
 
   if (opts.nocase) f += 'i';
 
