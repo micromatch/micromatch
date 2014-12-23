@@ -29,22 +29,33 @@ npm i micromatch --save
 
 ## Usage
 
+### micromatch()
+
 ```js
 var micromatch = require('micromatch');
 
-mm(['a.js', 'b.md', 'c.txt'], '*.{js,txt}');
+micromatch(['a.js', 'b.md', 'c.txt'], '*.{js,txt}');
 //=> ['a.js', 'c.txt']
 ```
 
-Also supports negation patterns:
-
+**Negation patterns:**
 
 ```js
-mm(['a.js', 'b.md', 'c.txt'], '!*.{js,txt}');
+micromatch(['a.js', 'b.md', 'c.txt'], '!*.{js,txt}');
 //=> ['b.md']
 
-mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']);
+micromatch(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']);
 //=> ['a.md', 'd.json']
+```
+
+### micromatch.matchRe()
+
+Generate a regular expression for matching file paths based on the given pattern:
+
+```js
+var
+micromatch.makeRe('a/?/c.md');
+//=> /^a\/.\/c\.md$/
 ```
 
 
