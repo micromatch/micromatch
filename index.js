@@ -13,7 +13,6 @@ var diff = require('arr-diff');
 var braces = require('braces');
 
 function makeRe(glob, options) {
-  glob = unixify(glob);
   var opts = options || {};
   var flags = '';
   var i = 0;
@@ -26,23 +25,19 @@ function makeRe(glob, options) {
 
   cache = cache || glob;
   if (cache !== glob) {
+    glob = unixify(glob);
     regex = null;
     cache = glob;
   }
 
+  // if `true`, then we can just return
+  // the regex that was previously cached
   if (regex instanceof RegExp) {
     return regex;
   }
 
   if (/\{/.test(glob)) {
-    if (!isBasicBrace(glob)) {
-      glob = glob.replace(/\{([^{]+)\}/g, function (_, inner) {
-        var parts = inner.split(',').join('|');
-        return '(' + parts + ')';
-      });
-    } else {
-      glob = braces(glob).join('|');
-    }
+    glob = expand(glob);
   }
 
   while (i < len) {
@@ -50,6 +45,7 @@ function makeRe(glob, options) {
     var re = group[1].re;
     var to = group[1].to;
 
+    // apply special cases from options
     for (var key in opts) {
       if (group[1].hasOwnProperty(key)) {
         to += group[1][key];
@@ -60,11 +56,9 @@ function makeRe(glob, options) {
 
   if (opts.nocase) flags += 'i';
 
-  var res = /^!/.test(glob)
-    ? '^(?!((?!\\.)' + glob.slice(1) + ')$)'
-    : '^' + glob + '$';
-
-  regex = new RegExp(res, flags);
+  // cache the regex
+  regex = globRegex(glob, flags);
+  // return the result
   return regex;
 }
 
@@ -91,7 +85,7 @@ function match(files, pattern, options) {
   var i = 0;
 
   while (i < len) {
-    var fp = files[i++];
+    var fp = unixify(files[i++]);
     if (makeRe(pattern, options).test(fp)) {
       res.push(fp);
     }
@@ -137,6 +131,50 @@ function micromatch(files, patterns, opts) {
     res = concat(res, match(files, glob, opts));
   }
   return res;
+}
+
+/**
+ * Create the regex to do the matching. If
+ * the leading character in the `glob` is `!`
+ * a negation regex is returned.
+ *
+ * @param {String} `glob`
+ * @param {String} `flags`
+ */
+
+function globRegex(glob, flags) {
+  var  res = '^' + glob + '$';
+  if (/^!/.test(glob)) {
+    res = '^(?!((?!\\.)' + glob.slice(1) + ')$)';
+  }
+  return new RegExp(res, flags);
+}
+
+/**
+ * Regex for matching single-level braces
+ */
+
+function bracesRegex() {
+  return /\{([^{]+)\}/g;
+}
+
+/**
+ * Expand braces in the given glob pattern.
+ *
+ * @param  {String} `glob`
+ * @return {String}
+ */
+
+function expand (glob) {
+  if (!isBasicBrace(glob)) {
+    // avoid sending the glob to the `braces` lib if possible
+    return glob.replace(bracesRegex(), function (_, inner) {
+      return '(' + inner.split(',').join('|') + ')';
+    });
+  } else {
+    // if it's nested, we'll use `braces`
+    return braces(glob).join('|');
+  }
 }
 
 /**
