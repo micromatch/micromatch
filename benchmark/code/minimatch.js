@@ -1,1 +1,3 @@
-module.exports = require('minimatch').braceExpand;
+'use strict';
+
+module.exports = require('minimatch').match;
