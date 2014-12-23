@@ -7,15 +7,21 @@
 
 'use strict';
 
+var path = require('path');
 var should = require('should');
 var mm = require('..');
 
-// in two cases below (out of hundreds), minimatch generates
-// a regex that returns a different answer.  I need to check
-// the spec before "fixing" these since minimatch is nowhere
-// close to meeting spec
-
 describe('micromatch string patterns', function () {
+  describe('file extensions:', function () {
+    it('should unixify file paths', function () {
+      path.sep = '\\';
+      mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
+      mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
+      mm(['E:\\a\\b\\c.md'], 'E:\\**/*.md').should.eql(['/a/b/c.md']);
+      mm(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
+    });
+  });
+
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
       mm(['.md'], '.md').should.eql(['.md']);
@@ -130,9 +136,9 @@ describe('micromatch string patterns', function () {
 
     it('should create a regular expression for negating files with extensions:', function () {
       mm(['abc.md'], '!*.md').should.eql([]);
-      // mm(['abc.txt'], '!*.md').should.eql(['abc.txt']);
-      // mm(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
-      // mm(['.dotfile.txt'], '!*.md').should.eql(['.dotfile.txt']);
+      mm(['abc.txt'], '!*.md').should.eql(['abc.txt']);
+      mm(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
+      mm(['.dotfile.txt'], '!*.md').should.eql(['.dotfile.txt']);
     });
 
     it('should create a regular expression for slashes:', function () {
@@ -204,9 +210,9 @@ describe('micromatch string patterns', function () {
       mm(['.gitignore.md'], '*.md', {dot: true}).should.eql(['.gitignore.md']);
       mm(['a/b/c/.gitignore.md'], '*.md').should.eql([]);
       mm(['a/b/c/.gitignore.md'], '**/*.md').should.eql(['a/b/c/.gitignore.md']);
-      // mm(['a/b/c/.gitignore.md'], '**/.*.md').should.eql();
-      // mm(['a/b/c/.gitignore.md'], '**/.*').should.eql();
-      // mm(['a/b/c/.verb.md'], '**/*.md'], {dot: true}).should.eql();
+      // mm(['a/b/c/.gitignore.md'], '**/.*.md').should.eql([]);
+      // mm(['a/b/c/.gitignore.md'], '**/.*').should.eql([]);
+      // mm(['a/b/c/.verb.md'], '**/*.md', {dot: true}).should.eql([]);
     });
   });
 });
