@@ -17,12 +17,14 @@ function makeRe(glob, options) {
   var flags = '';
   var i = 0;
 
+  // only recompile regex if options change
   optsCache = optsCache || opts;
   if (!equal(optsCache, opts)) {
     regex = null;
     cache = glob;
   }
 
+  // only recompile regex if glob changes
   cache = cache || glob;
   if (cache !== glob) {
     glob = unixify(glob);
@@ -169,7 +171,7 @@ function bracesRegex() {
 
 function expand (glob) {
   if (!isBasicBrace(glob)) {
-    // avoid sending the glob to the `braces` lib if possible
+    // avoid sending the glob to the `braces` lib if not necessary
     return glob.replace(bracesRegex(), function (_, inner) {
       return '(' + inner.split(',').join('|') + ')';
     });
@@ -230,7 +232,6 @@ function equal(a, b) {
       return false;
     }
   }
-
   return true;
 }
 
