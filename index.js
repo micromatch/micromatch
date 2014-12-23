@@ -36,10 +36,12 @@ function makeRe(glob, options) {
     return regex;
   }
 
+  // expand `{1..5}` braces
   if (/\{/.test(glob)) {
     glob = expand(glob);
   }
 
+  var len = tokens.length;
   while (i < len) {
     var group = tokens[i++];
     var re = group[1].re;
@@ -273,8 +275,6 @@ var tokens = [
   ['**',   {re: /[*]{2}/g,  to: '[\\s\\S]+'}],
   ['*',    {re: /[*]/g,     to: '[^\\/]*?', matchBase: matchBase, dot: dotfile}],
 ];
-
-var len = tokens.length;
 
 /**
  * Expose `micromatch`
