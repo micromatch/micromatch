@@ -58,10 +58,11 @@ function makeRe(glob, options) {
   }
 
   if (/\{/.test(glob)) {
-    if (!/\{.*\{/.test(glob)) {
-      glob = glob.replace(/\{/g, '(');
-      glob = glob.replace(/,/g, '|');
-      glob = glob.replace(/\}/g, ')');
+    if (!isNested(glob)) {
+      glob = glob.replace(/\{([^{]+)\}/g, function (_, inner) {
+        var parts = inner.split(',').join('|');
+        return '(' + parts + ')';
+      });
     } else {
       glob = braces(glob).join('|');
     }
@@ -88,6 +89,23 @@ function makeRe(glob, options) {
 
   regex = new RegExp(res, flags);
   return regex;
+}
+
+function isNested(str) {
+  var a = str.indexOf('{');
+  str = str.slice(a + 1);
+  var i = 0;
+
+  while (a !== -1) {
+    var ch = str.charAt(i++);
+    if (ch === '{') {
+      return true;
+    }
+    if (ch === '}') {
+      return false;
+    }
+  }
+  return false;
 }
 
 function equal(a, b) {
@@ -122,9 +140,31 @@ function match(files, pattern, options) {
   return res;
 }
 
-function micromatch(files, patterns, options) {
-  options = options || {};
+function micromatch(files, patterns, opts) {
+  opts = opts || {};
 
+  if (!files || !patterns) return [];
+  files = arrayify(files);
+
+  if (typeof patterns === 'string') {
+    return union([], match(files, patterns, opts));
+  }
+
+  var len = patterns.length;
+  var res = [];
+  var i = 0;
+
+  while (len--) {
+    var glob = patterns[i++];
+    if (glob.charAt(0) === '!') {
+      glob = glob.slice(1);
+    } else {
+      diff = union;
+    }
+    res = diff(res, match(files, glob, opts));
+  }
+
+  return res;
 }
 
 function arrayify(val) {
