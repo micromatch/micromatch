@@ -12,29 +12,6 @@ var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
 
-/**
- * Special patterns
- */
-
-var matchBase = '[\\s\\S]+';
-var dotfile = '[^\\/]*?';
-
-/**
- * Glob tokens to match and replace with
- * regular expressions
- */
-
-var tokens = [
-  ['\\\\', {re: /\\{2}/g, to: '\\/'}],
-  ['/',    {re: /\//g, to: '\\/'}],
-  ['.',    {re: /[.]/g,  to: '\\.'}],
-  ['?',    {re: /\?/g, to: '.'}],
-  ['**',   {re: /[*]{2}/g,  to: '[\\s\\S]+'}],
-  ['*',    {re: /[*]/g,  to: '[^\\/]*?', matchBase: matchBase, dot: dotfile}],
-];
-
-var len = tokens.length;
-
 function makeRe(glob, options) {
   glob = unixify(glob);
   var opts = options || {};
@@ -58,7 +35,7 @@ function makeRe(glob, options) {
   }
 
   if (/\{/.test(glob)) {
-    if (!isNested(glob)) {
+    if (!isBasicBrace(glob)) {
       glob = glob.replace(/\{([^{]+)\}/g, function (_, inner) {
         var parts = inner.split(',').join('|');
         return '(' + parts + ')';
@@ -91,35 +68,17 @@ function makeRe(glob, options) {
   return regex;
 }
 
-function isNested(str) {
-  var a = str.indexOf('{');
-  str = str.slice(a + 1);
-  var i = 0;
-
-  while (a !== -1) {
-    var ch = str.charAt(i++);
-    if (ch === '{') {
-      return true;
-    }
-    if (ch === '}') {
-      return false;
-    }
-  }
-  return false;
-}
-
-function equal(a, b) {
-  if (!b) return a;
-  for (var prop in b) {
-    if (!a.hasOwnProperty(prop)) {
-      return false;
-    }
-    if (a[prop] !== b[prop]) {
-      return false;
-    }
-  }
-  return true;
-}
+/**
+ * Pass an array of files and a glob pattern as a string.
+ * This function is called by the main `micromatch` function
+ * If you only need to pass a single pattern you might get
+ * minor speed improvements using this function.
+ *
+ * @param  {Array} `files`
+ * @param  {Array} `pattern`
+ * @param  {Object} `options`
+ * @return {Array}
+ */
 
 function match(files, pattern, options) {
   if (typeof files !== 'string' && !Array.isArray(files)) {
@@ -140,11 +99,23 @@ function match(files, pattern, options) {
   return res;
 }
 
-function micromatch(files, patterns, opts) {
-  opts = opts || {};
+/**
+ * The main function. Pass an array of filepaths,
+ * and a string or array of glob patterns
+ *
+ * @param  {Array|String} `files`
+ * @param  {Array|String} `patterns`
+ * @param  {Object} `opts`
+ * @return {Array} Array of matches
+ */
 
-  if (!files || !patterns) return [];
+function micromatch(files, patterns, opts) {
+  if (!files || !patterns) {
+    return [];
+  }
+
   files = arrayify(files);
+  opts = opts || {};
 
   if (typeof patterns === 'string') {
     return union([], match(files, patterns, opts));
@@ -156,16 +127,79 @@ function micromatch(files, patterns, opts) {
 
   while (len--) {
     var glob = patterns[i++];
+    var concat = union;
+
     if (glob.charAt(0) === '!') {
       glob = glob.slice(1);
-    } else {
-      diff = union;
+      concat = diff;
     }
-    res = diff(res, match(files, glob, opts));
-  }
 
+    res = concat(res, match(files, glob, opts));
+  }
   return res;
 }
+
+/**
+ * Return `true` if the path contains nested
+ * braces. If so, then the [braces] lib is used
+ * for expansion. if not, we convert the braces
+ * to a regex.
+ *
+ * @param  {String} str
+ * @return {Boolean}
+ */
+
+function isBasicBrace(str) {
+  if (/\.{2}/.test(str)) {
+    return true;
+  }
+
+  var a = str.indexOf('{');
+  str = str.slice(a + 1);
+  var i = 0;
+
+  while (a !== -1) {
+    var ch = str.charAt(i++);
+    if (ch === '{') {
+      return true;
+    }
+    if (ch === '}') {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Return true if object A is equal (enough)
+ * to object B. Used for options caching.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Boolean}
+ */
+
+function equal(a, b) {
+  if (!b) return false;
+
+  for (var prop in b) {
+    if (!a.hasOwnProperty(prop)) {
+      return false;
+    }
+    if (a[prop] !== b[prop]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Coerce `val` to an array
+ *
+ * @param  {*} val
+ * @return {Array}
+ */
 
 function arrayify(val) {
   return !Array.isArray(val)
@@ -180,6 +214,29 @@ function arrayify(val) {
 var regex;
 var cache;
 var optsCache;
+
+/**
+ * Special patterns
+ */
+
+var matchBase = '[\\s\\S]+';
+var dotfile =   '[^\\/]*?';
+
+/**
+ * Glob tokens to match and replace with
+ * regular expressions
+ */
+
+var tokens = [
+  ['\\\\', {re: /\\{2}/g,   to: '\\/'}],
+  ['/',    {re: /\//g,      to: '\\/'}],
+  ['.',    {re: /[.]/g,     to: '\\.'}],
+  ['?',    {re: /\?/g,      to: '.'}],
+  ['**',   {re: /[*]{2}/g,  to: '[\\s\\S]+'}],
+  ['*',    {re: /[*]/g,     to: '[^\\/]*?', matchBase: matchBase, dot: dotfile}],
+];
+
+var len = tokens.length;
 
 /**
  * Expose `micromatch`

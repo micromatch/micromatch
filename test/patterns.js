@@ -27,6 +27,9 @@ describe('micromatch string patterns', function () {
   describe('file names:', function () {
     it('should match files with the given extension:', function () {
       mm(['.md', '.txt'], '*.md').should.eql(['.md']);
+      mm(['a.md', 'b.js', 'c.txt'], '*.{js,txt}').should.eql(['b.js', 'c.txt']);
+      mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
+      mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']).should.eql(['d.json', 'a.md']);
       mm(['.foo.md'], '*.md').should.eql(['.foo.md']);
       mm(['foo.md'], '*.md').should.eql(['foo.md']);
       mm(['a/b/c/foo.md'], '*.md').should.eql([]);
@@ -97,6 +100,7 @@ describe('micromatch string patterns', function () {
       mm(['a/b/c/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
       mm(['a/b/cd/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/xyz.md']);
       mm(['a/b/ce/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/xyz.md']);
+      mm(['a/b.js', 'a/c.js', 'a/d.js', 'a/e.js'], 'a/{c..e}.js').should.eql(['a/c.js', 'a/d.js', 'a/e.js']);
     });
   });
 
@@ -317,11 +321,11 @@ describe('micromatch array patterns', function () {
     });
 
     it('should create a regular expression for negating files with extensions:', function () {
-      mm(['abc.md'], ['!*.md']).should.eql(['abc.md']);
+      mm(['abc.md'], ['!*.md']).should.eql([]);
       mm(['abc.md'], ['!**/*.md']).should.eql([]);
-      // mm(['abc.txt'], ['!*.md']).should.eql(['abc.txt']);
-      // mm(['.dotfile.md'], ['!*.md']).should.eql(['.dotfile.md']);
-      // mm(['.dotfile.txt'], ['!*.md']).should.eql(['.dotfile.txt']);
+      mm(['abc.txt'], ['*', '!*.md']).should.eql(['abc.txt']);
+      mm(['.dotfile.md'], ['!*.md']).should.eql([]);
+      mm(['.dotfile.txt'], ['*', '!*.md']).should.eql(['.dotfile.txt']);
     });
 
     it('should create a regular expression for slashes:', function () {
