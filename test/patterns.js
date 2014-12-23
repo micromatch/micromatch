@@ -1,0 +1,402 @@
+/*!
+ * micromatch <https://github.com/jonschlinkert/micromatch>
+ *
+ * Copyright (c) 2014 Jon Schlinkert, contributors.
+ * Licensed under the MIT License
+ */
+
+'use strict';
+
+var should = require('should');
+var mm = require('..');
+
+// in two cases below (out of hundreds), minimatch generates
+// a regex that returns a different answer.  I need to check
+// the spec before "fixing" these since minimatch is nowhere
+// close to meeting spec
+
+describe('micromatch string patterns', function () {
+  describe('file extensions:', function () {
+    it('should create a regular expression for matching extensions:', function () {
+      mm(['.md'], '.md').should.eql(['.md']);
+      mm(['.txt'], '.md').should.eql([]);
+      mm(['.gitignore'], '.md').should.eql([]);
+    });
+  });
+
+  describe('file names:', function () {
+    it('should match files with the given extension:', function () {
+      mm(['.md', '.txt'], '*.md').should.eql(['.md']);
+      mm(['.foo.md'], '*.md').should.eql(['.foo.md']);
+      mm(['foo.md'], '*.md').should.eql(['foo.md']);
+      mm(['a/b/c/foo.md'], '*.md').should.eql([]);
+    });
+
+    it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
+      mm(['.gitignore'], '*.md').should.eql([]);
+      mm(['.verb.txt'], '*.md').should.eql([]);
+    });
+  });
+
+  describe('file paths:', function () {
+    it('should create a regular expression for file paths:', function () {
+      mm(['.gitignore'], 'a/b/c/*.md').should.eql([]);
+      mm(['.gitignore.md'], 'a/b/c/*.md').should.eql([]);
+      mm(['a/b/c/d.gitignore.md'], 'a/b/c/*.md').should.eql(['a/b/c/d.gitignore.md']);
+      mm(['a/b/d/.gitignore'], 'a/b/c/*.md').should.eql([]);
+      mm(['a/b/c/xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/xyz.md']);
+      mm(['a/b/c/.xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/.xyz.md']);
+      mm(['a/bb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bb/c/xyz.md']);
+      mm(['a/bbbb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bbbb/c/xyz.md']);
+      mm(['a/bb.bb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bb.bb/c/xyz.md']);
+      mm(['a/bb.bb/aa/bb/aa/c/xyz.md'], 'a/**/c/*.md').should.eql(['a/bb.bb/aa/bb/aa/c/xyz.md']);
+      mm(['a/bb.bb/aa/b.b/aa/c/xyz.md'], 'a/**/c/*.md').should.eql(['a/bb.bb/aa/b.b/aa/c/xyz.md']);
+    });
+  });
+
+  describe('special characters:', function () {
+    it('should match one character per question mark:', function () {
+      mm(['a/b/c.md'], 'a/?/c.md').should.eql(['a/b/c.md']);
+      mm(['a/bb/c.md'], 'a/?/c.md').should.eql([]);
+      mm(['a/bb/c.md'], 'a/??/c.md').should.eql(['a/bb/c.md']);
+      mm(['a/bbb/c.md'], 'a/??/c.md').should.eql([]);
+      mm(['a/bbb/c.md'], 'a/???/c.md').should.eql(['a/bbb/c.md']);
+      mm(['a/bbbb/c.md'], 'a/????/c.md').should.eql(['a/bbbb/c.md']);
+    });
+
+    it('should match multiple groups of question marks:', function () {
+      mm(['a/bb/c/dd/e.md'], 'a/?/c/?/e.md').should.eql([]);
+      mm(['a/b/c/d/e.md'], 'a/?/c/?/e.md').should.eql(['a/b/c/d/e.md']);
+      mm(['a/b/c/d/e.md'], 'a/?/c/???/e.md').should.eql([]);
+      mm(['a/b/c/zzz/e.md'], 'a/?/c/???/e.md').should.eql(['a/b/c/zzz/e.md']);
+    });
+
+    it('should use special characters and glob stars together:', function () {
+      mm(['a/b/c/d/e.md'], 'a/?/c/?/*/e.md').should.eql([]);
+      mm(['a/b/c/d/e/e.md'], 'a/?/c/?/*/e.md').should.eql(['a/b/c/d/e/e.md']);
+      mm(['a/b/c/d/efghijk/e.md'], 'a/?/c/?/*/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/b/c/d/efghijk/e.md'], 'a/?/**/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/bb/c/d/efghijk/e.md'], 'a/?/**/e.md').should.eql([]);
+      mm(['a/b/c/d/efghijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/b/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b/c/d/efgh.ijk/e.md']);
+      mm(['a/b.bb/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b.bb/c/d/efgh.ijk/e.md']);
+      mm(['a/bbb/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/bbb/c/d/efgh.ijk/e.md']);
+    });
+  });
+
+  describe('brace expansion:', function () {
+    it('should create a regular brace expansion:', function () {
+      mm(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/d/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/c/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/cd/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/iii.md']);
+      mm(['a/b/ce/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/iii.md']);
+
+      mm(['xyz.md'], 'a/b/c{d,e}/xyz.md').should.eql([]);
+      mm(['a/b/d/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/c/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/cd/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/xyz.md']);
+      mm(['a/b/ce/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/xyz.md']);
+    });
+  });
+
+  describe('double stars:', function () {
+    it('should create a regular expression for double stars:', function () {
+      mm(['.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm(['a/b/z/.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
+
+      mm(['a/b/c/d/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql([]);
+      mm(['a/b/c/j/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/j/e/z/foo.md']);
+      mm(['a/b/c/d/e/j/n/p/o/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
+      mm(['a/b/c/j/e/z/foo.txt'], 'a/**/j/**/z/*.md').should.eql([]);
+
+      mm(['a/b/d/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm(['a/b/c/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm(['a/b/foo/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/foo/cd/bar/xyz.md']);
+      mm(['a/b/baz/ce/fez/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/baz/ce/fez/xyz.md']);
+    });
+  });
+
+  describe('negation', function () {
+    it.skip('should create a regular expression for negating extensions:', function () {
+      mm(['.md'], '!.md').should.eql([]);
+      mm(['foo.md'], '!.md').should.eql(['foo.md']);
+    });
+
+    it('should create a regular expression for negating files with extensions:', function () {
+      mm(['abc.md'], '!*.md').should.eql([]);
+      // mm(['abc.txt'], '!*.md').should.eql(['abc.txt']);
+      // mm(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
+      // mm(['.dotfile.txt'], '!*.md').should.eql(['.dotfile.txt']);
+    });
+
+    it('should create a regular expression for slashes:', function () {
+      mm(['.gitignore'], 'a/b/c/*.md').should.eql([]);
+      mm(['a/b/c/.gitignore'], 'a/b/c/*.md').should.eql([]);
+      mm(['a/b/c/foo.md'], 'a/b/c/*.md').should.eql(['a/b/c/foo.md']);
+      mm(['a/b/c/bar.md'], 'a/b/c/*.md').should.eql(['a/b/c/bar.md']);
+    });
+
+    it('should create a regex for brace expansion:', function () {
+      mm(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/d/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/c/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/cd/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/iii.md']);
+      mm(['a/b/ce/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/iii.md']);
+
+      mm(['xyz.md'], 'a/b/c{d,e}/xyz.md').should.eql([]);
+      mm(['a/b/d/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/c/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+      mm(['a/b/cd/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/xyz.md']);
+      mm(['a/b/ce/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/xyz.md']);
+      mm(['a/b/cef/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cef/xyz.md']);
+      mm(['a/b/ceg/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/ceg/xyz.md']);
+      mm(['a/b/cd/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cd/xyz.md']);
+    });
+
+    it('should create a regular expression for double stars:', function () {
+      mm(['.gitignore'], 'a/**/z/*.md').should.eql([]);
+
+      mm(['a/b/z/.dotfile.md'], 'a/**/z/*.md').should.eql(['a/b/z/.dotfile.md']);
+      mm(['a/b/z/.dotfile'], 'a/**/z/*.md').should.eql([]);
+      mm(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
+
+      mm(['a/b/c/d/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql([]);
+      mm(['a/b/c/j/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/j/e/z/foo.md']);
+      mm(['a/b/c/d/e/j/n/p/o/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
+      mm(['a/b/c/j/e/z/foo.txt'], 'a/**/j/**/z/*.md').should.eql([]);
+
+      mm(['a/b/d/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm(['a/b/c/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm(['a/b/foo/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/foo/cd/bar/xyz.md']);
+      mm(['a/b/baz/ce/fez/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/baz/ce/fez/xyz.md']);
+    });
+  });
+
+
+  describe('options', function () {
+    it('should support the `matchBase` option:', function () {
+      mm(['a/b/c/foo.md'], '*.md').should.eql([]);
+      // mm(['a/b/c/foo.md'], '*.md', {matchBase: true}).should.eql();
+    });
+
+    it('should support the `nocase` option:', function () {
+      mm(['a/b/d/e.md'], 'a/b/c/*.md').should.eql([]);
+      mm(['a/b/c/e.md'], 'A/b/C/*.md').should.eql([]);
+      mm(['a/b/c/e.md'], 'A/b/C/*.md', {nocase: true}).should.eql(['a/b/c/e.md']);
+      mm(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
+    });
+
+    it('should match dotfiles when `dotfile` is true:', function () {
+      mm(['.gitignore'], '.gitignore', {dot: true}).should.eql(['.gitignore']);
+      mm(['foo.md'], '*.md', {dot: true}).should.eql(['foo.md']);
+      mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
+      mm(['a/b/c/.gitignore'], '*.md', {dot: true}).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], '*.md', {dot: true}).should.eql([]);
+      mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
+      mm(['.gitignore'], '*.md', {dot: true}).should.eql([]);
+      mm(['.gitignore'], '*.*', {dot: true}).should.eql(['.gitignore']);
+      mm(['.gitignore.md'], '*.md', {dot: true}).should.eql(['.gitignore.md']);
+      mm(['a/b/c/.gitignore.md'], '*.md').should.eql([]);
+      mm(['a/b/c/.gitignore.md'], '**/*.md').should.eql(['a/b/c/.gitignore.md']);
+      // mm(['a/b/c/.gitignore.md'], '**/.*.md').should.eql();
+      // mm(['a/b/c/.gitignore.md'], '**/.*').should.eql();
+      // mm(['a/b/c/.verb.md'], '**/*.md'], {dot: true}).should.eql();
+    });
+  });
+});
+
+describe('micromatch array patterns', function () {
+  describe('file extensions:', function () {
+    it('should create a regular expression for matching extensions:', function () {
+      mm(['.md'], ['.md']).should.eql(['.md']);
+      mm(['.txt'], ['.md']).should.eql([]);
+      mm(['.gitignore'], ['.md']).should.eql([]);
+    });
+  });
+
+  describe('file names:', function () {
+    it('should match files with the given extension:', function () {
+      mm(['.md', '.txt'], ['*.md']).should.eql(['.md']);
+      mm(['.foo.md'], ['*.md']).should.eql(['.foo.md']);
+      mm(['foo.md'], ['*.md']).should.eql(['foo.md']);
+      mm(['a/b/c/foo.md'], ['*.md']).should.eql([]);
+    });
+
+    it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
+      mm(['.gitignore'], ['*.md']).should.eql([]);
+      mm(['.verb.txt'], ['*.md']).should.eql([]);
+    });
+  });
+
+  describe('file paths:', function () {
+    it('should create a regular expression for file paths:', function () {
+      mm(['.gitignore'], ['a/b/c/*.md']).should.eql([]);
+      mm(['.gitignore.md'], ['a/b/c/*.md']).should.eql([]);
+      mm(['a/b/c/d.gitignore.md'], ['a/b/c/*.md']).should.eql(['a/b/c/d.gitignore.md']);
+      mm(['a/b/d/.gitignore'], ['a/b/c/*.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/c/*.md']).should.eql(['a/b/c/xyz.md']);
+      mm(['a/b/c/.xyz.md'], ['a/b/c/*.md']).should.eql(['a/b/c/.xyz.md']);
+      mm(['a/bb/c/xyz.md'], ['a/*/c/*.md']).should.eql(['a/bb/c/xyz.md']);
+      mm(['a/bbbb/c/xyz.md'], ['a/*/c/*.md']).should.eql(['a/bbbb/c/xyz.md']);
+      mm(['a/bb.bb/c/xyz.md'], ['a/*/c/*.md']).should.eql(['a/bb.bb/c/xyz.md']);
+      mm(['a/bb.bb/aa/bb/aa/c/xyz.md'], ['a/**/c/*.md']).should.eql(['a/bb.bb/aa/bb/aa/c/xyz.md']);
+      mm(['a/bb.bb/aa/b.b/aa/c/xyz.md'], ['a/**/c/*.md']).should.eql(['a/bb.bb/aa/b.b/aa/c/xyz.md']);
+    });
+  });
+
+  describe('special characters:', function () {
+    it('should match one character per question mark:', function () {
+      mm(['a/b/c.md'], ['a/?/c.md']).should.eql(['a/b/c.md']);
+      mm(['a/bb/c.md'], ['a/?/c.md']).should.eql([]);
+      mm(['a/bb/c.md'], ['a/??/c.md']).should.eql(['a/bb/c.md']);
+      mm(['a/bbb/c.md'], ['a/??/c.md']).should.eql([]);
+      mm(['a/bbb/c.md'], ['a/???/c.md']).should.eql(['a/bbb/c.md']);
+      mm(['a/bbbb/c.md'], ['a/????/c.md']).should.eql(['a/bbbb/c.md']);
+    });
+
+    it('should match multiple groups of question marks:', function () {
+      mm(['a/bb/c/dd/e.md'], ['a/?/c/?/e.md']).should.eql([]);
+      mm(['a/b/c/d/e.md'], ['a/?/c/?/e.md']).should.eql(['a/b/c/d/e.md']);
+      mm(['a/b/c/d/e.md'], ['a/?/c/???/e.md']).should.eql([]);
+      mm(['a/b/c/zzz/e.md'], ['a/?/c/???/e.md']).should.eql(['a/b/c/zzz/e.md']);
+    });
+
+    it('should use special characters and glob stars together:', function () {
+      mm(['a/b/c/d/e.md'], ['a/?/c/?/*/e.md']).should.eql([]);
+      mm(['a/b/c/d/e/e.md'], ['a/?/c/?/*/e.md']).should.eql(['a/b/c/d/e/e.md']);
+      mm(['a/b/c/d/efghijk/e.md'], ['a/?/c/?/*/e.md']).should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/b/c/d/efghijk/e.md'], ['a/?/**/e.md']).should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/bb/c/d/efghijk/e.md'], ['a/?/**/e.md']).should.eql([]);
+      mm(['a/b/c/d/efghijk/e.md'], ['a/*/?/**/e.md']).should.eql(['a/b/c/d/efghijk/e.md']);
+      mm(['a/b/c/d/efgh.ijk/e.md'], ['a/*/?/**/e.md']).should.eql(['a/b/c/d/efgh.ijk/e.md']);
+      mm(['a/b.bb/c/d/efgh.ijk/e.md'], ['a/*/?/**/e.md']).should.eql(['a/b.bb/c/d/efgh.ijk/e.md']);
+      mm(['a/bbb/c/d/efgh.ijk/e.md'], ['a/*/?/**/e.md']).should.eql(['a/bbb/c/d/efgh.ijk/e.md']);
+    });
+  });
+
+  describe('brace expansion:', function () {
+    it('should create a regular brace expansion:', function () {
+      mm(['iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/d/iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/c/iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/cd/iii.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/cd/iii.md']);
+      mm(['a/b/ce/iii.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/ce/iii.md']);
+
+      mm(['xyz.md'], ['a/b/c{d,e}/xyz.md']).should.eql([]);
+      mm(['a/b/d/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/cd/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/cd/xyz.md']);
+      mm(['a/b/ce/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/ce/xyz.md']);
+    });
+  });
+
+  describe('double stars:', function () {
+    it('should create a regular expression for double stars:', function () {
+      mm(['.gitignore'], ['a/**/z/*.md']).should.eql([]);
+      mm(['a/b/z/.gitignore'], ['a/**/z/*.md']).should.eql([]);
+      mm(['a/b/c/d/e/z/foo.md'], ['a/**/z/*.md']).should.eql(['a/b/c/d/e/z/foo.md']);
+
+      mm(['a/b/c/d/e/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql([]);
+      mm(['a/b/c/j/e/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql(['a/b/c/j/e/z/foo.md']);
+      mm(['a/b/c/d/e/j/n/p/o/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
+      mm(['a/b/c/j/e/z/foo.txt'], ['a/**/j/**/z/*.md']).should.eql([]);
+
+      mm(['a/b/d/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
+      mm(['a/b/foo/cd/bar/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/foo/cd/bar/xyz.md']);
+      mm(['a/b/baz/ce/fez/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/baz/ce/fez/xyz.md']);
+    });
+  });
+
+  describe('negation', function () {
+    it.skip('should create a regular expression for negating extensions:', function () {
+      mm(['.md'], ['!.md']).should.eql([]);
+      mm(['foo.md'], ['!.md']).should.eql(['foo.md']);
+    });
+
+    it('should create a regular expression for negating files with extensions:', function () {
+      mm(['abc.md'], ['!*.md']).should.eql(['abc.md']);
+      mm(['abc.md'], ['!**/*.md']).should.eql([]);
+      // mm(['abc.txt'], ['!*.md']).should.eql(['abc.txt']);
+      // mm(['.dotfile.md'], ['!*.md']).should.eql(['.dotfile.md']);
+      // mm(['.dotfile.txt'], ['!*.md']).should.eql(['.dotfile.txt']);
+    });
+
+    it('should create a regular expression for slashes:', function () {
+      mm(['.gitignore'], ['a/b/c/*.md']).should.eql([]);
+      mm(['a/b/c/.gitignore'], ['a/b/c/*.md']).should.eql([]);
+      mm(['a/b/c/foo.md'], ['a/b/c/*.md']).should.eql(['a/b/c/foo.md']);
+      mm(['a/b/c/bar.md'], ['a/b/c/*.md']).should.eql(['a/b/c/bar.md']);
+    });
+
+    it('should create a regex for brace expansion:', function () {
+      mm(['iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/d/iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/c/iii.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/cd/iii.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/cd/iii.md']);
+      mm(['a/b/ce/iii.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/ce/iii.md']);
+
+      mm(['xyz.md'], ['a/b/c{d,e}/xyz.md']).should.eql([]);
+      mm(['a/b/d/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
+      mm(['a/b/cd/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/cd/xyz.md']);
+      mm(['a/b/ce/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/ce/xyz.md']);
+      mm(['a/b/cef/xyz.md'], ['a/b/c{d,e{f,g}}/*.md']).should.eql(['a/b/cef/xyz.md']);
+      mm(['a/b/ceg/xyz.md'], ['a/b/c{d,e{f,g}}/*.md']).should.eql(['a/b/ceg/xyz.md']);
+      mm(['a/b/cd/xyz.md'], ['a/b/c{d,e{f,g}}/*.md']).should.eql(['a/b/cd/xyz.md']);
+    });
+
+    it('should create a regular expression for double stars:', function () {
+      mm(['.gitignore'], ['a/**/z/*.md']).should.eql([]);
+
+      mm(['a/b/z/.dotfile.md'], ['a/**/z/*.md']).should.eql(['a/b/z/.dotfile.md']);
+      mm(['a/b/z/.dotfile'], ['a/**/z/*.md']).should.eql([]);
+      mm(['a/b/c/d/e/z/foo.md'], ['a/**/z/*.md']).should.eql(['a/b/c/d/e/z/foo.md']);
+
+      mm(['a/b/c/d/e/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql([]);
+      mm(['a/b/c/j/e/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql(['a/b/c/j/e/z/foo.md']);
+      mm(['a/b/c/d/e/j/n/p/o/z/foo.md'], ['a/**/j/**/z/*.md']).should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
+      mm(['a/b/c/j/e/z/foo.txt'], ['a/**/j/**/z/*.md']).should.eql([]);
+
+      mm(['a/b/d/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
+      mm(['a/b/foo/cd/bar/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/foo/cd/bar/xyz.md']);
+      mm(['a/b/baz/ce/fez/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/baz/ce/fez/xyz.md']);
+    });
+  });
+
+
+  describe('options', function () {
+    it('should support the `matchBase` option:', function () {
+      mm(['a/b/c/foo.md'], ['*.md']).should.eql([]);
+      // mm(['a/b/c/foo.md'], ['*.md'], {matchBase: true}).should.eql();
+    });
+
+    it('should support the `nocase` option:', function () {
+      mm(['a/b/d/e.md'], ['a/b/c/*.md']).should.eql([]);
+      mm(['a/b/c/e.md'], ['A/b/C/*.md']).should.eql([]);
+      mm(['a/b/c/e.md'], ['A/b/C/*.md'], {nocase: true}).should.eql(['a/b/c/e.md']);
+      mm(['a/b/c/e.md'], ['A/b/C/*.MD'], {nocase: true}).should.eql(['a/b/c/e.md']);
+      mm(['a/b/c.d/e.md'], ['A/b/C.d/*.MD'], {nocase: true}).should.eql(['a/b/c.d/e.md']);
+    });
+
+    it('should match dotfiles when `dotfile` is true:', function () {
+      mm(['.gitignore'], ['.gitignore'], {dot: true}).should.eql(['.gitignore']);
+      mm(['foo.md'], ['*.md'], {dot: true}).should.eql(['foo.md']);
+      mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['a/b/c/.gitignore'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['.gitignore'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['.gitignore'], ['*.*'], {dot: true}).should.eql(['.gitignore']);
+      mm(['.gitignore.md'], ['*.md'], {dot: true}).should.eql(['.gitignore.md']);
+      mm(['a/b/c/.gitignore.md'], ['*.md']).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], ['**/*.md']).should.eql(['a/b/c/.gitignore.md']);
+      // mm(['a/b/c/.gitignore.md'], ['**/.*.md']).should.eql();
+      // mm(['a/b/c/.gitignore.md'], ['**/.*']).should.eql();
+      // mm(['a/b/c/.verb.md'], ['**/*.md'], {dot: true}).should.eql();
+    });
+  });
+});
