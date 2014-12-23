@@ -3,7 +3,8 @@
 > Glob matching for javascript/node.js. Like minimatch, but 10-40x faster.
 
  - 5-40x faster than minimatch ([benchmarks](#benchmarks))
- - Extensice unit tests, well-organized code-base
+ - Focus on core Bash 4.3 specification features that are actually used (or can be used) in node.js
+ - Extensive unit tests
 
 ## Features
 
