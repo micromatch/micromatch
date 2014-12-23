@@ -25,11 +25,19 @@
   "scripts": {
     "test": "mocha -R spec"
   },
+  "dependencies": {
+    "arr-diff": "^0.2.2",
+    "arr-union": "^1.0.0",
+    "braces": "^0.1.5",
+    "unixify": "^0.1.0"
+  },
   "devDependencies": {
     "benchmarked": "^0.1.3",
+    "chalk": "^0.5.1",
     "minimatch": "^2.0.1",
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "write": "^0.1.1"
   },
   "keywords": [
     "bash",
@@ -48,8 +56,5 @@
     "regex",
     "regular",
     "shell"
-  ],
-  "dependencies": {
-    "braces": "^0.1.5"
-  }
+  ]
 }
