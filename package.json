@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
-  "description": "Like minimatch, but faster.",
-  "version": "0.1.0",
+  "description": "Glob matching for javascript/node.js. Like minimatch, but 10-40x faster.",
+  "version": "0.2.0",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": {
     "name": "Jon Schlinkert",
