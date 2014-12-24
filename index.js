@@ -84,13 +84,14 @@ function match(files, pattern, options) {
   }
 
   files = arrayify(files);
+  var regex = makeRe(pattern, options);
   var len = files.length;
   var res = [];
   var i = 0;
 
   while (i < len) {
     var fp = unixify(files[i++]);
-    if (makeRe(pattern, options).test(fp)) {
+    if (regex.test(fp)) {
       res.push(fp);
     }
   }
