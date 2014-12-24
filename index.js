@@ -14,7 +14,7 @@ var braces = require('braces');
 
 function makeRe(glob, options) {
   var opts = options || {};
-  var flags = '';
+  var flags = opts.flags || '';
   var i = 0;
 
   // only recompile regex if options change
