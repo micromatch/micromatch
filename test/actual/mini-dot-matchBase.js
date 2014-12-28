@@ -1,3 +1,12 @@
+var actual = fn("a");
+actual.should.eql(/^(?:a)$/);
+
+var actual = fn("a/");
+actual.should.eql(/^(?:a\/)$/);
+
+var actual = fn("a/*");
+actual.should.eql(/^(?:a\/(?!(?:^|\/)\.{1,2}(?:$|\/))(?=.)[^/]*?)$/);
+
 var actual = fn(".*");
 actual.should.eql(/^(?:(?=.)\.[^/]*?)$/);
 

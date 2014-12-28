@@ -8,11 +8,11 @@
 'use strict';
 
 var path = require('path');
+var filenameRe = require('filename-regex');
 var unixify = require('unixify');
 var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
-var filenameRe = /(?:[^\\\/.]*)(?:\.[^.\\\/]*$|$)/;
 
 
 /**
@@ -20,7 +20,7 @@ var filenameRe = /(?:[^\\\/.]*)(?:\.[^.\\\/]*$|$)/;
  *
  * This function is called by the main `micromatch` function
  * If you only need to pass a single pattern you might get
- * minor speed improvements using this function.
+ * very minor speed improvements using this function.
  *
  * @param  {Array} `files`
  * @param  {Array} `pattern`
@@ -36,6 +36,12 @@ function match(files, pattern, options) {
   var opts = options || {};
 
   files = arrayify(files);
+
+  var negate = opts.negate || pattern.charAt(0) === '!';
+  if (negate) {
+    pattern = pattern.slice(1);
+  }
+
   var regex = makeRe(pattern, opts);
   var len = files.length;
   var res = [];
@@ -43,19 +49,30 @@ function match(files, pattern, options) {
 
   while (i < len) {
     var file = files[i++];
-    var fp = unixify(file);
-    if (!/\//.test(fp)) {
-      regex = makeRe(pattern.replace(/\/?\*\*\/?/, ''), opts);
+    // var fp = unixify(file);
+    var fp = file.replace(/[\\\/]/g, '/');
+    console.log(fp)
+
+    if (!/\//.test(fp) && /\*\*/.test(pattern)) {
+      regex = baseRe(pattern, opts);
     }
 
     if (opts.matchBase) {
-      var filename = fp.match(filenameRe)[0];
+      var filename = fp.match(filenameRe())[0];
       if (regex.test(filename)) {
         res.push(fp);
       }
     } else if (regex.test(fp)) {
       res.push(fp);
     }
+  }
+
+  if (negate) {
+    return diff(files, res);
+  }
+
+  if (opts.nonull && !res.length) {
+    return pattern;
   }
   return res;
 }
@@ -208,7 +225,7 @@ var star        = '(%~=.)\\.' + slashQ;
 var dotstarbase = function(dot) {
   var re = dot ? ('(%~:^|\\/)' + dots + '(%~:$|\\/)') : '\\.';
   return '(%~!' + re + ')(%~=.)';
-}
+};
 
 var dotstars = function (dot) {
   var re = dot ? '(%~:' + dots + ')($|\\/)': '\\.';
@@ -243,7 +260,7 @@ function makeRe(glob, options) {
     return regex;
   }
 
-  var negate = opts.negate || glob.charAt(0) === '!';
+  var negate = glob.charAt(0) === '!';
   if (negate) {
     glob = glob.slice(1);
   }
@@ -257,6 +274,8 @@ function makeRe(glob, options) {
   }
 
   glob = glob.replace(/\[/g, dotstarbase(opts.dot) + '[');
+  glob = glob.replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2[^/]%%%~[^/]%%%~');
+  glob = glob.replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ);
   glob = glob.replace(/\*\.\*/g, stardot(opts.dot) + slashStar);
   glob = glob.replace(/^\.\*/g, star);
   glob = glob.replace(/\/\.\*/g, '\\/' + star);
@@ -266,12 +285,13 @@ function makeRe(glob, options) {
   glob = glob.replace(/\//g, '\\/');
   glob = glob.replace(/\.(\w+|$)/g, '\\.$1');
   glob = glob.replace(/\*\*/g, dotstars(opts.dot));
+  glob = glob.replace(/(?!\/)\*$/g, slashQ);
   glob = glob.replace(/\*/g, stardot(opts.dot));
 
   // clean up
   glob = glob.replace(/%~/g, '?');
   glob = glob.replace(/%%/g, '*');
-  glob = glob.replace(/\\+\//g, '\\/');
+  glob = glob.replace(/[\\]+\//g, '\\/');
   glob = glob.replace(/\[\^\\\/\]/g, '[^/]');
 
   if (opts.nocase) flags += 'i';
@@ -297,6 +317,20 @@ function globRegex(glob, negate) {
     : glob;
   return '^' + glob;
 }
+
+/**
+ * Create a regular expression for matching basenames
+ *
+ * @param  {String} pattern
+ * @param  {Object} opts
+ * @return {RegExp}
+ */
+
+function baseRe(pattern, opts) {
+  var re = pattern + '|' + pattern.replace(/\/?\*\*\/?/, '');
+  return makeRe(re, opts);
+}
+
 
 /**
  * Results cache
