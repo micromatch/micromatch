@@ -211,9 +211,8 @@ function arrayify(val) {
     : val;
 }
 
-
 /**
- * Special patterns
+ * Special patterns to be converted to regex
  */
 
 var dots        = '\\.{1,2}';
@@ -234,6 +233,15 @@ var dotstars = function (dot) {
 var stardot = function (dot) {
   return dotstarbase(dot) + slashQ;
 };
+
+/**
+ * Create a regular expression for matching
+ * file paths.
+ *
+ * @param  {String} glob
+ * @param  {Object} options
+ * @return {RegExp}
+ */
 
 function makeRe(glob, options) {
   var opts = options || {};
