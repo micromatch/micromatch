@@ -7,67 +7,16 @@
 
 'use strict';
 
+var path = require('path');
 var unixify = require('unixify');
 var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
 
-function makeRe(glob, options) {
-  var opts = options || {};
-  var flags = opts.flags || '';
-  var i = 0;
-
-  // only recompile regex if options change
-  optsCache = optsCache || opts;
-  if (!equal(optsCache, opts)) {
-    regex = null;
-    cache = glob;
-  }
-
-  // only recompile regex if glob changes
-  cache = cache || glob;
-  if (cache !== glob) {
-    glob = unixify(glob);
-    regex = null;
-    cache = glob;
-  }
-
-  // if `true`, then we can just return
-  // the regex that was previously cached
-  if (regex instanceof RegExp) {
-    return regex;
-  }
-
-  // expand `{1..5}` braces
-  if (/\{/.test(glob)) {
-    glob = expand(glob);
-  }
-
-  var len = tokens.length;
-  while (i < len) {
-    var group = tokens[i++];
-    var re = group[1].re;
-    var to = group[1].to;
-
-    // apply special cases from options
-    for (var key in opts) {
-      if (group[1].hasOwnProperty(key)) {
-        to += group[1][key];
-      }
-    }
-    glob = glob.replace(re, to);
-  }
-
-  if (opts.nocase) flags += 'i';
-
-  // cache the regex
-  regex = globRegex(glob, flags);
-  // return the result
-  return regex;
-}
 
 /**
  * Pass an array of files and a glob pattern as a string.
+ *
  * This function is called by the main `micromatch` function
  * If you only need to pass a single pattern you might get
  * minor speed improvements using this function.
@@ -90,7 +39,9 @@ function match(files, pattern, options) {
   var i = 0;
 
   while (i < len) {
-    var fp = unixify(files[i++]);
+    var file = files[i++];
+    var fp = unixify(file);
+    // console.log(isDrive(file));
     if (regex.test(fp)) {
       res.push(fp);
     }
@@ -139,47 +90,23 @@ function micromatch(files, patterns, opts) {
 }
 
 /**
- * Create the regex to do the matching. If
- * the leading character in the `glob` is `!`
- * a negation regex is returned.
- *
- * @param {String} `glob`
- * @param {String} `flags`
- */
-
-function globRegex(glob, flags) {
-  var  res = '^' + glob + '$';
-  if (/^!/.test(glob)) {
-    res = '^(?!((?!\\.)' + glob.slice(1) + ')$)';
-  }
-  return new RegExp(res, flags);
-}
-
-/**
- * Regex for matching single-level braces
- */
-
-function bracesRegex() {
-  return /\{([^{]+)\}/g;
-}
-
-/**
  * Expand braces in the given glob pattern.
  *
  * @param  {String} `glob`
  * @return {String}
  */
 
-function expand (glob) {
-  if (!isBasicBrace(glob)) {
-    // avoid sending the glob to the `braces` lib if not necessary
-    return glob.replace(bracesRegex(), function (_, inner) {
-      return '(' + inner.split(',').join('|') + ')';
-    });
-  } else {
-    // if it's nested, we'll use `braces`
-    return braces(glob).join('|');
-  }
+function expand(glob, fn) {
+  // if (!isBasicBrace(glob)) {
+  //   // avoid sending the glob to the `braces` lib if not necessary
+  //   return glob.replace(bracesRegex(), function(_, inner) {
+  //     return '(' + inner.split(',').join('|') + ')';
+  //   });
+  // } else {
+  //   // if it's nested, we'll use `braces`
+  //   return braces(glob, fn).join('|');
+  // }
+  return braces(glob, fn).join('|');
 }
 
 /**
@@ -224,7 +151,6 @@ function isBasicBrace(str) {
 
 function equal(a, b) {
   if (!b) return false;
-
   for (var prop in b) {
     if (!a.hasOwnProperty(prop)) {
       return false;
@@ -234,6 +160,14 @@ function equal(a, b) {
     }
   }
   return true;
+}
+
+/**
+ * Regex for matching single-level braces
+ */
+
+function bracesRegex() {
+  return /\{([^{]+)\}/g;
 }
 
 /**
@@ -249,20 +183,34 @@ function arrayify(val) {
     : val;
 }
 
-/**
- * Results cache
- */
+function unixify(fp) {
+  if (process.platform === 'win32' || path.sep === '\\') {
+    return fp.replace(/^[A-Z]:\\?|[\\\/]+/gi, '/');
+  }
+  return fp;
+}
 
-var regex;
-var cache;
-var optsCache;
+function isDrive(fp) {
+  if (fp.charAt(1) !== ':') {
+    var first = fp.charCodeAt(0);
+    if (first >= 65 && first <= 122) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Special patterns
  */
 
-var matchBase = '[\\s\\S]+';
-var dotfile =   '[^\\/]*?';
+var dotStar   = '(%~=.)\\.[^/]%%%~';
+var starDot   = '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)[^/]%%%~\.';
+var star      = '(%~!\\.)(%~=.)[^/]%%%~';
+var stars     = '(%~:(%~!(%~:\\/|^)\\.).)%%%~';
+var dotfile   = '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
+// var dotfile =   '(?!\\.)(?=.)[^/]%%?\\.[^/]%%?';
+// var dotfile   = '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))(?=.)[^/]%%?\\.[^/]%%?';
 
 /**
  * Glob tokens to match and replace with
@@ -270,13 +218,102 @@ var dotfile =   '[^\\/]*?';
  */
 
 var tokens = [
-  ['\\\\', {re: /\\{2}/g,   to: '\\/'}],
-  ['/',    {re: /\//g,      to: '\\/'}],
-  ['.',    {re: /[.]/g,     to: '\\.'}],
-  ['?',    {re: /\?/g,      to: '.'}],
-  ['**',   {re: /[*]{2}/g,  to: '[\\s\\S]+'}],
-  ['*',    {re: /[*]/g,     to: '[^\\/]*?', matchBase: matchBase, dot: dotfile}],
+  ['.*',   {re: /\.\*/g,      to: dotStar}],
+  ['?',    {re: /\?/g,        to: '[^/]'}],
+  ['*.',   {re: /\*\./g,      to: starDot}],
+  ['**',   {re: /[*]{2}/g,    to: stars}],
+  ['*',    {re: /[*]/g,       to: star}],
+  ['.',    {re: /\.(\w+|$)/g, to: '\\.$1'}],
+  ['%~',   {re: /%~/g,        to: '?'}],
+  ['%%',   {re: /%%/g,        to: '*'}],
+  ['\\/',   {re: /\\+\//g,   to: '\\/'}],
 ];
+
+function makeRe(glob, options, isBase) {
+  if (typeof options === 'boolean') {
+    isBase = options;
+    options = {};
+  }
+
+  var opts = options || {};
+  var flags = opts.flags || '';
+  var i = 0;
+
+  // reset cache, recompile regex if options change
+  optsCache = optsCache || opts;
+  if (!equal(optsCache, opts)) {
+    cache = glob;
+    regex = null;
+  }
+
+  // reset cache, recompile regex if glob changes
+  cache = cache || glob;
+  if (cache !== glob) {
+    glob = unixify(glob);
+    cache = glob;
+    regex = null;
+  }
+
+  // if `true`, then we can just return
+  // the regex that was previously cached
+  if (regex instanceof RegExp) {
+    return regex;
+  }
+
+  // expand `{1..5}` braces
+  if (/\{/.test(glob)) {
+    glob = expand(glob);
+  }
+
+  glob = glob.replace(/\//g, '\\/');
+  glob = glob.replace(/\.\*/g, dotStar);
+  glob = glob.replace(/\*\./g, starDot);
+  glob = glob.replace(/\?/g, '[^/]');
+  glob = glob.replace(/\.(\w+|$)/g, '\\.$1');
+
+  if (opts.dot) {
+    glob = glob.replace(/[*]{2}/g, dotfile);
+    glob = glob.replace(/[*]{1}/g, dotStar);
+  } else {
+    glob = glob.replace(/[*]{2}/g, stars);
+    glob = glob.replace(/[*]{1}/g, star);
+  }
+
+  glob = glob.replace(/%~/g, '?');
+  glob = glob.replace(/%%/g, '*');
+  glob = glob.replace(/\\+\//g, '\\/');
+
+  if (opts.nocase) flags += 'i';
+
+  // cache the regex
+  regex = globRegex(glob, flags, isBase);
+  return regex;
+}
+
+/**
+ * Create the regex to do the matching. If
+ * the leading character in the `glob` is `!`
+ * a negation regex is returned.
+ *
+ * @param {String} `glob`
+ * @param {String} `flags`
+ */
+
+function globRegex(glob, flags) {
+  var res = '^(?:' + glob + ')$';
+  if (/^!/.test(glob)) {
+    res = '^(?!(?:' + glob.slice(1) + ')$).*$';
+  }
+  return new RegExp(res, flags);
+}
+
+/**
+ * Results cache
+ */
+
+var regex;
+var cache;
+var optsCache;
 
 /**
  * Expose `micromatch`
