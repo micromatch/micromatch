@@ -32,12 +32,13 @@ describe('micromatch.matchRe', function () {
       mm.makeRe('*.md').test('a/b/c/foo.md').should.be.false;
     });
 
-    it.skip('should not match dotfiles, even if the dotfile name equals the extension:', function () {
-      mm.makeRe('*.md').test('.md').should.be.true;
-      mm.makeRe('*.md').test('.foo.md').should.be.true;
+    it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
+      mm.makeRe('*.md').test('a.md').should.be.true;
+      mm.makeRe('*.*.md').test('.foo.md').should.be.false;
+      mm.makeRe('*.*.md').test('a.foo.md').should.be.true;
       mm.makeRe('*.md').test('.gitignore').should.be.false;
       mm.makeRe('*.md').test('.verb.txt').should.be.false;
-      // mm.makeRe('a/b/c/*.md').test('a/b/c/.xyz.md').should.be.true;
+      mm.makeRe('a/b/c/.*.md').test('a/b/c/.xyz.md').should.be.true;
     });
   });
 

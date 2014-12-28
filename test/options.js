@@ -41,10 +41,10 @@ describe('options', function () {
       mm.match(['.gitignore'], '*.*', {dot: true}).should.eql(['.gitignore']);
       mm.match(['.gitignore.md'], '*.md', {dot: true}).should.eql(['.gitignore.md']);
       mm.match(['a/b/c/.gitignore.md'], '*.md').should.eql([]);
-      mm.match(['a/b/c/.gitignore.md'], '**/*.md').should.eql(['a/b/c/.gitignore.md']);
-      // mm(['a/b/c/.gitignore.md'], '**/.*.md').should.eql();
-      // mm(['a/b/c/.gitignore.md'], '**/.*').should.eql();
-      // mm(['a/b/c/.verb.md'], '**/*.md', {dot: true}).should.eql();
+      mm.match(['a/b/c/.gitignore.md'], '**/.*.md').should.eql(['a/b/c/.gitignore.md']);
+      mm.match(['a/b/c/.gitignore.md'], '**/.*.md').should.eql(['a/b/c/.gitignore.md']);
+      mm.match(['a/b/c/.gitignore.md'], '**/.*').should.eql(['a/b/c/.gitignore.md']);
+      mm.match(['a/b/c/.verb.md'], '**/*.md', {dot: true}).should.eql(['a/b/c/.verb.md']);
     });
   });
 });
