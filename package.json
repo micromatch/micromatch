@@ -26,7 +26,7 @@
     "test": "mocha -R spec"
   },
   "dependencies": {
-    "arr-diff": "^0.2.2",
+    "arr-diff": "^1.0.1",
     "arr-union": "^1.0.0",
     "braces": "^1.0.0",
     "unixify": "^0.1.0"
