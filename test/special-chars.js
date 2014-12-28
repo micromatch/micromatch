@@ -9,7 +9,12 @@
 
 var path = require('path');
 var should = require('should');
+var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
+
+if ('minimatch' in argv) {
+  mm = require('minimatch');
+}
 
 describe('special characters', function () {
   describe('?:', function () {
@@ -28,6 +33,7 @@ describe('special characters', function () {
       mm(['a/b/c/d/e.md'], 'a/?/c/???/e.md').should.eql([]);
       mm(['a/b/c/zzz/e.md'], 'a/?/c/???/e.md').should.eql(['a/b/c/zzz/e.md']);
     });
+
 
     it('should use special characters and glob stars together:', function () {
       mm(['a/b/c/d/e.md'], 'a/?/c/?/*/e.md').should.eql([]);

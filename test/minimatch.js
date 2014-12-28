@@ -14,7 +14,7 @@ var mm = require('minimatch');
  * Minimatch for comparison
  */
 
-describe.skip('minimatch', function () {
+describe('minimatch', function () {
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
       mm.makeRe('.md').should.eql(/^(?:\.md)$/);
@@ -30,6 +30,12 @@ describe.skip('minimatch', function () {
       mm.makeRe('*.md').test('dotfile.md').should.be.true;
       mm.makeRe('*.md').test('.dotfile.md').should.be.false;
       mm.makeRe('*.md').test('.dotfile.txt').should.be.false;
+    });
+
+    it('should match basenames:', function () {
+      mm.match(['a.js', 'b.md', 'c.txt'], '*.md').should.eql(['b.md']);
+      mm.match(['a.js', 'b.md', 'c.txt'], '*.js').should.eql(['a.js']);
+      mm.match(['a.js', 'b.md', 'c.txt'], '*.txt').should.eql(['c.txt']);
     });
   });
 
@@ -51,6 +57,16 @@ describe.skip('minimatch', function () {
       mm.makeRe('a/b/c/*.md').test('abc.md').should.be.false;
       mm.makeRe('a/b/c/*.md').test('a/b/d/e.md').should.be.false;
       mm.makeRe('a/b/c/*.md').test('a/b/c/e.md').should.be.true;
+    });
+
+    it('should match file paths:', function () {
+      mm.match(['a/a.js', 'a/b.md', 'a/c.txt'], '**/*.md').should.eql(['a/b.md']);
+      mm.match(['a/a.js', 'a/b.md', 'a/c.txt'], '**/*.js').should.eql(['a/a.js']);
+      mm.match(['a/a.js', 'a/b.md', 'a/c.txt'], '**/*.txt').should.eql(['a/c.txt']);
+
+      mm.match(['a.js', 'b.md', 'c.txt'], '**/*.md').should.eql(['b.md']);
+      mm.match(['a.js', 'b.md', 'c.txt'], '**/*.js').should.eql(['a.js']);
+      mm.match(['a.js', 'b.md', 'c.txt'], '**/*.txt').should.eql(['c.txt']);
     });
   });
 

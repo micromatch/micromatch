@@ -9,7 +9,12 @@
 
 var path = require('path');
 var should = require('should');
+var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
+
+if ('minimatch' in argv) {
+  mm = require('minimatch');
+}
 
 describe('negation patterns', function () {
   describe('.match()', function () {
