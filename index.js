@@ -204,30 +204,28 @@ function isDrive(fp) {
  * Special patterns
  */
 
-var dotStar   = '(%~=.)\\.[^/]%%%~';
-var starDot   = '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)[^/]%%%~\.';
-var star      = '(%~!\\.)(%~=.)[^/]%%%~';
+var a = '(?!\\.)(?=.)[^/]*?';
+var d = '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))(?=.)[^/]*?';
+
+var b = '(?:(?!(?:\\/|^)\\.).)*?';
+var e = '(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/)).)*?';
+
+
+var slashQ    = '[^/]%%%~';
+var slashStar = '\\.' + slashQ;
+var star      = '(%~=.)\\.' + slashQ;
+var dotstarbase = '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)';
+var dotstar   = dotstarbase + slashQ;
+var stardot   = dotstar;
+
 var stars     = '(%~:(%~!(%~:\\/|^)\\.).)%%%~';
-var dotfile   = '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
+// var dotstars  = '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
+
+var dotstars = function (dot) {
+  return '(%~:(%~!(%~:\\/|^)' + + ').)%%%~';
+}
 // var dotfile =   '(?!\\.)(?=.)[^/]%%?\\.[^/]%%?';
 // var dotfile   = '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))(?=.)[^/]%%?\\.[^/]%%?';
-
-/**
- * Glob tokens to match and replace with
- * regular expressions
- */
-
-var tokens = [
-  ['.*',   {re: /\.\*/g,      to: dotStar}],
-  ['?',    {re: /\?/g,        to: '[^/]'}],
-  ['*.',   {re: /\*\./g,      to: starDot}],
-  ['**',   {re: /[*]{2}/g,    to: stars}],
-  ['*',    {re: /[*]/g,       to: star}],
-  ['.',    {re: /\.(\w+|$)/g, to: '\\.$1'}],
-  ['%~',   {re: /%~/g,        to: '?'}],
-  ['%%',   {re: /%%/g,        to: '*'}],
-  ['\\/',   {re: /\\+\//g,   to: '\\/'}],
-];
 
 function makeRe(glob, options, isBase) {
   if (typeof options === 'boolean') {
@@ -237,7 +235,12 @@ function makeRe(glob, options, isBase) {
 
   var opts = options || {};
   var flags = opts.flags || '';
+  var negate = /^!/.test(glob);
   var i = 0;
+
+  if (negate) {
+    glob = glob.slice(1);
+  }
 
   // reset cache, recompile regex if options change
   optsCache = optsCache || opts;
@@ -265,28 +268,41 @@ function makeRe(glob, options, isBase) {
     glob = expand(glob);
   }
 
+  glob = glob.replace(/\[/g, dotstarbase + '[');
+  glob = glob.replace(/\*\.\*/g, stardot + slashStar);
+  glob = glob.replace(/^\.\*/g, star);
+  glob = glob.replace(/\/\.\*/g, '\\/' + star);
+  glob = glob.replace(/[^?]\?/g, '\\/'+ dotstarbase + '[^/]');
+  glob = glob.replace(/(\?)/g, function(match, $1) {
+    return '[^/]';
+  });
+
+  if (opts.dot) {
+    glob = glob.replace(/\*\./g, stardot + '\.');
+  } else {
+    glob = glob.replace(/\*\./g, stardot);
+  }
+
   glob = glob.replace(/\//g, '\\/');
-  glob = glob.replace(/\.\*/g, dotStar);
-  glob = glob.replace(/\*\./g, starDot);
-  glob = glob.replace(/\?/g, '[^/]');
   glob = glob.replace(/\.(\w+|$)/g, '\\.$1');
 
   if (opts.dot) {
-    glob = glob.replace(/[*]{2}/g, dotfile);
-    glob = glob.replace(/[*]{1}/g, dotStar);
+    glob = glob.replace(/\*\*/g, dotstars);
+    glob = glob.replace(/\*/g, dotstar);
   } else {
-    glob = glob.replace(/[*]{2}/g, stars);
-    glob = glob.replace(/[*]{1}/g, star);
+    glob = glob.replace(/\*\*/g, stars);
+    glob = glob.replace(/\*/g, star);
   }
 
   glob = glob.replace(/%~/g, '?');
   glob = glob.replace(/%%/g, '*');
   glob = glob.replace(/\\+\//g, '\\/');
+  glob = glob.replace(/\[\^\\\/\]/g, '[^/]');
 
   if (opts.nocase) flags += 'i';
 
   // cache the regex
-  regex = globRegex(glob, flags, isBase);
+  regex = new RegExp(globRegex(glob, negate), flags);
   return regex;
 }
 
@@ -299,12 +315,12 @@ function makeRe(glob, options, isBase) {
  * @param {String} `flags`
  */
 
-function globRegex(glob, flags) {
-  var res = '^(?:' + glob + ')$';
-  if (/^!/.test(glob)) {
-    res = '^(?!(?:' + glob.slice(1) + ')$).*$';
-  }
-  return new RegExp(res, flags);
+function globRegex(glob, negate) {
+  glob = ('(?:' + glob + ')$');
+  glob = negate
+    ? ('(?!' + glob + ').*$')
+    : glob;
+  return '^' + glob;
 }
 
 /**
