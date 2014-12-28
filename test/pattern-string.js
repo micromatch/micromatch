@@ -19,12 +19,14 @@ if ('minimatch' in argv) {
 var files = ['a', 'b', 'c', 'd', 'a/a', 'a/b', 'a/b.js', 'a/c.js', 'a/b/c/d.js', '.a/.js', 'a/b/.js', 'a/b.md', 'a/b.txt']
 
 describe('micromatch string patterns', function () {
-  it.only('should unixify file paths', function () {
+  it('should unixify file paths', function () {
     path.sep = '\\';
-    // mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
-    // mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
-    mm(['E:\\a\\b\\c.md'], 'E:\\**/*.md').should.eql(['/a/b/c.md']);
-    mm(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
+    mm.match(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    mm.match(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    // mm.match(['E:\\a\\b\\c.md'], '*:/**/*.md').should.eql(['E:/a/b/c.md']);
+    mm.match(['E:/a/b/c.md'], 'E:/**/*.md').should.eql(['//a/b/c.md']);
+    // mm.match(['E:\\a\\b\\c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
+    mm.match(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
   });
 
   describe('file extensions:', function () {
