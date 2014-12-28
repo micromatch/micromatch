@@ -43,23 +43,6 @@ describe('negation patterns', function () {
       mm.match(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!**/*.md').should.eql(['a/b.js', 'a.js']);
     });
 
-    it('should create a regex for brace expansion:', function () {
-      mm.match(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-      mm.match(['a/b/d/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-      mm.match(['a/b/c/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-      mm.match(['a/b/cd/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/iii.md']);
-      mm.match(['a/b/ce/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/iii.md']);
-
-      mm.match(['xyz.md'], 'a/b/c{d,e}/xyz.md').should.eql([]);
-      mm.match(['a/b/d/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-      mm.match(['a/b/c/xyz.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-      mm.match(['a/b/cd/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/xyz.md']);
-      mm.match(['a/b/ce/xyz.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/ce/xyz.md']);
-      mm.match(['a/b/cef/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cef/xyz.md']);
-      mm.match(['a/b/ceg/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/ceg/xyz.md']);
-      mm.match(['a/b/cd/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cd/xyz.md']);
-    });
-
     it('should create a regular expression for double stars:', function () {
       mm.match(['.gitignore'], 'a/**/z/*.md').should.eql([]);
 

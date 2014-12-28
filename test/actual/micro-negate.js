@@ -1,3 +1,12 @@
+var actual = fn("!a");
+actual.should.eql(/^(?!^(?:a)$).*$/);
+
+var actual = fn("!a/");
+actual.should.eql(/^(?!^(?:a\/)$).*$/);
+
+var actual = fn("!a/*");
+actual.should.eql(/^(?!^(?:a\/(?!\.)(?=.)[^/]*?)$).*$/);
+
 var actual = fn("!.*");
 actual.should.eql(/^(?!^(?:(?=.)\.[^/]*?)$).*$/);
 
@@ -257,13 +266,13 @@ var actual = fn("!a/{c..e}.js");
 actual.should.eql(/^(?!^(?:a\/c\.js|a\/d\.js|a\/e\.js)$).*$/);
 
 var actual = fn("!E:**/*.js");
-actual.should.eql(/^(?!^(?:E:(?:(?!(?:\/|^)\.).)*?\/(?!\.)(?=.)[^/]*?\.js)$).*$/);
+actual.should.eql(/^(?!^(?:(?=.)E:[^/]*?[^/]*?\/(?!\.)(?=.)[^/]*?\.js)$).*$/);
 
 var actual = fn("!E:**/*.md");
-actual.should.eql(/^(?!^(?:E:(?:(?!(?:\/|^)\.).)*?\/(?!\.)(?=.)[^/]*?\.md)$).*$/);
+actual.should.eql(/^(?!^(?:(?=.)E:[^/]*?[^/]*?\/(?!\.)(?=.)[^/]*?\.md)$).*$/);
 
 var actual = fn("!E:\\**/*.js");
-actual.should.eql(/^(?!^(?:E:\\(?:(?!(?:\/|^)\.).)*?\/(?!\.)(?=.)[^/]*?\.js)$).*$/);
+actual.should.eql(/^(?!^(?:(?=.)E:\\[^/]*?[^/]*?\/(?!\.)(?=.)[^/]*?\.js)$).*$/);
 
 var actual = fn("!E:\\**/*.md");
-actual.should.eql(/^(?!^(?:E:\\(?:(?!(?:\/|^)\.).)*?\/(?!\.)(?=.)[^/]*?\.md)$).*$/);
+actual.should.eql(/^(?!^(?:(?=.)E:\\[^/]*?[^/]*?\/(?!\.)(?=.)[^/]*?\.md)$).*$/);

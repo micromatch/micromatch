@@ -16,29 +16,34 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
+var files = ['a', 'b', 'c', 'd', 'a/a', 'a/b', 'a/b.js', 'a/c.js', 'a/b/c/d.js', '.a/.js', 'a/b/.js', 'a/b.md', 'a/b.txt']
+
 describe('micromatch string patterns', function () {
+  it.only('should unixify file paths', function () {
+    path.sep = '\\';
+    // mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    // mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    mm(['E:\\a\\b\\c.md'], 'E:\\**/*.md').should.eql(['/a/b/c.md']);
+    mm(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
+  });
+
   describe('file extensions:', function () {
-    it('should unixify file paths', function () {
-      path.sep = '\\';
-      mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
-      mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
-      mm(['E:\\a\\b\\c.md'], 'E:\\**/*.md').should.eql(['/a/b/c.md']);
-      mm(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
+    it('should match extensions:', function () {
+      mm(['.md'], '.md').should.eql(['.md']);
+      mm(['.txt'], '.md').should.eql([]);
+      mm(['.gitignore'], '.md').should.eql([]);
     });
   });
 
   describe('common patterns:', function () {
-    it('should create a regular expression for matching extensions:', function () {
-      mm(['a/'], 'a/*').should.eql([]);
-      mm(['a/'], 'a/').should.eql(['a/']);
+    it('should match directories:', function () {
+      mm.match(['a/'], 'a/*').should.eql([]);
+      mm.match(['a/'], 'a/').should.eql(['a/']);
     });
-  });
 
-  describe('file extensions:', function () {
-    it('should create a regular expression for matching extensions:', function () {
-      mm(['.md'], '.md').should.eql(['.md']);
-      mm(['.txt'], '.md').should.eql([]);
-      mm(['.gitignore'], '.md').should.eql([]);
+    it('should match files:', function () {
+      mm.match(files, 'a/*').should.eql(['a/a', 'a/b', 'a/b.js',  'a/c.js', 'a/b.md', 'a/b.txt']);
+      mm.match(files, 'a*').should.eql(['a']);
     });
   });
 
@@ -53,7 +58,8 @@ describe('micromatch string patterns', function () {
 
     it('should match files with the given extension:', function () {
       mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
-      mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']).should.eql(['d.json', 'a.md']);
+      mm(['a.md', 'b.js', 'c.txt'], '!**/*.{js,txt}').should.eql(['a.md']);
+      mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']).should.eql(['a.md', 'd.json']);
     });
 
     it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
