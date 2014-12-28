@@ -42,6 +42,7 @@ function match(files, pattern, options) {
     pattern = pattern.slice(1);
   }
 
+  var doubleStar = /\*\*/.test(pattern);
   var regex = makeRe(pattern, opts);
   var len = files.length;
   var res = [];
@@ -49,11 +50,9 @@ function match(files, pattern, options) {
 
   while (i < len) {
     var file = files[i++];
-    // var fp = unixify(file);
-    var fp = file.replace(/[\\\/]/g, '/');
-    console.log(fp)
+    var fp = unixify(file);
 
-    if (!/\//.test(fp) && /\*\*/.test(pattern)) {
+    if (!/\//.test(fp) && doubleStar) {
       regex = baseRe(pattern, opts);
     }
 
@@ -128,14 +127,14 @@ function micromatch(files, patterns, opts) {
  */
 
 function expand(glob, fn) {
-  // if (!isBasicBrace(glob)) {
-  //   return glob.replace(bracesRegex(), function(_, inner) {
-  //     return '(' + inner.split(',').join('|') + ')';
-  //   });
-  // } else {
-  //   return braces(glob, fn).join('|');
-  // }
-  return braces(glob, fn).join('|');
+  if (isBasicBrace(glob)) {
+    return glob.replace(bracesRegex(), function(_, inner) {
+      return '(' + inner.split(',').join('|') + ')';
+    });
+  } else {
+    return braces(glob, fn).join('|');
+  }
+  // return braces(glob, fn).join('|');
 }
 
 /**
@@ -149,8 +148,8 @@ function expand(glob, fn) {
  */
 
 function isBasicBrace(str) {
-  if (/\.{2}/.test(str)) {
-    return true;
+  if (/\.{2}|\(/.test(str)) {
+    return false;
   }
 
   var a = str.indexOf('{');
@@ -160,13 +159,13 @@ function isBasicBrace(str) {
   while (a !== -1) {
     var ch = str.charAt(i++);
     if (ch === '{') {
-      return true;
-    }
-    if (ch === '}') {
       return false;
     }
+    if (ch === '}') {
+      return true;
+    }
   }
-  return false;
+  return true;
 }
 
 /**
@@ -243,7 +242,7 @@ function makeRe(glob, options) {
   optsCache = optsCache || opts;
   if (!equal(optsCache, opts)) {
     cache = glob;
-    regex = null;
+    globRe = null;
   }
 
   // reset cache, recompile regex if glob changes
@@ -251,13 +250,13 @@ function makeRe(glob, options) {
   if (cache !== glob) {
     glob = unixify(glob);
     cache = glob;
-    regex = null;
+    globRe = null;
   }
 
   // if `true`, then we can just return
   // the regex that was previously cached
-  if (regex instanceof RegExp) {
-    return regex;
+  if (globRe instanceof RegExp) {
+    return globRe;
   }
 
   var negate = glob.charAt(0) === '!';
@@ -274,7 +273,7 @@ function makeRe(glob, options) {
   }
 
   glob = glob.replace(/\[/g, dotstarbase(opts.dot) + '[');
-  glob = glob.replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2[^/]%%%~[^/]%%%~');
+  glob = glob.replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2' + slashQ + slashQ);
   glob = glob.replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ);
   glob = glob.replace(/\*\.\*/g, stardot(opts.dot) + slashStar);
   glob = glob.replace(/^\.\*/g, star);
@@ -297,8 +296,8 @@ function makeRe(glob, options) {
   if (opts.nocase) flags += 'i';
 
   // cache the regex
-  regex = new RegExp(globRegex(glob, negate), flags);
-  return regex;
+  globRe = new RegExp(globRegex(glob, negate), flags);
+  return globRe;
 }
 
 /**
@@ -336,7 +335,7 @@ function baseRe(pattern, opts) {
  * Results cache
  */
 
-var regex;
+var globRe;
 var cache;
 var optsCache;
 
