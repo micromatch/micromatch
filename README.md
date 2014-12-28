@@ -1,6 +1,6 @@
 # micromatch [![NPM version](https://badge.fury.io/js/micromatch.svg)](http://badge.fury.io/js/micromatch)
 
-> Glob matching for javascript/node.js. A faster and more stable alternative to minimatch (bencharks show micromatch is 10-40x faster on avg).
+> Glob matching for javascript/node.js. A faster alternative to minimatch (10-20x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.
 
  - 10-20x faster than minimatch ([benchmarks](#benchmarks)) on average
  - Focus on core Bash 4.3 specification features that are actually used (or can be used) in node.js
@@ -83,9 +83,10 @@ As with regex, parenthese can be nested, so patterns like `((a|b)|c)/b` will wor
 
 In simple cases, brace expansion appears to work the same way as the logical `OR` operator. For example, `(a|b)` will achieve the same result as `{a,b}`.
 
-Here are some powerful features unique to brace expansion:
+Here are some powerful features unique to brace expansion (versus character classes):
 
  - range expansion: `a{1..3}b/*.js` expands to: `['a1b/*.js', 'a2b/*.js', 'a3b/*.js']`
+ - nesting: `a{c,{d,e}}b/*.js` expands to: `['acb/*.js', 'adb/*.js', 'aeb/*.js']`
 
 
 Learn about [brace expansion][braces], or visit [braces][braces] to ask questions and create an issue related to brace-expansion, or to see the full range of features and options related to brace expansion.
