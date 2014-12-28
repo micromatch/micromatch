@@ -12,6 +12,7 @@ var unixify = require('unixify');
 var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
+var filenameRe = /(?:[^\\\/.]*)(?:\.[^.\\\/]*$|$)/;
 
 
 /**
@@ -32,8 +33,10 @@ function match(files, pattern, options) {
     throw new Error('micromatch.match() expects a string or array.');
   }
 
+  var opts = options || {};
+
   files = arrayify(files);
-  var regex = makeRe(pattern, options);
+  var regex = makeRe(pattern, opts);
   var len = files.length;
   var res = [];
   var i = 0;
@@ -41,8 +44,16 @@ function match(files, pattern, options) {
   while (i < len) {
     var file = files[i++];
     var fp = unixify(file);
-    // console.log(isDrive(file));
-    if (regex.test(fp)) {
+    if (!/\//.test(fp)) {
+      regex = makeRe(pattern.replace(/\/?\*\*\/?/, ''), opts);
+    }
+
+    if (opts.matchBase) {
+      var filename = fp.match(filenameRe)[0];
+      if (regex.test(filename)) {
+        res.push(fp);
+      }
+    } else if (regex.test(fp)) {
       res.push(fp);
     }
   }
@@ -92,18 +103,19 @@ function micromatch(files, patterns, opts) {
 /**
  * Expand braces in the given glob pattern.
  *
+ * We only need to use the [braces] lib when
+ * patterns are nested.
+ *
  * @param  {String} `glob`
  * @return {String}
  */
 
 function expand(glob, fn) {
   // if (!isBasicBrace(glob)) {
-  //   // avoid sending the glob to the `braces` lib if not necessary
   //   return glob.replace(bracesRegex(), function(_, inner) {
   //     return '(' + inner.split(',').join('|') + ')';
   //   });
   // } else {
-  //   // if it's nested, we'll use `braces`
   //   return braces(glob, fn).join('|');
   // }
   return braces(glob, fn).join('|');
@@ -183,64 +195,32 @@ function arrayify(val) {
     : val;
 }
 
-function unixify(fp) {
-  if (process.platform === 'win32' || path.sep === '\\') {
-    return fp.replace(/^[A-Z]:\\?|[\\\/]+/gi, '/');
-  }
-  return fp;
-}
-
-function isDrive(fp) {
-  if (fp.charAt(1) !== ':') {
-    var first = fp.charCodeAt(0);
-    if (first >= 65 && first <= 122) {
-      return true;
-    }
-  }
-  return false;
-}
 
 /**
  * Special patterns
  */
 
-var a = '(?!\\.)(?=.)[^/]*?';
-var d = '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))(?=.)[^/]*?';
+var dots        = '\\.{1,2}';
+var slashQ      = '[^/]%%%~';
+var slashStar   = '\\.' + slashQ;
+var star        = '(%~=.)\\.' + slashQ;
 
-var b = '(?:(?!(?:\\/|^)\\.).)*?';
-var e = '(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/)).)*?';
-
-
-var slashQ    = '[^/]%%%~';
-var slashStar = '\\.' + slashQ;
-var star      = '(%~=.)\\.' + slashQ;
-var dotstarbase = '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)';
-var dotstar   = dotstarbase + slashQ;
-var stardot   = dotstar;
-
-var stars     = '(%~:(%~!(%~:\\/|^)\\.).)%%%~';
-// var dotstars  = '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
+var dotstarbase = function(dot) {
+  var re = dot ? ('(%~:^|\\/)' + dots + '(%~:$|\\/)') : '\\.';
+  return '(%~!' + re + ')(%~=.)';
+}
 
 var dotstars = function (dot) {
-  return '(%~:(%~!(%~:\\/|^)' + + ').)%%%~';
-}
-// var dotfile =   '(?!\\.)(?=.)[^/]%%?\\.[^/]%%?';
-// var dotfile   = '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))(?=.)[^/]%%?\\.[^/]%%?';
+  var re = dot ? '(%~:' + dots + ')($|\\/)': '\\.';
+  return '(%~:(%~!(%~:\\/|^)' + re + ').)%%%~';
+};
 
-function makeRe(glob, options, isBase) {
-  if (typeof options === 'boolean') {
-    isBase = options;
-    options = {};
-  }
+var stardot = function (dot) {
+  return dotstarbase(dot) + slashQ;
+};
 
+function makeRe(glob, options) {
   var opts = options || {};
-  var flags = opts.flags || '';
-  var negate = /^!/.test(glob);
-  var i = 0;
-
-  if (negate) {
-    glob = glob.slice(1);
-  }
 
   // reset cache, recompile regex if options change
   optsCache = optsCache || opts;
@@ -263,37 +243,32 @@ function makeRe(glob, options, isBase) {
     return regex;
   }
 
+  var negate = opts.negate || glob.charAt(0) === '!';
+  if (negate) {
+    glob = glob.slice(1);
+  }
+
+  var flags = opts.flags || '';
+  var i = 0;
+
   // expand `{1..5}` braces
-  if (/\{/.test(glob)) {
+  if (/\{/.test(glob) && !opts.nobraces) {
     glob = expand(glob);
   }
 
-  glob = glob.replace(/\[/g, dotstarbase + '[');
-  glob = glob.replace(/\*\.\*/g, stardot + slashStar);
+  glob = glob.replace(/\[/g, dotstarbase(opts.dot) + '[');
+  glob = glob.replace(/\*\.\*/g, stardot(opts.dot) + slashStar);
   glob = glob.replace(/^\.\*/g, star);
   glob = glob.replace(/\/\.\*/g, '\\/' + star);
-  glob = glob.replace(/[^?]\?/g, '\\/'+ dotstarbase + '[^/]');
-  glob = glob.replace(/(\?)/g, function(match, $1) {
-    return '[^/]';
-  });
-
-  if (opts.dot) {
-    glob = glob.replace(/\*\./g, stardot + '\.');
-  } else {
-    glob = glob.replace(/\*\./g, stardot);
-  }
-
+  glob = glob.replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]');
+  glob = glob.replace(/\?/g, '[^/]');
+  glob = glob.replace(/\*\./g, stardot(opts.dot) + '\.');
   glob = glob.replace(/\//g, '\\/');
   glob = glob.replace(/\.(\w+|$)/g, '\\.$1');
+  glob = glob.replace(/\*\*/g, dotstars(opts.dot));
+  glob = glob.replace(/\*/g, stardot(opts.dot));
 
-  if (opts.dot) {
-    glob = glob.replace(/\*\*/g, dotstars);
-    glob = glob.replace(/\*/g, dotstar);
-  } else {
-    glob = glob.replace(/\*\*/g, stars);
-    glob = glob.replace(/\*/g, star);
-  }
-
+  // clean up
   glob = glob.replace(/%~/g, '?');
   glob = glob.replace(/%%/g, '*');
   glob = glob.replace(/\\+\//g, '\\/');
@@ -318,7 +293,7 @@ function makeRe(glob, options, isBase) {
 function globRegex(glob, negate) {
   glob = ('(?:' + glob + ')$');
   glob = negate
-    ? ('(?!' + glob + ').*$')
+    ? ('(?!^' + glob + ').*$')
     : glob;
   return '^' + glob;
 }
