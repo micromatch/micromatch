@@ -134,7 +134,6 @@ function expand(glob, fn) {
   } else {
     return braces(glob, fn).join('|');
   }
-  // return braces(glob, fn).join('|');
 }
 
 /**
@@ -212,7 +211,9 @@ function arrayify(val) {
 }
 
 /**
- * Special patterns to be converted to regex
+ * Special patterns to be converted to regex.
+ * Heuristics are used to simplify patterns
+ * and speed up processing.
  */
 
 var dots        = '\\.{1,2}';

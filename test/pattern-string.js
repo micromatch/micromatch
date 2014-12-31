@@ -23,9 +23,7 @@ describe('micromatch string patterns', function () {
     path.sep = '\\';
     mm.match(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
     mm.match(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
-    // mm.match(['E:\\a\\b\\c.md'], '*:/**/*.md').should.eql(['E:/a/b/c.md']);
     mm.match(['E:/a/b/c.md'], 'E:/**/*.md').should.eql(['//a/b/c.md']);
-    // mm.match(['E:\\a\\b\\c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
     mm.match(['E:\\a\\b\\c.md'], 'E:**/*.md').should.eql(['/a/b/c.md']);
   });
 
