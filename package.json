@@ -7,6 +7,12 @@
     "name": "Jon Schlinkert",
     "url": "https://github.com/jonschlinkert"
   },
+  "maintainers": [
+    {
+      "name": "Jon Schlinkert",
+      "url": "https://github.com/jonschlinkert"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/jonschlinkert/micromatch.git"
@@ -48,18 +54,25 @@
     "expression",
     "file",
     "files",
+    "filter",
+    "find",
     "glob",
     "globbing",
+    "globs",
     "globstar",
     "match",
+    "matcher",
     "matches",
     "matching",
     "minimatch",
     "multimatch",
     "path",
+    "pattern",
+    "patterns",
     "regex",
     "regexp",
     "regular",
-    "shell"
+    "shell",
+    "wildcard"
   ]
 }
