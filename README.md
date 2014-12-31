@@ -92,7 +92,7 @@ Here are some powerful features unique to brace expansion (versus character clas
 Learn about [brace expansion][braces], or visit [braces][braces] to ask questions and create an issue related to brace-expansion, or to see the full range of features and options related to brace expansion.
 
 
-## .matchRe
+## .makeRe
 
 Generate a regular expression for matching file paths based on the given pattern:
 
