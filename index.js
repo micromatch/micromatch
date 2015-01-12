@@ -16,67 +16,6 @@ var braces = require('braces');
 
 
 /**
- * Pass an array of files and a glob pattern as a string.
- *
- * This function is called by the main `micromatch` function
- * If you only need to pass a single pattern you might get
- * very minor speed improvements using this function.
- *
- * @param  {Array} `files`
- * @param  {Array} `pattern`
- * @param  {Object} `options`
- * @return {Array}
- */
-
-function match(files, pattern, options) {
-  if (typeof files !== 'string' && !Array.isArray(files)) {
-    throw new Error('micromatch.match() expects a string or array.');
-  }
-
-  var opts = options || {};
-
-  files = arrayify(files);
-
-  var negate = opts.negate || pattern.charAt(0) === '!';
-  if (negate) {
-    pattern = pattern.slice(1);
-  }
-
-  var doubleStar = /\*\*/.test(pattern);
-  var regex = makeRe(pattern, opts);
-  var len = files.length;
-  var res = [];
-  var i = 0;
-
-  while (i < len) {
-    var file = files[i++];
-    var fp = unixify(file);
-
-    if (!/\//.test(fp) && doubleStar) {
-      regex = baseRe(pattern, opts);
-    }
-
-    if (opts.matchBase) {
-      var filename = fp.match(filenameRe())[0];
-      if (regex.test(filename)) {
-        res.push(fp);
-      }
-    } else if (regex.test(fp)) {
-      res.push(fp);
-    }
-  }
-
-  if (negate) {
-    return diff(files, res);
-  }
-
-  if (opts.nonull && !res.length) {
-    return pattern;
-  }
-  return res;
-}
-
-/**
  * The main function. Pass an array of filepaths,
  * and a string or array of glob patterns
  *
@@ -117,97 +56,63 @@ function micromatch(files, patterns, opts) {
 }
 
 /**
- * Expand braces in the given glob pattern.
+ * Pass an array of files and a glob pattern as a string.
  *
- * We only need to use the [braces] lib when
- * patterns are nested.
+ * This function is called by the main `micromatch` function
+ * If you only need to pass a single pattern you might get
+ * very minor speed improvements using this function.
  *
- * @param  {String} `glob`
- * @return {String}
- */
-
-function expand(glob, fn) {
-  if (isBasicBrace(glob)) {
-    return glob.replace(bracesRegex(), function(_, inner) {
-      return '(' + inner.split(',').join('|') + ')';
-    });
-  } else {
-    return braces(glob, fn).join('|');
-  }
-}
-
-/**
- * Return `true` if the path contains nested
- * braces. If so, then the [braces] lib is used
- * for expansion. if not, we convert the braces
- * to a regex.
- *
- * @param  {String} str
- * @return {Boolean}
- */
-
-function isBasicBrace(str) {
-  if (/\.{2}|\(/.test(str)) {
-    return false;
-  }
-
-  var a = str.indexOf('{');
-  str = str.slice(a + 1);
-  var i = 0;
-
-  while (a !== -1) {
-    var ch = str.charAt(i++);
-    if (ch === '{') {
-      return false;
-    }
-    if (ch === '}') {
-      return true;
-    }
-  }
-  return true;
-}
-
-/**
- * Return true if object A is equal (enough)
- * to object B. Used for options caching.
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Boolean}
- */
-
-function equal(a, b) {
-  if (!b) return false;
-  for (var prop in b) {
-    if (!a.hasOwnProperty(prop)) {
-      return false;
-    }
-    if (a[prop] !== b[prop]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Regex for matching single-level braces
- */
-
-function bracesRegex() {
-  return /\{([^{]+)\}/g;
-}
-
-/**
- * Coerce `val` to an array
- *
- * @param  {*} val
+ * @param  {Array} `files`
+ * @param  {Array} `pattern`
+ * @param  {Object} `options`
  * @return {Array}
  */
 
-function arrayify(val) {
-  return !Array.isArray(val)
-    ? [val]
-    : val;
+function match(files, pattern, options) {
+  if (typeof files !== 'string' && !Array.isArray(files)) {
+    throw new Error('micromatch.match() expects a string or array.');
+  }
+
+  var opts = options || {};
+  files = arrayify(files);
+
+  var negate = opts.negate || pattern.charAt(0) === '!';
+  if (negate) {
+    pattern = pattern.slice(1);
+  }
+
+  var doubleStar = /\*\*/.test(pattern);
+  var regex = makeRe(pattern, opts);
+  var len = files.length;
+  var res = [];
+  var i = 0;
+
+  while (i < len) {
+    var file = files[i++];
+    var fp = unixify(file);
+
+    if (!/\//.test(fp) && doubleStar) {
+      regex = baseRegex(pattern, opts);
+    }
+
+    if (opts.matchBase) {
+      var filename = fp.match(filenameRe());
+      if (regex.test(filename[0])) {
+        res.push(fp);
+      }
+    } else if (regex.test(fp)) {
+      res.push(fp);
+    }
+  }
+
+  if (negate) {
+    return diff(files, res);
+  }
+
+  if (opts.nonull && !res.length) {
+    return pattern;
+  }
+  return res;
 }
 
 /**
@@ -276,31 +181,37 @@ function makeRe(glob, options) {
   var flags = opts.flags || '';
   var i = 0;
 
-  // expand `{1..5}` braces
+  // expandBraces `{1..5}` braces
   if (/\{/.test(glob) && !opts.nobraces) {
-    glob = expand(glob);
+    glob = expandBraces(glob, options);
   }
 
-  glob = glob.replace(/\[/g, dotstarbase(opts.dot) + '[');
-  glob = glob.replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2' + slashQ + slashQ);
-  glob = glob.replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ);
-  glob = glob.replace(/\*\.\*/g, stardot(opts.dot) + slashStar);
-  glob = glob.replace(/^\.\*/g, star);
-  glob = glob.replace(/\/\.\*/g, '\\/' + star);
-  glob = glob.replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]');
-  glob = glob.replace(/\?/g, '[^/]');
-  glob = glob.replace(/\*\./g, stardot(opts.dot) + '\.');
-  glob = glob.replace(/\//g, '\\/');
-  glob = glob.replace(/\.(\w+|$)/g, '\\.$1');
-  glob = glob.replace(/\*\*/g, dotstars(opts.dot));
-  glob = glob.replace(/(?!\/)\*$/g, slashQ);
-  glob = glob.replace(/\*/g, stardot(opts.dot));
+  glob = glob
+    .replace(/\[/g, dotstarbase(opts.dot) + '[')
+    .replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2' + slashQ + slashQ)
+    .replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ)
+    .replace(/\*\.\*/g, stardot(opts.dot) + slashStar)
+    .replace(/^\.\*/g, star)
+    .replace(/\/\.\*/g, '\\/' + star)
+    .replace(/\*\./g, stardot(opts.dot) + '\.')
 
-  // clean up
-  glob = glob.replace(/%~/g, '?');
-  glob = glob.replace(/%%/g, '*');
-  glob = glob.replace(/[\\]+\//g, '\\/');
-  glob = glob.replace(/\[\^\\\/\]/g, '[^/]');
+    // handle consecutive `?` chars
+    .replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]')
+    .replace(/\?/g, '[^/]')
+    .replace(/\//g, '\\/')
+    .replace(/\.(\w+|$)/g, '\\.$1')
+    .replace(/\*\*/g, dotstars(opts.dot))
+    .replace(/(?!\/)\*$/g, slashQ)
+    .replace(/\*/g, stardot(opts.dot))
+
+    // clean up
+    .replace(/%~/g, '?')
+    .replace(/%%/g, '*')
+    .replace(/\?\./g, '?\\.')
+    .replace(/[\\]+\//g, '\\/')
+    .replace(/~\^/g, '[')
+    .replace(/\^~/g, ']')
+    .replace(/\[\^\\\/\]/g, '[^/]');
 
   if (opts.nocase) flags += 'i';
 
@@ -327,18 +238,129 @@ function globRegex(glob, negate) {
 }
 
 /**
- * Create a regular expression for matching basenames
+ * Create a regular expression for optionally
+ * matching basenames or full file paths.
  *
  * @param  {String} pattern
  * @param  {Object} opts
  * @return {RegExp}
  */
 
-function baseRe(pattern, opts) {
-  var re = pattern + '|' + pattern.replace(/\/?\*\*\/?/, '');
+function baseRegex(pattern, opts) {
+  var re = pattern + '|' + pattern
+    .replace(/\/\*\*|\*\*\//g, '');
   return makeRe(re, opts);
 }
 
+/**
+ * Expand braces in the given glob pattern.
+ *
+ * We only need to use the [braces] lib when
+ * patterns are nested.
+ *
+ * @param  {String} `glob`
+ * @return {String}
+ */
+
+function expandBraces(glob, options) {
+  options = options || {};
+  options.makeRe = options.makeRe || true;
+
+  var a = glob.match(/[\{\(\[]/g);
+  var b = glob.match(/[\}\)\]]/g);
+
+  if (a && b && (a.length !== b.length)) {
+    options.makeRe = false;
+  }
+
+  return braces(glob, options).join('|');
+}
+
+/**
+ * Regex for matching single-level braces
+ */
+
+function bracesRegex() {
+  return /\{(.*),(.*)\}/g;
+}
+
+/**
+ * Regex for matching single-level braces
+ */
+
+function rangeRegex() {
+  return /\{(.{1,2})(\.{2})(.{1,2})\}/g;
+}
+
+/**
+ * Return `false` if the path contains nested braces
+ * or a range (`..`). If so, then the [braces] lib
+ * is used for expansion. if not, we convert the
+ * braces to a regex.
+ *
+ * @param  {String} str
+ * @return {Boolean}
+ */
+
+function isBasicBrace(str) {
+  if (/\(|\{[^}]*\{/.test(str)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Return true if a brace contains a basic range.
+ * A basic range only has two arguments.
+ *
+ * @param  {String} str
+ * @return {Boolean}
+ */
+
+function isBasicRange(str) {
+  var match = str.match(/\.\./g);
+  if (!match || (match && match.length === 2)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Return true if object A is equal (enough)
+ * to object B. Used for options caching. All
+ * we need to know is if the object has changed
+ * in any way.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Boolean}
+ */
+
+function equal(a, b) {
+  if (!b) return false;
+  for (var prop in b) {
+    if (!a.hasOwnProperty(prop)) {
+      return false;
+    }
+    if (a[prop] !== b[prop]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Coerce `val` to an array
+ *
+ * @param  {*} val
+ * @return {Array}
+ */
+
+function arrayify(val) {
+  return !Array.isArray(val)
+    ? [val]
+    : val;
+}
 
 /**
  * Results cache
@@ -365,3 +387,9 @@ module.exports.match = match;
  */
 
 module.exports.makeRe = makeRe;
+
+/**
+ * Expose `micromatch.braces`
+ */
+
+module.exports.braces = braces;
