@@ -15,7 +15,7 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
-describe('micromatch.matchRe', function () {
+describe('micromatch.makeRe', function () {
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
       mm.makeRe('.md').test('.md').should.be.true;
