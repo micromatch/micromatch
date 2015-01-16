@@ -41,3 +41,5 @@ function writeActual(dest, fn, options) {
 
   fs.writeFileSync(__dirname + '/../actual/' + dest + '.js', res);
 }
+
+
