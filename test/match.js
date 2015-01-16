@@ -57,7 +57,7 @@ describe('micromatch', function () {
   });
 
   describe('double stars:', function () {
-    it('should create a regular expression for double stars:', function () {
+    it('should match full file paths:', function () {
       mm.match(['.gitignore'], 'a/**/z/*.md').should.eql([]);
       mm.match(['a/b/z/.gitignore'], 'a/**/z/*.md').should.eql([]);
       mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
@@ -71,6 +71,23 @@ describe('micromatch', function () {
       mm.match(['a/b/c/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
       mm.match(['a/b/foo/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/foo/cd/bar/xyz.md']);
       mm.match(['a/b/baz/ce/fez/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/baz/ce/fez/xyz.md']);
+    });
+
+    it('should match paths with leading `./`:', function () {
+      mm.match(['./.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/z/.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/c/d/e/z/foo.md'], './a/**/z/*.md').should.eql(['./a/b/c/d/e/z/foo.md']);
+
+      mm.match(['./a/b/c/d/e/z/foo.md'], './a/**/j/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/c/j/e/z/foo.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/j/e/z/foo.md']);
+      mm.match(['./a/b/c/d/e/j/n/p/o/z/foo.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/d/e/j/n/p/o/z/foo.md']);
+      mm.match(['./a/b/c/j/e/z/foo.txt'], './a/**/j/**/z/*.md').should.eql([]);
+
+      mm.match(['./a/b/d/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm.match(['./a/b/c/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
+      mm.match(['./a/b/foo/cd/bar/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql(['./a/b/foo/cd/bar/xyz.md']);
+      mm.match(['./a/b/baz/ce/fez/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql(['./a/b/baz/ce/fez/xyz.md']);
     });
   });
 });

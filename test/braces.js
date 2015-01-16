@@ -43,4 +43,8 @@ describe('brace expansion', function () {
   it('should handle range expansion:', function () {
     mm.match(['aa', 'ab', 'ac', 'acc', 'ad', 'ae', 'af', 'ag'], '*{a..e}').should.eql(['aa', 'ab', 'ac', 'acc', 'ad', 'ae']);
   });
+
+  it('should optimize regex when `optimize` is true:', function () {
+    mm.match(['aa', 'ab', 'ac', 'acc', 'ad', 'ae', 'af', 'ag'], '*{a..e}').should.eql(['aa', 'ab', 'ac', 'acc', 'ad', 'ae']);
+  });
 });
