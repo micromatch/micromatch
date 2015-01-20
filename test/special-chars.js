@@ -10,10 +10,14 @@
 var path = require('path');
 var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
+var ref = require('./support/reference');
 var mm = require('..');
 
 if ('minimatch' in argv) {
-  mm = require('minimatch');
+  mm = ref.minimatch;
+}
+if ('wildmatch' in argv) {
+  mm = ref.wildmatch;
 }
 
 describe('special characters', function () {

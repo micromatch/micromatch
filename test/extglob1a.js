@@ -21,8 +21,8 @@ if ('wildmatch' in argv) {
 }
 
 describe('extglob1a', function () {
-  it.only('should match character classes:', function () {
-    console.log(mm.makeRe('a*!(x)'))
+  it.skip('should match character classes:', function () {
+    // console.log(mm.makeRe('a*!(x)'))
     mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c').should.eql(['a', 'ab']);
     // mm.match(['a', 'ab'], 'a*!(x)').should.eql(['a', 'ab']);
     mm.match(['ba'], 'a*!(x)').should.eql([]);

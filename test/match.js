@@ -9,10 +9,14 @@
 
 var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
+var ref = require('./support/reference');
 var mm = require('..');
 
 if ('minimatch' in argv) {
-  mm = require('minimatch');
+  mm = ref.minimatch;
+}
+if ('wildmatch' in argv) {
+  mm = ref.wildmatch;
 }
 
 describe('micromatch', function () {
@@ -27,17 +31,22 @@ describe('micromatch', function () {
   describe('file names:', function () {
     it('should match files with the given extension:', function () {
       mm.match(['.md', '.txt'], '*.md').should.eql([]);
+      mm.match(['.md', '.txt'], '.md').should.eql(['.md']);
       mm.match(['.foo.md'], '*.md').should.eql([]);
       mm.match(['foo.md'], '*.md').should.eql(['foo.md']);
       mm.match(['a/b/c/foo.md'], '*.md').should.eql([]);
     });
 
     it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
+      mm.match(['.foo.md'], '*.md').should.eql([]);
+      mm.match(['a/.foo.md'], '*.md').should.eql([]);
+      mm.match(['a/.foo.md'], 'a/.foo.md').should.eql(['a/.foo.md']);
       mm.match(['.foo.md'], '*.md', {dot: true}).should.eql(['.foo.md']);
       mm.match(['.foo.md'], '.*', {dot: true}).should.eql(['.foo.md']);
       mm.match(['.gitignore'], '*.md').should.eql([]);
       mm.match(['.verb.txt'], '*.md').should.eql([]);
-      // mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/.xyz.md']);
+      mm.match(['a/b/c/.xyz.md'], 'a/b/c/.*.md').should.eql(['a/b/c/.xyz.md']);
+      mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', {dot: true}).should.eql(['a/b/c/.xyz.md']);
     });
   });
 

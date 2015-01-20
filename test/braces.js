@@ -10,16 +10,19 @@
 var path = require('path');
 var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
+var ref = require('./support/reference');
 var mm = require('..');
 
 if ('minimatch' in argv) {
-  mm = require('minimatch');
+  mm = ref.minimatch;
+}
+if ('wildmatch' in argv) {
+  mm = ref.wildmatch;
 }
 
 describe('brace expansion', function () {
   it('should create a regex for brace expansion:', function () {
     mm.match(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
-    mm.match(['iii.md'], '!a/b/c{d,e}/*.md').should.eql(['iii.md']);
     mm.match(['a/b/d/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
     mm.match(['a/b/c/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
     mm.match(['a/b/cd/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/iii.md']);
@@ -36,7 +39,12 @@ describe('brace expansion', function () {
     mm.match(['a/b/cd/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cd/xyz.md']);
   });
 
-  it('should expand character classes:', function () {
+  it('should match negation patterns:', function () {
+    mm.match(['iii.md'], '!a/b/c{d,e}/*.md').should.eql(['iii.md']);
+  });
+
+  it('should match character classes:', function () {
+    mm.match(['aa', 'ab', 'ac', 'ad', 'bad', 'baa', 'bbaa'], '(a|b*|c)').should.eql(['bad', 'baa', 'bbaa']);
     mm.match(['aa', 'ab', 'ac', 'ad', 'bad', 'baa', 'bbaa'], '*(a|{b),c)}').should.eql(['aa', 'ab', 'ac', 'baa', 'bbaa']);
   });
 
