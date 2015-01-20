@@ -19,6 +19,6 @@ if ('minimatch' in argv) {
 describe('brace expansion', function () {
   it('should optimize regex when `optimize` is true:', function () {
     mm.makeRe('{{c,d}..{d,f}}').should.eql(/^(?:c|d|e|f)$/);
-    mm.makeRe('{c,d}/**/{d,f}').should.eql(/^(?:(?:c|d)\/(?:(?!(?:\/|^)\.).)*?\/(?:d|f))$/);
+    mm.makeRe('{c,d}/**/{d,f}').should.eql(/^(?:(?:c|d)\/(.*\/)*(?:d|f))$/);
   });
 });
