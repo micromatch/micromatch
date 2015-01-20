@@ -7921,5 +7921,5 @@ module.exports = [
     "a/cj/f/g/foo/bar-baz-quux/j/fez/bang/klmnop/fooc10.hbs",
     "a/dj/f/g/foo/bar-baz-quux/j/fez/bang/klmnop/fooc10.hbs"
   ],
-  "**/*.{js,md}"
+  "**/fooc09.{js,md}"
 ];
