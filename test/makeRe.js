@@ -18,11 +18,17 @@ if ('minimatch' in argv) {
 describe('micromatch.makeRe', function () {
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
-      mm.makeRe('.md').should.eql(/^(?:\.md)$/)
-      mm.makeRe('.txt').should.eql(/^(?:\.txt)$/)
+      mm.makeRe('.md').should.eql(/^(?:\.md)$/);
+      mm.makeRe('.txt').should.eql(/^(?:\.txt)$/);
       mm.makeRe('.md').test('.md').should.be.true;
       mm.makeRe('.md').test('.txt').should.be.false;
       mm.makeRe('.md').test('.gitignore').should.be.false;
+    });
+  });
+
+  describe('braces:', function () {
+    it('should create a regular expression for matching extensions:', function () {
+      mm.makeRe('a/b/c/{d,e}/f.js').should.eql(/^(?:a\/b\/c\/(?:d|e)\/f\.js)$/);
     });
   });
 
