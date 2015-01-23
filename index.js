@@ -9,11 +9,11 @@
 
 var path = require('path');
 var filenameRe = require('filename-regex');
-var unixify = require('unixify');
 var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
-
+var win32 = process.platform === 'win32';
+// var toRegex = require('./to-regex');
 
 /**
  * The main function. Pass an array of filepaths,
@@ -34,25 +34,23 @@ function micromatch(files, patterns, opts) {
   opts = opts || {};
 
   if (typeof patterns === 'string') {
-    return union([], match(files, patterns, opts));
+    return match(files, patterns, opts);
   }
 
   var len = patterns.length;
-  var res = [];
+  var neg = [], res = [];
   var i = 0;
 
   while (len--) {
     var glob = patterns[i++];
-    var concat = union;
-
-    if (glob.charAt(0) === '!') {
-      glob = glob.slice(1);
-      concat = diff;
+    if (glob.charCodeAt(0) === 33) {
+      neg.push.apply(neg, match(files, glob.slice(1), opts));
+    } else {
+      res.push.apply(res, match(files, glob, opts));
     }
-
-    res = concat(res, match(files, glob, opts));
   }
-  return res;
+
+  return diff(res, neg);
 }
 
 /**
@@ -81,8 +79,10 @@ function match(files, pattern, options) {
     pattern = pattern.slice(1);
   }
 
-  var doubleStar = /\*\*/.test(pattern);
-  var regex = makeRe(pattern, opts);
+  opts.hasGlobstar = /\*\*/.test(pattern);
+  // opts.hasGlobstar = pattern.indexOf('**') !== -1;
+  // opts.hasDotfile = /(?:\/|^)\./.test(pattern);
+  opts.regex = makeRe(pattern, opts);
   var len = files.length;
   var res = [];
   var i = 0;
@@ -91,18 +91,11 @@ function match(files, pattern, options) {
     var file = files[i++];
     var fp = unixify(file);
 
-    if (!/\//.test(fp) && doubleStar) {
-      regex = baseRegex(pattern, opts);
+    // opts.isDotfile = fp.charCodeAt(0) === 46 || file.charCodeAt(0) === 46 || fp.indexOf('/.');
+    if (!isMatch(fp, pattern, opts)) {
+      continue;
     }
-
-    if (opts.matchBase) {
-      var filename = fp.match(filenameRe());
-      if (regex.test(filename[0])) {
-        res.push(fp);
-      }
-    } else if (regex.test(fp)) {
-      res.push(fp);
-    }
+    res.push(fp);
   }
 
   if (negate) {
@@ -114,6 +107,51 @@ function match(files, pattern, options) {
   }
   return res;
 }
+
+function isMatch(fp, pattern, opts) {
+  // console.log(opts)
+  // var hasDot = isDotfile(fp);
+  // var hasDot = /(?:\/|^)\.[^\/]*$/.test(fp);
+
+  var dot = opts.dot;
+  var res = false;
+
+  // if (!/\//.test(fp) && opts.hasGlobstar) {
+  //   opts.regex = baseRegex(pattern, opts);
+  // }
+
+  // if (opts.matchBase) {
+  //   var matches = filenameRe().exec(fp);
+  //   if (opts.regex.test(matches[0])) {
+  //     return true;
+  //   }
+  // }
+
+  // console.log(opts)
+  // console.log(opts.regex)
+  // console.log(opts.regex.test(fp))
+
+  // if (dot === undefined || dot === false) {
+  //   if (opts.isDotfile) {
+  //     return false;
+  //   }
+  // } else if (opts.regex.test(fp)) {
+  //   return true;
+  // }
+
+  return opts.regex.test(fp);
+}
+
+function unixify(fp, normalize) {
+  if (win32 || path.sep === '\\') {
+    fp = fp.replace(/\\/g, '/');
+  }
+  return fp;
+}
+
+// function isMatch(fp, pattern) {
+//   return makeRe(pattern).test(fp);
+// }
 
 /**
  * Special patterns to be converted to regex.
@@ -136,9 +174,18 @@ var dotstars = function (dot) {
   return '(%~:(%~!(%~:\\/|^)' + re + ').)%%%~';
 };
 
+// var dotstarbase = function(dot) {
+//   return '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)';
+// };
+
+// var dotstars = function (dot) {
+//   return '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
+// };
+
 var stardot = function (dot) {
   return dotstarbase(dot) + slashQ;
 };
+
 
 /**
  * Create a regular expression for matching
@@ -173,6 +220,11 @@ function makeRe(glob, options) {
     return globRe;
   }
 
+  if (glob === '**') {
+    globRe = /.*/;
+    return globRe;
+  }
+
   var negate = glob.charAt(0) === '!';
   if (negate) {
     glob = glob.slice(1);
@@ -182,25 +234,31 @@ function makeRe(glob, options) {
   var i = 0;
 
   // expandBraces `{1..5}` braces
-  if (/\{/.test(glob) && !opts.nobraces) {
+  if (glob.indexOf('{') !== -1 && !opts.nobraces) {
     glob = expandBraces(glob, options);
   }
 
   glob = glob
+    .replace(/\?:/g, '_QMARK_:')
     .replace(/\[/g, dotstarbase(opts.dot) + '[')
-    .replace(/^(\w):([\\\/]*)\*\*/gi, '(%~=.)$1:$2' + slashQ + slashQ)
+
+    // glob stars
+    .replace(/^(\w):([\\\/]+?)/gi, '(%~=.)$1:$2')
     .replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ)
     .replace(/\*\.\*/g, stardot(opts.dot) + slashStar)
     .replace(/^\.\*/g, star)
     .replace(/\/\.\*/g, '\\/' + star)
     .replace(/\*\./g, stardot(opts.dot) + '\.')
+    // .replace(/\*\*/g, dotstars(opts.dot))
+    .replace(/\*\*/g, '.%%')
 
-    // handle consecutive `?` chars
+    // consecutive `?` chars
     .replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]')
+    // .replace(/[^?]\?/g, '\\/.%%[^/]')
     .replace(/\?/g, '[^/]')
     .replace(/\//g, '\\/')
+
     .replace(/\.(\w+|$)/g, '\\.$1')
-    .replace(/\*\*/g, dotstars(opts.dot))
     .replace(/(?!\/)\*$/g, slashQ)
     .replace(/\*/g, stardot(opts.dot))
 
@@ -208,6 +266,7 @@ function makeRe(glob, options) {
     .replace(/%~/g, '?')
     .replace(/%%/g, '*')
     .replace(/\?\./g, '?\\.')
+    .replace(/_QMARK_:/g, '?:')
     .replace(/[\\]+\//g, '\\/')
     .replace(/~\^/g, '[')
     .replace(/\^~/g, ']')
@@ -219,6 +278,55 @@ function makeRe(glob, options) {
   globRe = new RegExp(globRegex(glob, negate), flags);
   return globRe;
 }
+
+/**
+ * Create a regular expression for matching
+ * file paths.
+ *
+ * @param  {String} glob
+ * @param  {Object} options
+ * @return {RegExp}
+ */
+
+// function makeRe(glob, options) {
+//   var opts = options || {};
+
+//   // reset cache, recompile regex if options change
+//   optsCache = optsCache || opts;
+//   if (!equal(optsCache, opts)) {
+//     cache = glob;
+//     globRe = null;
+//   }
+
+//   // reset cache, recompile regex if glob changes
+//   cache = cache || glob;
+//   if (cache !== glob) {
+//     glob = unixify(glob);
+//     cache = glob;
+//     globRe = null;
+//   }
+
+//   // if `true`, then we can just return the regex that
+//   // was previously cached
+//   if (globRe != null) {
+//     return globRe;
+//   }
+
+//   // is the glob a negation pattern?
+//   var negate = glob.charAt(0) === '!';
+//   if (negate) {
+//     glob = glob.slice(1);
+//   }
+
+//   glob = toRegex(glob, opts);
+//   var flags = '';
+
+//   if (opts.nocase) flags += 'i';
+
+//   // cache the regex
+//   globRe = new RegExp(globRegex(glob, negate), flags);
+//   return globRe;
+// }
 
 /**
  * Create the regex to do the matching. If
