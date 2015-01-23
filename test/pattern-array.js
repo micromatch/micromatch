@@ -12,8 +12,8 @@ var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
 
-if ('minimatch' in argv) {
-  mm = require('minimatch');
+if ('multimatch' in argv) {
+  mm = require('multimatch');
 }
 
 

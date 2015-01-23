@@ -20,7 +20,7 @@ describe('options', function () {
   describe('.match()', function () {
     it('should support the `matchBase` option:', function () {
       mm.match(['a/b/c/foo.md'], '*.md').should.eql([]);
-      mm(['a/b/c/foo.md'], '*.md', {matchBase: true}).should.eql(['a/b/c/foo.md']);
+      mm.match(['a/b/c/foo.md'], '*.md', {matchBase: true}).should.eql(['a/b/c/foo.md']);
     });
 
     it('should support the `nocase` option:', function () {
@@ -30,7 +30,7 @@ describe('options', function () {
       mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
     });
 
-    it('should match dotfiles when `dotfile` is true:', function () {
+    it.only('should match dotfiles when `dotfile` is true:', function () {
       mm.match(['a/b', 'a/.b', '.a/b', '.a/.b'], '**').should.eql(['a/b']);
       mm.match(['a/b', 'a/.b', 'a/.b', '.a/.b'], '**', {dot: true}).should.eql(['a/b', 'a/.b', 'a/.b', '.a/.b']);
       mm.match(['.gitignore'], '*.*', {dot: true}).should.eql(['.gitignore']);
