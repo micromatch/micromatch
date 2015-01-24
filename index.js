@@ -89,10 +89,10 @@ function match(files, pattern, options) {
 
   while (i < len) {
     var file = files[i++];
-    var fp = unixify(file);
+    var fp = unixify(file, opts);
 
     // opts.isDotfile = fp.charCodeAt(0) === 46 || file.charCodeAt(0) === 46 || fp.indexOf('/.');
-    if (!isMatch(fp, pattern, opts)) {
+    if (!isMatch(fp, null, opts)) {
       continue;
     }
     res.push(fp);
@@ -120,12 +120,12 @@ function isMatch(fp, pattern, opts) {
   //   opts.regex = baseRegex(pattern, opts);
   // }
 
-  // if (opts.matchBase) {
-  //   var matches = filenameRe().exec(fp);
-  //   if (opts.regex.test(matches[0])) {
-  //     return true;
-  //   }
-  // }
+  if (opts.matchBase) {
+    var matches = filenameRe().exec(fp);
+    if (opts.regex.test(matches[0])) {
+      return true;
+    }
+  }
 
   // console.log(opts)
   // console.log(opts.regex)
@@ -139,12 +139,14 @@ function isMatch(fp, pattern, opts) {
   //   return true;
   // }
 
-  return opts.regex.test(fp);
+  return pattern
+    ? makeRe(pattern).test(fp)
+    : opts.regex.test(fp);
 }
 
-function unixify(fp, normalize) {
-  if (win32 || path.sep === '\\') {
-    fp = fp.replace(/\\/g, '/');
+function unixify(fp, opts) {
+  if (opts && opts.normalize || win32 || path.sep === '\\') {
+    return fp.replace(/[\\\/]+/g, '/');
   }
   return fp;
 }
@@ -162,30 +164,22 @@ function unixify(fp, normalize) {
 var dots        = '\\.{1,2}';
 var slashQ      = '[^/]%%%~';
 var slashStar   = '\\.' + slashQ;
-var star        = '(%~=.)\\.' + slashQ;
+var lookahead   = '(%~=.)';
+var star        = lookahead + '\\.' + slashQ;
 
-var dotstarbase = function(dot) {
+function dotstarbase(dot) {
   var re = dot ? ('(%~:^|\\/)' + dots + '(%~:$|\\/)') : '\\.';
-  return '(%~!' + re + ')(%~=.)';
-};
+  return '(%~!' + re + ')' + lookahead;
+}
 
-var dotstars = function (dot) {
+function dotstars(dot) {
   var re = dot ? '(%~:' + dots + ')($|\\/)': '\\.';
   return '(%~:(%~!(%~:\\/|^)' + re + ').)%%%~';
-};
+}
 
-// var dotstarbase = function(dot) {
-//   return '(%~!(%~:^|\\/)\\.{1,2}(%~:$|\\/))(%~=.)';
-// };
-
-// var dotstars = function (dot) {
-//   return '(%~:(%~!(%~:\\/|^)(%~:\\.{1,2})($|\\/)).)%%%~';
-// };
-
-var stardot = function (dot) {
+function stardot(dot) {
   return dotstarbase(dot) + slashQ;
-};
-
+}
 
 /**
  * Create a regular expression for matching
@@ -209,7 +203,7 @@ function makeRe(glob, options) {
   // reset cache, recompile regex if glob changes
   cache = cache || glob;
   if (cache !== glob) {
-    glob = unixify(glob);
+    glob = unixify(glob, opts);
     cache = glob;
     globRe = null;
   }
@@ -220,12 +214,19 @@ function makeRe(glob, options) {
     return globRe;
   }
 
-  if (glob === '**') {
+  // see if there is at least one star
+  var twoStars = glob.indexOf('**');
+
+  if (twoStars === 0 && glob.length === 2) {
     globRe = /.*/;
     return globRe;
   }
 
-  var negate = glob.charAt(0) === '!';
+  var oneStar = glob.indexOf('*');
+  var hasTwoStars = !!twoStars;
+  var hasStar = !!oneStar;
+
+  var negate = glob.charCodeAt(0) === 33; /* '!' */
   if (negate) {
     glob = glob.slice(1);
   }
@@ -238,39 +239,41 @@ function makeRe(glob, options) {
     glob = expandBraces(glob, options);
   }
 
-  glob = glob
-    .replace(/\?:/g, '_QMARK_:')
-    .replace(/\[/g, dotstarbase(opts.dot) + '[')
+  glob = glob.replace(/\?:/g, '_QMARK_:')
+  glob = glob.replace(/\[/g, dotstarbase(opts.dot) + '[')
 
-    // glob stars
-    .replace(/^(\w):([\\\/]+?)/gi, '(%~=.)$1:$2')
-    .replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ)
-    .replace(/\*\.\*/g, stardot(opts.dot) + slashStar)
-    .replace(/^\.\*/g, star)
-    .replace(/\/\.\*/g, '\\/' + star)
-    .replace(/\*\./g, stardot(opts.dot) + '\.')
-    // .replace(/\*\*/g, dotstars(opts.dot))
-    .replace(/\*\*/g, '.%%')
+  // glob stars
+  glob = glob.replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2')
+  if (hasStar) {
+    glob = glob.replace(/\/\*$/g, '\\/' + dotstarbase(opts.dot) + slashQ)
+    glob = glob.replace(/\*\.\*/g, stardot(opts.dot) + slashStar)
+    glob = glob.replace(/^\.\*/g, star)
+    glob = glob.replace(/\/\.\*/g, '\\/' + star)
+    glob = glob.replace(/\*\./g, stardot(opts.dot) + '\.')
+    glob = glob.replace(/(?!\/)\*$/g, slashQ)
+  }
 
-    // consecutive `?` chars
-    .replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]')
-    // .replace(/[^?]\?/g, '\\/.%%[^/]')
-    .replace(/\?/g, '[^/]')
-    .replace(/\//g, '\\/')
+  glob = glob.replace(/\*\*/g, '.%%')
+  // .replace(/\*\*/g, dotstars(opts.dot))
 
-    .replace(/\.(\w+|$)/g, '\\.$1')
-    .replace(/(?!\/)\*$/g, slashQ)
-    .replace(/\*/g, stardot(opts.dot))
+  // consecutive `?` chars
+  glob = glob.replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + '[^/]')
+  // .replace(/[^?]\?/g, '\\/.%%[^/]')
+  glob = glob.replace(/\?/g, '[^/]')
+  glob = glob.replace(/\//g, '\\/')
 
-    // clean up
-    .replace(/%~/g, '?')
-    .replace(/%%/g, '*')
-    .replace(/\?\./g, '?\\.')
-    .replace(/_QMARK_:/g, '?:')
-    .replace(/[\\]+\//g, '\\/')
-    .replace(/~\^/g, '[')
-    .replace(/\^~/g, ']')
-    .replace(/\[\^\\\/\]/g, '[^/]');
+  glob = glob.replace(/\.(\w+|$)/g, '\\.$1')
+  glob = glob.replace(/\*/g, stardot(opts.dot))
+
+  // clean up
+  glob = glob.replace(/%~/g, '?')
+  glob = glob.replace(/%%/g, '*')
+  glob = glob.replace(/\?\./g, '?\\.')
+  glob = glob.replace(/_QMARK_:/g, '?:')
+  glob = glob.replace(/[\\]+\//g, '\\/')
+  glob = glob.replace(/~\^/g, '[')
+  glob = glob.replace(/\^~/g, ']')
+  glob = glob.replace(/\[\^\\\/\]/g, '[^/]');
 
   if (opts.nocase) flags += 'i';
 
