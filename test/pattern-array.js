@@ -41,11 +41,11 @@ describe('micromatch array patterns', function () {
   });
 
   describe('file paths:', function () {
-    it('should create a regular expression for file paths:', function () {
+    it('should match full file paths using an array of patterns:', function () {
       mm(['.gitignore'], ['a/b/c/*.md']).should.eql([]);
       mm(['.gitignore.md'], ['a/b/c/*.md']).should.eql([]);
       mm(['a.js'], ['*.js']).should.eql(['a.js']);
-      mm(['a.js'], ['**/*.js']).should.eql(['a.js']);
+      mm(['a.js', 'b.js', 'a/b.js'], ['**/*.js']).should.eql(['a.js', 'b.js', 'a/b.js']);
       mm(['a/b/c/d.gitignore.md'], ['a/b/c/*.md']).should.eql(['a/b/c/d.gitignore.md']);
       mm(['a/b/d/.gitignore'], ['a/b/c/*.md']).should.eql([]);
       mm(['a/b/c/xyz.md'], ['a/*/c/*.md']).should.eql(['a/b/c/xyz.md']);

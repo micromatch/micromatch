@@ -23,6 +23,8 @@ if ('wildmatch' in argv) {
 describe('brace expansion', function () {
   it('should create a regex for brace expansion:', function () {
     mm.match(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
+    mm.match(['a/a', 'b/b', 'a/b', 'a/c'], '*/{a,c}').should.eql(['a/a', 'a/c']);
+    mm.match(['a/a/a', 'b/b/b', 'a/a/b', 'a/a/c'], '**/**/{a,c}').should.eql(['a/a/a', 'a/a/c']);
     mm.match(['a/b/d/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
     mm.match(['a/b/c/iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
     mm.match(['a/b/cd/iii.md'], 'a/b/c{d,e}/*.md').should.eql(['a/b/cd/iii.md']);

@@ -16,6 +16,8 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
+console.log(mm.makeRe('**', {dot: true}))
+
 describe('options', function () {
   describe('.match()', function () {
     it('should support the `matchBase` option:', function () {
@@ -30,7 +32,7 @@ describe('options', function () {
       mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
     });
 
-    it.only('should match dotfiles when `dotfile` is true:', function () {
+    it('should match dotfiles when `dotfile` is true:', function () {
       mm.match(['a/b', 'a/.b', '.a/b', '.a/.b'], '**').should.eql(['a/b']);
       mm.match(['a/b', 'a/.b', 'a/.b', '.a/.b'], '**', {dot: true}).should.eql(['a/b', 'a/.b', 'a/.b', '.a/.b']);
       mm.match(['.gitignore'], '*.*', {dot: true}).should.eql(['.gitignore']);

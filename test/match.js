@@ -20,15 +20,33 @@ if ('wildmatch' in argv) {
 }
 
 describe('micromatch', function () {
-  describe('file extensions:', function () {
-    it('should create a regular expression for matching extensions:', function () {
-      mm.match(['.md'], '.md').should.eql(['.md']);
-      mm.match(['.txt'], '.md').should.eql([]);
-      mm.match(['.gitignore'], '.md').should.eql([]);
+  describe('basic patterns:', function () {
+    it('should correctly deal with empty globs', function () {
+      mm.match(['ab'], '').should.eql([]);
+      mm.match(['a'], '').should.eql([]);
+      mm.match(['.'], '').should.eql([]);
+    });
+
+    it('should match with non-glob patterns', function () {
+      mm.match(['.'], '.').should.eql(['.']);
+      mm.match(['ab'], 'ab').should.eql(['ab']);
+      mm.match(['ab', 'a'], 'a').should.eql(['a']);
+      mm.match(['ab', 'a'], '/a').should.eql([]);
+      mm.match(['/ab', '/a'], '/a').should.eql(['/a']);
     });
   });
 
-  describe('file names:', function () {
+  describe('paths/extensions', function () {
+    it('should match with common glob patterns', function () {
+      mm.match(['/ab', '/cd', 'ef'], '/*').should.eql(['/ab', '/cd']);
+      mm.match(['ab'], './*').should.eql([]);
+      mm.match(['ab'], '*').should.eql(['ab']);
+      mm.match(['ab'], 'ab').should.eql(['ab']);
+    });
+  });
+
+
+  describe('paths/filenames:', function () {
     it('should match files with the given extension:', function () {
       mm.match(['.md', '.txt'], '*.md').should.eql([]);
       mm.match(['.md', '.txt'], '.md').should.eql(['.md']);
@@ -37,25 +55,36 @@ describe('micromatch', function () {
       mm.match(['a/b/c/foo.md'], '*.md').should.eql([]);
     });
 
-    it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
+    it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {
       mm.match(['.foo.md'], '*.md').should.eql([]);
       mm.match(['a/.foo.md'], '*.md').should.eql([]);
       mm.match(['a/.foo.md'], 'a/.foo.md').should.eql(['a/.foo.md']);
-      mm.match(['.foo.md'], '*.md', {dot: true}).should.eql(['.foo.md']);
-      mm.match(['.foo.md'], '.*', {dot: true}).should.eql(['.foo.md']);
-      mm.match(['.gitignore'], '*.md').should.eql([]);
+      mm.match(['.a'], '*.md').should.eql([]);
       mm.match(['.verb.txt'], '*.md').should.eql([]);
       mm.match(['a/b/c/.xyz.md'], 'a/b/c/.*.md').should.eql(['a/b/c/.xyz.md']);
+      mm.match(['.md'], '.md').should.eql(['.md']);
+      mm.match(['.txt'], '.md').should.eql([]);
+      mm.match(['.a'], '.md').should.eql([]);
+      mm.match(['.a'], '.a').should.eql(['.a']);
+      mm.match(['.b'], '.b*').should.eql(['.b']);
+      mm.match(['.ab', '.a', '.b'], '.a*').should.eql(['.ab', '.a']);
+      mm.match(['.ab', '.a', '.b'], '.*').should.eql(['.ab', '.a', '.b']);
+      mm.match(['.ab', '.a', '.b'], '*.*').should.eql([]);
+      mm.match(['.a'], 'a/b/c/*.md').should.eql([]);
+      mm.match(['.a.md'], 'a/b/c/*.md').should.eql([]);
+      mm.match(['a/b/c/d.a.md'], 'a/b/c/*.md').should.eql(['a/b/c/d.a.md']);
+      mm.match(['a/b/d/.a'], 'a/b/c/*.md').should.eql([]);
+    });
+
+    it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
+      mm.match(['.foo.md'], '*.md', {dot: true}).should.eql(['.foo.md']);
+      mm.match(['.foo.md'], '.*', {dot: true}).should.eql(['.foo.md']);
       mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', {dot: true}).should.eql(['a/b/c/.xyz.md']);
     });
   });
 
-  describe('file paths:', function () {
-    it('should create a regular expression for file paths:', function () {
-      mm.match(['.gitignore'], 'a/b/c/*.md').should.eql([]);
-      mm.match(['.gitignore.md'], 'a/b/c/*.md').should.eql([]);
-      mm.match(['a/b/c/d.gitignore.md'], 'a/b/c/*.md').should.eql(['a/b/c/d.gitignore.md']);
-      mm.match(['a/b/d/.gitignore'], 'a/b/c/*.md').should.eql([]);
+  describe('paths/filepaths:', function () {
+    it('should match file paths:', function () {
       mm.match(['a/b/c/xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/xyz.md']);
       mm.match(['a/bb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bb/c/xyz.md']);
       mm.match(['a/bbbb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bbbb/c/xyz.md']);
@@ -67,8 +96,8 @@ describe('micromatch', function () {
 
   describe('double stars:', function () {
     it('should match full file paths:', function () {
-      mm.match(['.gitignore'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['a/b/z/.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['.a'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['a/b/z/.a'], 'a/**/z/*.md').should.eql([]);
       mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
 
       mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql([]);
@@ -83,8 +112,8 @@ describe('micromatch', function () {
     });
 
     it('should match paths with leading `./`:', function () {
-      mm.match(['./.gitignore'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['./a/b/z/.gitignore'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./.a'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/z/.a'], 'a/**/z/*.md').should.eql([]);
       mm.match(['./a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql([]);
       mm.match(['./a/b/c/d/e/z/foo.md'], './a/**/z/*.md').should.eql(['./a/b/c/d/e/z/foo.md']);
 
