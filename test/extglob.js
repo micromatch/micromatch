@@ -22,6 +22,7 @@ if ('wildmatch' in argv) {
 
 describe('extglob', function () {
   it.skip('should match character classes:', function () {
+    mm.isMatch(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
     mm.isMatch('axb', 'a?(b*)').should.eql([]);
     mm.isMatch('ax', '?(a.*|b)').should.eql([]);
     mm.isMatch('ax', 'a?(b*)').should.eql([]);

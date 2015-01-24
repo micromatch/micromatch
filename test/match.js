@@ -40,8 +40,18 @@ describe('micromatch', function () {
     it('should match with common glob patterns', function () {
       mm.match(['/ab', '/cd', 'ef'], '/*').should.eql(['/ab', '/cd']);
       mm.match(['ab'], './*').should.eql([]);
+      mm.match(['./ab'], './*').should.eql(['./ab']);
       mm.match(['ab'], '*').should.eql(['ab']);
       mm.match(['ab'], 'ab').should.eql(['ab']);
+    });
+
+    it('should match one directory level:', function () {
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/*/e').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'b/b/c/e', 'a/b/c/d/e'], '*/b/*/e').should.eql(['a/b/c/e', 'b/b/c/e']);
+    });
+
+    it('should match multiple directory levels:', function () {
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/**/e').should.eql(['a/b/c/e', 'a/b/c/d/e']);
     });
   });
 
