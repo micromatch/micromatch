@@ -21,16 +21,36 @@ if ('wildmatch' in argv) {
 }
 
 describe('extglob', function () {
-  it.skip('should match character classes:', function () {
-    mm.isMatch(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
-    mm.isMatch('axb', 'a?(b*)').should.eql([]);
-    mm.isMatch('ax', '?(a.*|b)').should.eql([]);
-    mm.isMatch('ax', 'a?(b*)').should.eql([]);
-    // mm.makeRe('?(a.*|b)').should.eql(/^(?:.(a.(?!\.)(?=.)[^\/]*?|b))$/);
+  it('should match extglobs:', function () {
+    mm.match(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
+    mm.match(['axb'], 'a?(b*)').should.eql([]);
+    mm.match(['ax'], '?(a.*|b)').should.eql([]);
+    mm.match(['ax'], 'a?(b*)').should.eql([]);
+    mm.match(['ax'], 'a?(b*)').should.eql([]);
+    mm.match(['yax'], '?(a*|b)').should.eql(['yax']);
+    mm.match(['ax'], '?(a*|b)').should.eql([]);
+  });
+
+  it('should match character classes:', function () {
+    mm.isMatch('ax', 'a?(b*)').should.be.false;
+    mm.isMatch('abx', 'a?(b*)').should.be.false;
+    mm.isMatch('axbx', 'a?(b*)').should.be.true;
+    mm.isMatch('axb', 'a?(b*)').should.be.false;
+    mm.isMatch('ax', '?(a*|b)').should.be.false;
+    mm.isMatch('yax', '?(a*|b)').should.be.true;
+    mm.isMatch('ax', 'a?(b+)').should.be.false;
+    mm.isMatch('ax', 'a?(b*)').should.be.false;
+    mm.isMatch('axb', 'a?(b*)').should.be.false;
+    mm.isMatch('abbbb', 'a?(b*)').should.be.true;
+    mm.isMatch('axbbbb', 'a?(b*)').should.be.true;
+    mm.isMatch('xbbbb', 'a?(b*)').should.be.false;
+    mm.isMatch('xabbbb', 'a?(b*)').should.be.false;
+  });
+
+  it('should create a regex for character classes:', function () {
+    mm.makeRe('a?(b*)').should.eql(/^(?:a.(b(?!\.)(?=.)[^/]*?))$/);
+    // mm.makeRe('a?(b*)').should.eql(/^(?:(?=.)a(?:b[^/]*?)?)$/);
+    mm.makeRe('?(a.*|b)').should.eql(/^(?:.(a.(?!\.)(?=.)[^/]*?|b))$/);
   });
 });
 
-// console.log(/a?(b+)/.test('ax'))
-// console.log(/a?(b*)/.test('ax'))
-// console.log(/a?(b*)/.test('axb'))
-// console.log(/a?(b*)/.test('axbbbb'))
