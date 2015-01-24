@@ -9,7 +9,6 @@
 
 var path = require('path');
 var filenameRe = require('filename-regex');
-var union = require('arr-union');
 var diff = require('arr-diff');
 var braces = require('braces');
 var win32 = process.platform === 'win32';
@@ -79,7 +78,7 @@ function match(files, pattern, options) {
   }
 
   opts.hasGlobstar = /\*\*/.test(pattern);
-  opts.regex = makeRe(pattern, opts);
+  var regex = makeRe(pattern, opts);
 
   var len = files.length;
   var res = [];
@@ -89,7 +88,7 @@ function match(files, pattern, options) {
     var file = files[i++];
     var fp = unixify(file, opts);
 
-    if (!isMatch(fp, null, opts)) {
+    if (!isMatch(fp, regex, opts)) {
       continue;
     }
     res.push(fp);
@@ -105,21 +104,60 @@ function match(files, pattern, options) {
   return res;
 }
 
+/**
+ * Returns true if the filepath matches the given
+ * pattern.
+ */
+
 function isMatch(fp, pattern, opts) {
-  var dot = opts.dot;
-  var res = false;
+  if (!(pattern instanceof RegExp)) {
+    return makeRe(pattern).test(fp);
+  }
 
   if (opts.matchBase) {
     var matches = filenameRe().exec(fp);
-    if (opts.regex.test(matches[0])) {
+    if (pattern.test(matches[0])) {
       return true;
     }
   }
 
-  return pattern
-    ? makeRe(pattern).test(fp)
-    : opts.regex.test(fp);
+  return pattern.test(fp);
 }
+
+/**
+ * Filter files with the given pattern.
+ *
+ * @param  {String|Array} `pattern`
+ * @param  {Array} `files`
+ * @param  {Options} `opts`
+ * @return {Array}
+ */
+
+function filter(pattern, opts) {
+  var re = !(pattern instanceof RegExp)
+    ? makeRe(pattern, opts)
+    : pattern;
+
+  return function (files) {
+    if (typeof files === 'string') {
+      return isMatch(files, pattern, opts);
+    }
+
+    var res = files.slice();
+    var len = files.length;
+
+    while (len--) {
+      if (!isMatch(files[len], pattern, opts)) {
+        res.splice(len, 1);
+      }
+    }
+    return res;
+  };
+}
+
+/**
+ * Convert a file path to a unix path.
+ */
 
 function unixify(fp, opts) {
   if (opts && opts.normalize || win32 || path.sep === '\\') {
@@ -137,12 +175,9 @@ function unixify(fp, opts) {
 var dot         = '\\.';
 var dots        = dot + '{1,2}';
 var slashQ      = esc('[^/]*?');
-var slashStar   = dot + slashQ;
 var lookahead   = esc('(?=.)');
-var star        = lookahead + dot + slashQ;
 var start       = '(?:^|\\/)';
 var end         = '(?:\\/|$)';
-
 
 function esc(str) {
   return str.replace(/\?/g, '%~')
@@ -166,7 +201,6 @@ function doublestar() {
 function stardot(dotfile) {
   return dotstarbase(dotfile) + slashQ;
 }
-
 
 /**
  * Create a regular expression for matching
@@ -215,21 +249,20 @@ function makeRe(glob, options) {
     glob = unesc(glob);
   }
 
+  var negate = glob.charCodeAt(0) === 33; /* '!' */
+  if (negate) {
+    glob = glob.slice(1);
+  }
+
   // see if there is at least one star
   var twoStars = glob.indexOf('**');
+  var flags = opts.flags || '';
 
   if (twoStars === 0 && glob.length === 2 && !opts.dot) {
     glob = doublestar();
   } else {
 
     var oneStar = glob.indexOf('*');
-    var negate = glob.charCodeAt(0) === 33; /* '!' */
-    if (negate) {
-      glob = glob.slice(1);
-    }
-
-    var flags = opts.flags || '';
-    var i = 0;
 
     // expandBraces `{1..5}` braces
     if (glob.indexOf('{') !== -1 && !opts.nobraces) {
@@ -293,21 +326,6 @@ function globRegex(glob, negate) {
 }
 
 /**
- * Create a regular expression for optionally
- * matching basenames or full file paths.
- *
- * @param  {String} pattern
- * @param  {Object} opts
- * @return {RegExp}
- */
-
-function baseRegex(pattern, opts) {
-  var re = pattern + '|' + pattern
-    .replace(/\/\*\*|\*\*\//g, '');
-  return makeRe(re, opts);
-}
-
-/**
  * Expand braces in the given glob pattern.
  *
  * We only need to use the [braces] lib when
@@ -326,55 +344,6 @@ function expandBraces(glob, options) {
     options.makeRe = false;
   }
   return braces(glob, options).join('|');
-}
-
-/**
- * Regex for matching single-level braces
- */
-
-function bracesRegex() {
-  return /\{(.*),(.*)\}/g;
-}
-
-/**
- * Regex for matching single-level braces
- */
-
-function rangeRegex() {
-  return /\{(.{1,2})(\.{2})(.{1,2})\}/g;
-}
-
-/**
- * Return `false` if the path contains nested braces
- * or a range (`..`). If so, then the [braces] lib
- * is used for expansion. if not, we convert the
- * braces to a regex.
- *
- * @param  {String} str
- * @return {Boolean}
- */
-
-function isBasicBrace(str) {
-  if (/\(|\{[^}]*\{/.test(str)) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * Return true if a brace contains a basic range.
- * A basic range only has two arguments.
- *
- * @param  {String} str
- * @return {Boolean}
- */
-
-function isBasicRange(str) {
-  var match = str.match(/\.\./g);
-  if (!match || (match && match.length === 2)) {
-    return false;
-  }
-  return true;
 }
 
 /**
@@ -435,6 +404,12 @@ module.exports = micromatch;
 module.exports.match = match;
 
 /**
+ * Expose `micromatch.isMatch`
+ */
+
+module.exports.isMatch = isMatch;
+
+/**
  * Expose `micromatch.makeRe`
  */
 
@@ -445,3 +420,9 @@ module.exports.makeRe = makeRe;
  */
 
 module.exports.braces = braces;
+
+/**
+ * Expose `micromatch.filter`
+ */
+
+module.exports.filter = filter;
