@@ -28,7 +28,7 @@ describe('micromatch.makeRe', function () {
 
   describe('braces:', function () {
     it('should create a regular expression for matching extensions:', function () {
-      mm.makeRe('a/b/c/{d,e}/f.js').should.eql(/^(?:a\/b\/c\/(?:d|e)\/f\.js)$/);
+      mm.makeRe('a/b/c/{d,e}/f.js').should.eql(/^(?:a\/b\/c\/(d|e)\/f\.js)$/);
     });
   });
 
