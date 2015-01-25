@@ -31,13 +31,12 @@
   "dependencies": {
     "arr-diff": "^1.0.1",
     "arr-union": "^2.0.0",
-    "braces": "^1.3.0",
+    "braces": "^1.4.0",
     "filename-regex": "^2.0.0"
   },
   "devDependencies": {
     "benchmarked": "^0.1.3",
     "chalk": "^0.5.1",
-    "expand-range": "^1.4.0",
     "globby": "^1.1.0",
     "globy": "^0.1.8",
     "helper-reflinks": "^0.2.0",
@@ -46,6 +45,7 @@
     "mocha": "*",
     "multimatch": "^2.0.0",
     "should": "^4.6.1",
+    "template": "^0.6.2",
     "wildmatch": "^0.1.0",
     "write": "^0.1.1"
   },
