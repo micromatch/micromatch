@@ -156,6 +156,27 @@ function filter(pattern, opts) {
 }
 
 /**
+ * Filter files with the given pattern.
+ *
+ * @param  {String|Array} `pattern`
+ * @param  {Array} `files`
+ * @param  {Options} `opts`
+ * @return {Array}
+ */
+
+function expand(pattern, opts) {
+  var res = files.slice();
+  var len = files.length;
+
+  while (len--) {
+    if (!isMatch(files[len], pattern, opts)) {
+      res.splice(len, 1);
+    }
+  }
+  return res;
+}
+
+/**
  * Convert a file path to a unix path.
  */
 
@@ -172,17 +193,20 @@ function unixify(fp, opts) {
  * and speed up processing.
  */
 
+function esc(str) {
+  return str
+    .replace(/\?/g, '%~')
+    .replace(/\*/g, '%%');
+}
+
 var dot         = '\\.';
+var box         = '[^/]';
 var dots        = dot + '{1,2}';
-var slashQ      = esc('[^/]*?');
+var slashQ      = esc(box + '*?');
 var lookahead   = esc('(?=.)');
 var start       = '(?:^|\\/)';
 var end         = '(?:\\/|$)';
 
-function esc(str) {
-  return str.replace(/\?/g, '%~')
-    .replace(/\*/g, '%%');
-}
 
 function unesc(str) {
   return str.replace(/%~/g, '?')
@@ -211,7 +235,7 @@ function stardot(dotfile) {
  * @return {RegExp}
  */
 
-function makeRe(glob, options) {
+function makeGlob(glob, options) {
   var opts = options || {};
 
   // reset cache, recompile regex if options change
@@ -254,6 +278,13 @@ function makeRe(glob, options) {
     glob = glob.slice(1);
   }
 
+  var parens = glob.indexOf('(');
+  var square = glob.indexOf('[');
+
+  if (parens !== -1) {
+    glob = extglob(glob, opts);
+  }
+
   // see if there is at least one star
   var twoStars = glob.indexOf('**');
   var flags = opts.flags || '';
@@ -269,6 +300,9 @@ function makeRe(glob, options) {
       glob = expandBraces(glob, options);
     }
 
+    // escaped stars
+    replace(/\\\*/g, esc('\\*'));
+
     // windows drives
     replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2');
     replace(/\[/g, dotstarbase(opts.dot) + '[');
@@ -282,8 +316,13 @@ function makeRe(glob, options) {
     // question marks
     replace(/\?\./g, esc('?\\.'));
     replace(/\?:/g, esc('?:'));
+
     // consecutive `?` chars
+    replace(/[^?]\?/g, '\\/'+ dotstarbase(opts.dot) + box)
+    // .replace(/[^?]\?/g, '\\/.%%' + box)
+    // replace(/\?/g, box)
     replace(/\?/g, '.');
+
     replace(/\//g, '\\/');
 
     if (oneStar !== -1) {
@@ -296,7 +335,7 @@ function makeRe(glob, options) {
     }
 
     replace(/\.(\w+|$)/g, '\\.$1');
-    replace(/\[\^\\\/\]/g, '[^/]');
+    replace(/\[\^\\\/\]/g, box);
     replace(/[\\]+\//g, '\\/');
     unescape();
   }
@@ -305,7 +344,12 @@ function makeRe(glob, options) {
 
   // cache regex
   globRe = new RegExp(globRegex(glob, negate), flags);
+  // console.log(globRe)
   return globRe;
+}
+
+function makeRe(glob, options) {
+  return makeGlob(glob, options);
 }
 
 /**
@@ -323,6 +367,49 @@ function globRegex(glob, negate) {
     ? ('(?!^' + glob + ').*$')
     : glob;
   return '^' + glob;
+}
+
+
+/**
+ * Match exglob patterns:
+ *  - `?(...)` match zero or one of the given patterns.
+ *  - `*(...)` match zero or more of the given patterns.
+ *  - `+(...)` match one or more of the given patterns.
+ *  - `@(...)` match one of the given patterns.
+ *  - `!(...)` match anything except one of the given patterns.
+ */
+
+/**
+ * Create the regex to do the matching. If
+ * the leading character in the `glob` is `!`
+ * a negation regex is returned.
+ *
+ * @param {String} `glob`
+ * @param {String} `flags`
+ */
+
+function extglob(glob, opts) {
+  return glob.replace(/(\.)?([?*+@!])(\(([^)]*)\))/, function (match, $1, $2, $3, $4) {
+    if (!$2 || !$3 || !$4 || $4.indexOf('{') !== -1) {
+      return match;
+    }
+    var res;
+
+    if ($2 === '?') {
+      res = '(?:' + $4 + ')?';
+    }
+
+    if ($2 === '*' || $2 === '+') {
+      res = ($1 ? esc('\\.(?:') : esc('(?:')) + $4 + ')';
+    }
+
+    if ($2 === '!') {
+    console.log(arguments)
+      res = ($1 ? esc('\\.(?:(?!') : esc('((?!')) + $4 + esc(').*?)');
+    }
+
+    return res || match;
+  });
 }
 
 /**
