@@ -63,9 +63,9 @@ describe('.isMatch()', function () {
   });
 
   it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
-    mm.isMatch('.foo.md', '*.md', {dot: true}).should.be.false;
+    mm.isMatch('.foo.md', '*.md', {dot: true}).should.be.true;
     mm.isMatch('.foo.md', '.*', {dot: true}).should.be.true;
-    mm.isMatch('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}).should.be.false;
+    mm.isMatch('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}).should.be.true;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}).should.be.true;
   });
 

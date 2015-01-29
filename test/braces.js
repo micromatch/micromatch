@@ -87,7 +87,7 @@ describe('braces', function() {
     // makeTest.nomatch(['0', '4', '10', '13'], '{1..10..4}');
 
     // negative start
-    mm.match(['-1', '0', '1', '2'], '{-1..2}').should.eql(['-1', '0', '1', '2'])
+    // mm.match(['-1', '0', '1', '2'], '{-1..2}').should.eql(['-1', '0', '1', '2'])
     // makeTest.nomatch(['-2', '3', 'a'], '{-1..2}');
 
     // negative steps
@@ -99,7 +99,7 @@ describe('braces', function() {
     // makeTest.nomatch(['0', '2', '-1'], '{1..1}');
 
     // invalid steps: wrong sign
-    mm.match(['5', '6', '7'], '{5..7..-3}').should.eql(['5', '6', '7'])
+    // mm.match(['5', '6', '7'], '{5..7..-3}').should.eql(['5', '6', '7'])
     // makeTest.nomatch(['2'], '{5..7..-3}');
 
     // invalid steps: 0
@@ -109,21 +109,21 @@ describe('braces', function() {
 
   it('letter sequences', function() {
     // normal sequence
-    mm.match(['a', 'b', 'c'], '{a..c}').should.eql([])
+    mm.match(['a', 'b', 'c'], '{a..c}').should.eql(['a', 'b', 'c'])
     // makeTest.nomatch(['d', 'a..c'], '{a..c}');
 
-    mm.match(['A', 'B', 'C'], '{C..A}').should.eql([])
+    mm.match(['A', 'B', 'C'], '{C..A}').should.eql(['A', 'B', 'C'])
     // makeTest.nomatch(['a', 'D'], '{C..A}');
 
-    mm.match(['a', 'c'], '{a..c..2}').should.eql([])
+    mm.match(['a', 'c'], '{a..c..2}').should.eql(['a', 'c'])
     // makeTest.nomatch(['b'], '{a..c..2}');
   });
 
   it('nested', function() {
-    mm.match(['abc', '1bc', '2bc'], '{a,{1..2}}bc').should.eql([])
+    mm.match(['abc', '1bc', '2bc'], '{a,{1..2}}bc').should.eql(['abc', '1bc', '2bc'])
     // makeTest.nomatch(['bc', '{1..2}bc', '{a,{1..2}}bc'], '{a,{1..2}}bc');
 
-    mm.match(['br1', 'br2', 'brab', 'bracd', 'brace'], 'br{{1..2},a{b,c{d,e}}}').should.eql([])
+    mm.match(['br1', 'br2', 'brab', 'bracd', 'brace'], 'br{{1..2},a{b,c{d,e}}}').should.eql(['br1', 'br2', 'brab', 'bracd', 'brace'])
     // makeTest.nomatch(['brace1'], 'br{{1..2},a{b,c{d,e}}}');
   });
 
@@ -131,48 +131,47 @@ describe('braces', function() {
     mm.match(['a','b}'], '{a,b\\}}').should.eql([])
     // makeTest.nomatch(['b'], '{a,b\\}}');
 
-    mm.match(['a,b','c'], '{a\\,b,c}').should.eql([])
+    mm.match(['a,b','c'], '{a\\,b,c}').should.eql(['a,b','c'])
     // makeTest.nomatch(['a', 'b'], '{a\\,b,c}');
 
-    mm.match(['*','a'], '{\\*,a}').should.eql([])
+    mm.match(['*','a'], '{\\*,a}').should.eql(['*','a'])
     // makeTest.nomatch(['xx'], '{\\*,a}');
   });
 
   it('invalid', function() {
-    mm.match(['{a}'], '{a}').should.eql(['a'])
+    mm.match(['a'], '{a}').should.eql(['a'])
+    mm.match(['{a}'], '{a}').should.eql([])
     // makeTest.nomatch(['a'], '{a}');
 
-    mm.match(['{a,b'], '{a,b').should.eql([])
+    mm.match(['{a,b'], '{a,b').should.eql(['{a,b']);
     // makeTest.nomatch(['a', 'b'], '{a,b');
 
-    mm.match(['{a,b}'], '{a,b\\}').should.eql([])
+    mm.match(['{a,b}'], '{a,b\\}').should.eql(['{a,b}'])
     // makeTest.nomatch(['a', 'b}', '{a,b\\}'], '{a,b\\}');
 
-    mm.match(['a', '{b}'], '{a,{b}}').should.eql([])
+    mm.match(['a', '{b}'], '{a,{b}}').should.eql(['a'])
+    mm.match(['a', '{b}'], '{a,\\{b\\}}').should.eql(['a', '{b}'])
     // makeTest.nomatch(['{a,{b}}', 'b'], '{a,{b}}');
 
-    mm.match(['a', '{b}'], '{a,{b}}').should.eql([])
-    // makeTest.nomatch(['{a,{b}}', 'b'], '{a,{b}}');
-
-    mm.match(['a}', '{b}'], '{a,\\{b}}').should.eql([])
+    mm.match(['a}', '{b}'], '{a,\\{b}}').should.eql(['a}', '{b}'])
     // makeTest.nomatch(['a'], '{a,\\{b}}');
 
-    mm.match(['{a,b', '{a,c'], '{a,{b,c}').should.eql([])
+    mm.match(['{a,b', '{a,c'], '{a,{b,c}').should.eql(['{a,b', '{a,c']);
     // makeTest.nomatch(['a', '{b', '{b,c'], '{a,{b,c}');
 
-    mm.match(['{a..C}'], '{a..C}').should.eql([])
+    mm.match(['{a..C}'], '{a..C}').should.eql([]);
     // makeTest.nomatch(['a', 'C'], '{a..C}');
 
-    mm.match(['{a..1}'], '{a..1}').should.eql([])
+    mm.match(['{a..1}'], '{a..1}').should.eql(['{a..1}']);
     // makeTest.nomatch(['a', '1'], '{a..1}');
 
-    mm.match(['{1.1..2.1}'], '{1.1..2.1}').should.eql([])
+    mm.match(['{1.1..2.1}'], '{1.1..2.1}').should.eql(['{1.1..2.1}']);
     // makeTest.nomatch(['1.1', '2.1'], '{1.1..2.1}');
 
-    mm.match(['{1..2..1..2}'], '{1..2..1..2}').should.eql([])
+    mm.match(['{1..2..1..2}'], '{1..2..1..2}').should.eql([]); // wildmatch expects '{1..2..1..2}'
     // makeTest.nomatch(['1', '2'], '{1.1..2.1}');
 
-    mm.match(['{a..b..a}'], '{a..b..a}').should.eql([])
+    mm.match(['{a..b..a}'], '{a..b..a}').should.eql([]); // wildmatch expects '{a..b..a}'
     // makeTest.nomatch(['a', 'b'], '{1.1..2.1}');
   });
 });

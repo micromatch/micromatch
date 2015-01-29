@@ -12,7 +12,7 @@ var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
 
-if ('multimatch' in argv) {
+if ('multimatch' in argv || 'minimatch' in argv) {
   mm = require('multimatch');
 }
 
@@ -122,9 +122,7 @@ describe('micromatch string patterns', function () {
   describe('negation', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm(['.md'], '!.md').should.eql([]);
-      mm(['d.md'], '!.md').should.eql(['d.md']);
-      mm(['d.md'], ['!.md']).should.eql([]);
-      mm(['d.md'], ['*', '!.md']).should.eql(['d.md']);
+      mm(['d.md'], '!.md').should.eql([]);
     });
 
     it('should be inclusive by default when the pattern is a string:', function () {
@@ -207,11 +205,11 @@ describe('micromatch string patterns', function () {
       mm(['d.md'], '*.md', {dot: true}).should.eql(['d.md']);
       mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
       mm(['a/b/c/.dotfile'], '*.md', {dot: true}).should.eql([]);
-      mm(['a/b/c/.dotfile.md'], '*.md', {dot: true}).should.eql([]);
+      mm(['a/b/c/.dotfile.md'], '*.md', {dot: true}).should.eql(['a/b/c/.dotfile.md']);
       mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
       mm(['.dotfile'], '*.md', {dot: true}).should.eql([]);
       mm(['.dotfile'], '*.*', {dot: true}).should.eql(['.dotfile']);
-      mm(['.dotfile.md'], '*.md', {dot: true}).should.eql(['.dotfile.md']);
+      mm(['.dotfile.md'], '.*.md', {dot: true}).should.eql(['.dotfile.md']);
       mm(['a/b/c/.dotfile.md'], '*.md').should.eql([]);
       mm(['a/b/c/.dotfile.md'], '**/.*.md').should.eql(['a/b/c/.dotfile.md']);
       mm(['a/b/c/.dotfile.md'], '**/.*').should.eql(['a/b/c/.dotfile.md']);

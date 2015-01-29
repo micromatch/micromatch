@@ -19,12 +19,27 @@ if ('wildmatch' in argv) {
   mm = ref.wildmatch;
 }
 
-describe('micromatch', function () {
+describe('.match()', function () {
   describe('basic patterns:', function () {
     it('should correctly deal with empty globs', function () {
       mm.match(['ab'], '').should.eql([]);
       mm.match(['a'], '').should.eql([]);
       mm.match(['.'], '').should.eql([]);
+    });
+
+    it('should match with non-glob patterns', function () {
+      mm.match(['.'], '.').should.eql(['.']);
+      mm.match(['ab'], 'ab').should.eql(['ab']);
+      mm.match(['ab', 'a'], 'a').should.eql(['a']);
+      mm.match(['ab', 'a'], '/a').should.eql([]);
+      mm.match(['/ab', '/a'], '/a').should.eql(['/a']);
+    });
+  });
+
+  describe('characters:', function () {
+    it('qmark', function () {
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], '?a').should.eql([]);
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], '?b').should.eql(['ab', 'bb']);
     });
 
     it('should match with non-glob patterns', function () {
@@ -87,9 +102,11 @@ describe('micromatch', function () {
     });
 
     it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
-      mm.match(['.foo.md'], '*.md', {dot: true}).should.eql(['.foo.md']);
-      mm.match(['.foo.md'], '.*', {dot: true}).should.eql(['.foo.md']);
-      mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', {dot: true}).should.eql(['a/b/c/.xyz.md']);
+      var opts = { dot: true };
+
+      mm.match(['.foo.md'], '*.md', opts).should.eql(['.foo.md']);
+      mm.match(['.foo.md'], '.*', opts).should.eql(['.foo.md']);
+      mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', opts).should.eql(['a/b/c/.xyz.md']);
     });
   });
 

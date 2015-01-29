@@ -18,30 +18,26 @@ if ('multimatch' in argv) {
 
 
 describe('micromatch array patterns', function () {
-  describe('file extensions:', function () {
-    it('should create a regular expression for matching extensions:', function () {
-      mm(['.md'], ['.md']).should.eql(['.md']);
-      mm(['.txt'], ['.md']).should.eql([]);
-      mm(['.gitignore'], ['.md']).should.eql([]);
-    });
+  it('should match file extensions:', function () {
+    mm(['.md'], ['.md']).should.eql(['.md']);
+    mm(['.txt'], ['.md']).should.eql([]);
+    mm(['.gitignore'], ['.md']).should.eql([]);
   });
 
-  describe('file names:', function () {
-    it('should match files with the given extension:', function () {
-      mm(['a.md', 'a.txt'], ['*.md']).should.eql(['a.md']);
-      mm(['.d.md'], ['.*.md']).should.eql(['.d.md']);
-      mm(['d.md'], ['*.md']).should.eql(['d.md']);
-      mm(['a/b/c/d.md'], ['*.md']).should.eql([]);
-    });
-
-    it('should not match dotfiles, even if the dotfile name equals the extension:', function () {
-      mm(['.gitignore'], ['*.md']).should.eql([]);
-      mm(['.verb.txt'], ['*.md']).should.eql([]);
-    });
+  it('should match files with the given extension:', function () {
+    mm(['a.md', 'a.txt'], ['*.md']).should.eql(['a.md']);
+    mm(['.d.md'], ['.*.md']).should.eql(['.d.md']);
+    mm(['d.md'], ['*.md']).should.eql(['d.md']);
+    mm(['a/b/c/d.md'], ['*.md']).should.eql([]);
+  });
+  it('should not match dotfiles by default:', function () {
+    mm(['.gitignore'], ['*.md']).should.eql([]);
+    mm(['.verb.txt'], ['*.md']).should.eql([]);
   });
 
   describe('file paths:', function () {
     it('should match full file paths using an array of patterns:', function () {
+      mm(['a/b/c.md', 'a/b/c.txt'], '!*.txt', {matchBase: true}).should.eql(['a/b/c.md']);
       mm(['.gitignore'], ['a/b/c/*.md']).should.eql([]);
       mm(['.gitignore.md'], ['a/b/c/*.md']).should.eql([]);
       mm(['a.js'], ['*.js']).should.eql(['a.js']);
@@ -58,7 +54,12 @@ describe('micromatch array patterns', function () {
       mm(['a/bb.bb/aa/bb/aa/c/xyz.md'], ['a/**/c/*.md']).should.eql(['a/bb.bb/aa/bb/aa/c/xyz.md']);
       mm(['a/bb.bb/aa/b.b/aa/c/xyz.md'], ['a/**/c/*.md']).should.eql(['a/bb.bb/aa/b.b/aa/c/xyz.md']);
     });
+
+    it('matchBase / negation:', function () {
+      mm(['a/b/c.md', 'a/b/c.txt'], ['*', '!*.md'], {matchBase: true}).should.eql(['a/b/c.txt']);
+    });
   });
+
 
   describe('special characters:', function () {
     it('should match one character per question mark:', function () {
@@ -118,19 +119,21 @@ describe('micromatch array patterns', function () {
       mm(['a/b/c/j/e/z/d.txt'], ['a/**/j/**/z/*.md']).should.eql([]);
 
       mm(['a/b/d/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
-      // mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
-      // mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/*.md'])
-      // mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md'])
-      // mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/.*.md'])
-      // mm(['a/b/d/cd/e/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/d/cd/e/xyz.md']);
-      // mm(['a/b/baz/ce/fez/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/baz/ce/fez/xyz.md']);
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql([]);
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/*.md'])
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md'])
+      mm(['a/b/c/xyz.md'], ['a/b/**/c{d,e}/**/.*.md'])
+      mm(['a/b/d/cd/e/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/d/cd/e/xyz.md']);
+      mm(['a/b/baz/ce/fez/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/baz/ce/fez/xyz.md']);
     });
   });
 
   describe('negation', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm(['.md'], ['!.md']).should.eql([]);
-      mm(['d.md'], ['*', '!.md']).should.eql(['d.md']);
+      mm(['d.md'], ['!.md']).should.eql([]);
+      mm(['d.md'], ['*', '!.md']).should.eql([]); // result differs from multimatch, but not minimatch
+      mm(['d.md', 'c.txt'], ['*', '!.md']).should.eql(['c.txt']);
     });
 
     it('should negate files:', function () {
@@ -205,15 +208,17 @@ describe('micromatch array patterns', function () {
       mm(['d.md'], ['*.md'], {dot: true}).should.eql(['d.md']);
       mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
       mm(['a/b/c/.gitignore'], ['*.md'], {dot: true}).should.eql([]);
-      mm(['a/b/c/.gitignore.md'], ['*.md'], {dot: true}).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], ['*.md'], {dot: true}).should.eql(['a/b/c/.gitignore.md']);
       mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
       mm(['.gitignore'], ['*.md'], {dot: true}).should.eql([]);
       mm(['.gitignore'], ['*.*'], {dot: true}).should.eql(['.gitignore']);
+      mm(['.gitignore.md'], ['.*.md'], {dot: true}).should.eql(['.gitignore.md']);
       mm(['.gitignore.md'], ['*.md'], {dot: true}).should.eql(['.gitignore.md']);
+      mm(['a/b/c/.verb.md'], ['**/*.md'], {dot: true}).should.eql(['a/b/c/.verb.md']);
+
       mm(['a/b/c/.gitignore.md'], ['*.md']).should.eql([]);
       mm(['a/b/c/.gitignore.md'], ['**/.*.md']).should.eql(['a/b/c/.gitignore.md']);
       mm(['a/b/c/.gitignore.md'], ['**/.*']).should.eql(['a/b/c/.gitignore.md']);
-      mm(['a/b/c/.verb.md'], ['**/*.md'], {dot: true}).should.eql(['a/b/c/.verb.md']);
     });
   });
 });

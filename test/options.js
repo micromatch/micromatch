@@ -16,8 +16,6 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
-console.log(mm.makeRe('**', {dot: true}))
-
 describe('options', function () {
   describe('.match()', function () {
     it('should support the `matchBase` option:', function () {
@@ -31,22 +29,58 @@ describe('options', function () {
       mm.match(['a/b/c/e.md'], 'A/b/C/*.md', {nocase: true}).should.eql(['a/b/c/e.md']);
       mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
     });
+  });
 
-    it('should match dotfiles when `dotfile` is true:', function () {
-      mm.match(['a/b', 'a/.b', '.a/b', '.a/.b'], '**').should.eql(['a/b']);
-      mm.match(['a/b', 'a/.b', 'a/.b', '.a/.b'], '**', {dot: true}).should.eql(['a/b', 'a/.b', 'a/.b', '.a/.b']);
-      mm.match(['.gitignore'], '*.*', {dot: true}).should.eql(['.gitignore']);
-      mm.match(['.gitignore'], '*.md', {dot: true}).should.eql([]);
-      mm.match(['.gitignore'], '.gitignore', {dot: true}).should.eql(['.gitignore']);
-      mm.match(['.gitignore.md'], '*.md', {dot: true}).should.eql(['.gitignore.md']);
-      mm.match(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
-      mm.match(['a/b/c/.gitignore'], '*.md', {dot: true}).should.eql([]);
-      mm.match(['a/b/c/.gitignore.md'], '**/.*').should.eql(['a/b/c/.gitignore.md']);
-      mm.match(['a/b/c/.gitignore.md'], '**/.*.md').should.eql(['a/b/c/.gitignore.md']);
-      mm.match(['a/b/c/.gitignore.md'], '*.md').should.eql([]);
-      mm.match(['a/b/c/.gitignore.md'], '*.md', {dot: true}).should.eql([]);
-      mm.match(['a/b/c/.verb.md'], '**/*.md', {dot: true}).should.eql(['a/b/c/.verb.md']);
-      mm.match(['foo.md'], '*.md', {dot: true}).should.eql(['foo.md']);
+  describe('dotfiles:', function () {
+    describe('when `dot` or `dotfile` is NOT true:', function () {
+      it('should not match dotfiles by default:', function () {
+        mm.match(['.dotfile'], '*').should.eql([]);
+        mm.match(['.dotfile'], '**').should.eql([]);
+        mm.match(['a/b/c/.dotfile.md'], '*.md').should.eql([]);
+        mm.match(['a/b', 'a/.b', '.a/b', '.a/.b'], '**').should.eql(['a/b']);
+        mm.match(['a/b/c/.dotfile'], '*.*').should.eql([]);
+      });
+
+      it('should match dotfiles when a leading dot is defined in the path:', function () {
+        mm.match(['a/b/c/.dotfile.md'], '**/.*').should.eql(['a/b/c/.dotfile.md']);
+        mm.match(['a/b/c/.dotfile.md'], '**/.*.md').should.eql(['a/b/c/.dotfile.md']);
+      });
+
+      it('should use negation patterns on dotfiles:', function () {
+        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '!.b').should.eql(['.a', 'c', 'c.md']);
+      });
+    });
+
+    describe('when `dot` or `dotfile` is true:', function () {
+      it('should match dotfiles when there is a leading dot:', function () {
+        var opts = { dot: true };
+
+        mm.match(['.dotfile'], '*', opts).should.eql(['.dotfile']);
+        mm.match(['.dotfile'], '**', opts).should.eql(['.dotfile']);
+        mm.match(['a/b', 'a/.b', '.a/b', '.a/.b'], '**', opts).should.eql(['a/b', 'a/.b', '.a/b', '.a/.b']);
+        mm.match(['a/b', 'a/.b', 'a/.b', '.a/.b'], '{.*,**}', opts).should.eql(['a/b', 'a/.b', 'a/.b', '.a/.b']);
+        mm.match(['.dotfile'], '.dotfile', opts).should.eql(['.dotfile']);
+        mm.match(['.dotfile.md'], '.*.md', opts).should.eql(['.dotfile.md']);
+      });
+
+      it('should match dotfiles when there is not a leading dot:', function () {
+        var opts = { dot: true };
+        mm.match(['.dotfile'], '*.*', opts).should.eql(['.dotfile']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '*.*', opts).should.eql(['.a', '.b', 'c.md']);
+        mm.match(['.dotfile'], '*.md', opts).should.eql([]);
+        mm.match(['.verb.txt'], '*.md', opts).should.eql([]);
+        mm.match(['a/b/c/.dotfile'], '*.md', opts).should.eql([]);
+        mm.match(['a/b/c/.dotfile.md'], '*.md', opts).should.eql(['a/b/c/.dotfile.md']);
+        mm.match(['a/b/c/.verb.md'], '**/*.md', opts).should.eql(['a/b/c/.verb.md']);
+        mm.match(['foo.md'], '*.md', opts).should.eql(['foo.md']);
+      });
+
+      it('should use negation patterns on dotfiles:', function () {
+        var opts = { dot: true };
+        mm.match(['.a', '.b', 'c', 'c.md'], '!*.*').should.eql(['.a', '.b', 'c']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c']);
+      });
     });
   });
 });
