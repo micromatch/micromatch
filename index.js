@@ -8,7 +8,7 @@
 'use strict';
 
 var path = require('path');
-var filenameRe = require('filename-regex');
+var fileRe = require('filename-regex');
 var diff = require('arr-diff');
 var braces = require('braces');
 var win32 = process.platform === 'win32';
@@ -64,22 +64,23 @@ function micromatch(files, patterns, opts) {
  * @return {Array}
  */
 
-function match(files, pattern, options) {
+function match(files, pattern, opts) {
   if (typeof files !== 'string' && !Array.isArray(files)) {
     throw new Error('micromatch.match() expects a string or array.');
   }
 
-  var opts = options || {};
   files = arrayify(files);
+  opts = opts || {};
 
-  var negate = opts.negate || pattern.charAt(0) === '!';
-  if (negate) {
-    pattern = pattern.slice(1);
+  var negate = opts.negate || false;
+  if (opts.nonegate !== true) {
+    negate = pattern.charAt(0) === '!';
+    if (negate) {
+      pattern = pattern.slice(1);
+    }
   }
 
-  opts.hasGlobstar = /\*\*/.test(pattern);
   var regex = makeRe(pattern, opts);
-
   var len = files.length;
   var res = [];
   var i = 0;
@@ -111,16 +112,17 @@ function match(files, pattern, options) {
 
 function isMatch(fp, pattern, opts) {
   if (!(pattern instanceof RegExp)) {
-    return makeRe(pattern).test(fp);
+    pattern = makeRe(pattern, opts);
   }
 
-  if (opts.matchBase) {
-    var matches = filenameRe().exec(fp);
+  if (opts && opts.matchBase) {
+    var matches = fileRe().exec(fp);
+
+    // don't return if not `true`
     if (pattern.test(matches[0])) {
       return true;
     }
   }
-
   return pattern.test(fp);
 }
 
@@ -238,6 +240,7 @@ function makeRe(glob, options) {
   // if `true`, then we can just return
   // the regex that was previously cached
   if (globRe instanceof RegExp) {
+  console.log(globRe)
     return globRe;
   }
 
@@ -420,9 +423,3 @@ module.exports.makeRe = makeRe;
  */
 
 module.exports.braces = braces;
-
-/**
- * Expose `micromatch.filter`
- */
-
-module.exports.filter = filter;
