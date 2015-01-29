@@ -96,10 +96,6 @@ function match(files, pattern, opts) {
     }
   }
 
-  var regex = !(pattern instanceof RegExp)
-    ? makeRe(pattern, opts)
-    : pattern;
-
   var len = files.length;
   var res = [];
   var i = 0;
@@ -108,7 +104,7 @@ function match(files, pattern, opts) {
     var file = files[i++];
     var fp = unixify(file, opts);
 
-    if (!isMatch(fp, regex, opts)) { continue; }
+    if (!isMatch(fp, pattern, opts)) { continue; }
     res.push(fp);
   }
 
@@ -126,13 +122,11 @@ function match(files, pattern, opts) {
  */
 
 function isMatch(fp, pattern, opts) {
-  opts = opts || {};
-
   if (!(pattern instanceof RegExp)) {
     pattern = makeRe(pattern, opts);
   }
 
-  if (opts.matchBase) {
+  if (opts && opts.matchBase) {
     var matches = fileRe().exec(fp);
 
     // don't return if not `true`
@@ -142,21 +136,6 @@ function isMatch(fp, pattern, opts) {
   }
   return pattern.test(fp);
 }
-
-// function isMatch(fp, pattern, opts) {
-//   if (!(pattern instanceof RegExp)) {
-//     return makeRe(pattern).test(fp);
-//   }
-
-//   if (opts.matchBase) {
-//     var matches = fileRe().exec(fp);
-//     if (pattern.test(matches[0])) {
-//       return true;
-//     }
-//   }
-
-//   return pattern.test(fp);
-// }
 
 /**
  * Filter files with the given pattern.
@@ -285,19 +264,8 @@ function makeRe(glob, options) {
  */
 
 function wrapGlob(glob, negate) {
-  glob = baseGlob(glob, negate);
-  if (negate) {
-    glob = negateGlob(glob, negate);
-  }
-  return '^' + glob;
-}
-
-function baseGlob(glob) {
-  return '(?:' + glob + ')$';
-}
-
-function negateGlob(glob) {
-  return '(?!^' + glob + ').*$';
+  glob = ('(?:' + glob + ')$');
+  return '^' + (negate ? ('(?!^' + glob + ').*$') : glob);
 }
 
 /**
@@ -314,10 +282,7 @@ function negateGlob(glob) {
 function equal(a, b) {
   if (!b) return false;
   for (var prop in b) {
-    if (!a.hasOwnProperty(prop)) {
-      return false;
-    }
-    if (a[prop] !== b[prop]) {
+    if (!a.hasOwnProperty(prop) || a[prop] !== b[prop]) {
       return false;
     }
   }
@@ -400,7 +365,7 @@ module.exports.filter = filter;
  * Expose `micromatch.expand`
  */
 
-module.exports.expand = expand;
+module.exports.expand = parse;
 
 /**
  * Expose `micromatch.matchKeys`
