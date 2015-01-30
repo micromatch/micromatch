@@ -35,6 +35,7 @@
     "extend-shallow": "^0.2.0",
     "filename-regex": "^2.0.0",
     "glob-path-regex": "^1.0.0",
+    "is-glob": "^1.1.0",
     "preserve": "^0.2.0"
   },
   "devDependencies": {
