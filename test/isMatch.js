@@ -32,19 +32,20 @@ describe('.isMatch()', function () {
   it('should match files with the given extension:', function () {
     mm.isMatch('.md', '*.md').should.be.false;
     mm.isMatch('.md', '.md').should.be.true;
-    mm.isMatch('.foo.md', '*.md').should.be.false;
-    mm.isMatch('.foo.md', '.*.md').should.be.true;
-    mm.isMatch('foo.md', '*.md').should.be.true;
-    mm.isMatch('a/b/c/foo.md', '*.md').should.be.false;
-    mm.isMatch('a/b/foo.md', 'a/*.md').should.be.false;
-    mm.isMatch('a/b/foo.md', 'a/*/*.md').should.be.true;
-    mm.isMatch('a/b/foo.md', '**/*.md').should.be.true;
+    mm.isMatch('.c.md', '*.md').should.be.false;
+    mm.isMatch('.c.md', '.*.md').should.be.true;
+    mm.isMatch('c.md', '*.md').should.be.true;
+    mm.isMatch('c.md', '*.md').should.be.true;
+    mm.isMatch('a/b/c/c.md', '*.md').should.be.false;
+    mm.isMatch('a/b/c.md', 'a/*.md').should.be.false;
+    mm.isMatch('a/b/c.md', 'a/*/*.md').should.be.true;
+    mm.isMatch('a/b/c.md', '**/*.md').should.be.true;
   });
 
   it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {
-    mm.isMatch('.foo.md', '*.md').should.be.false;
-    mm.isMatch('a/.foo.md', '*.md').should.be.false;
-    mm.isMatch('a/.foo.md', 'a/.foo.md').should.be.true;
+    mm.isMatch('.c.md', '*.md').should.be.false;
+    mm.isMatch('a/.c.md', '*.md').should.be.false;
+    mm.isMatch('a/.c.md', 'a/.c.md').should.be.true;
     mm.isMatch('.a', '*.md').should.be.false;
     mm.isMatch('.verb.txt', '*.md').should.be.false;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/.*.md').should.be.true;
@@ -63,8 +64,8 @@ describe('.isMatch()', function () {
   });
 
   it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
-    mm.isMatch('.foo.md', '*.md', {dot: true}).should.be.true;
-    mm.isMatch('.foo.md', '.*', {dot: true}).should.be.true;
+    mm.isMatch('.c.md', '*.md', {dot: true}).should.be.true;
+    mm.isMatch('.c.md', '.*', {dot: true}).should.be.true;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}).should.be.true;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}).should.be.true;
   });
@@ -84,12 +85,12 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/z/.a', 'a/**/z/*.a').should.be.false;
     mm.isMatch('a/b/z/.a', 'a/*/z/*.a').should.be.false;
     mm.isMatch('a/b/z/.a', 'a/*/z/.a').should.be.true;
-    mm.isMatch('a/b/c/d/e/z/foo.md', 'a/**/z/*.md').should.be.true;
-    mm.isMatch('a/b/c/d/e/j/n/p/o/z/foo.md', 'a/**/j/**/z/*.md').should.be.true;
-    mm.isMatch('a/b/c/j/e/z/foo.txt', 'a/**/j/**/z/*.md').should.be.false;
+    mm.isMatch('a/b/c/d/e/z/c.md', 'a/**/z/*.md').should.be.true;
+    mm.isMatch('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md').should.be.true;
+    mm.isMatch('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md').should.be.false;
     mm.isMatch('a/b/d/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.false;
     mm.isMatch('a/b/c/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.false;
-    mm.isMatch('a/b/foo/cd/bar/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
+    mm.isMatch('a/b/c/cd/bar/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
     mm.isMatch('a/b/baz/ce/fez/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
   });
 
@@ -97,16 +98,16 @@ describe('.isMatch()', function () {
     mm.isMatch('./.a', 'a/**/z/*.md').should.be.false;
     mm.isMatch('./a/b/z/.a', 'a/**/z/.a').should.be.false;
     mm.isMatch('./a/b/z/.a', './a/**/z/.a').should.be.true;
-    mm.isMatch('./a/b/c/d/e/z/foo.md', 'a/**/z/*.md').should.be.false;
-    mm.isMatch('./a/b/c/d/e/z/foo.md', './a/**/z/*.md').should.be.true;
-    mm.isMatch('./a/b/c/d/e/z/foo.md', './a/**/j/**/z/*.md').should.be.false;
-    mm.isMatch('./a/b/c/j/e/z/foo.md', './a/**/j/**/z/*.md').should.be.true;
-    mm.isMatch('./a/b/c/j/e/z/foo.md', 'a/**/j/**/z/*.md').should.be.false;
-    mm.isMatch('./a/b/c/d/e/j/n/p/o/z/foo.md', './a/**/j/**/z/*.md').should.be.true;
-    mm.isMatch('./a/b/c/j/e/z/foo.txt', './a/**/j/**/z/*.md').should.be.false;
+    mm.isMatch('./a/b/c/d/e/z/c.md', 'a/**/z/*.md').should.be.false;
+    mm.isMatch('./a/b/c/d/e/z/c.md', './a/**/z/*.md').should.be.true;
+    mm.isMatch('./a/b/c/d/e/z/c.md', './a/**/j/**/z/*.md').should.be.false;
+    mm.isMatch('./a/b/c/j/e/z/c.md', './a/**/j/**/z/*.md').should.be.true;
+    mm.isMatch('./a/b/c/j/e/z/c.md', 'a/**/j/**/z/*.md').should.be.false;
+    mm.isMatch('./a/b/c/d/e/j/n/p/o/z/c.md', './a/**/j/**/z/*.md').should.be.true;
+    mm.isMatch('./a/b/c/j/e/z/c.txt', './a/**/j/**/z/*.md').should.be.false;
     mm.isMatch('./a/b/d/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false;
     mm.isMatch('./a/b/c/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false;
-    mm.isMatch('./a/b/foo/cd/bar/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
+    mm.isMatch('./a/b/c/cd/bar/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
     mm.isMatch('./a/b/baz/ce/fez/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
   });
 });

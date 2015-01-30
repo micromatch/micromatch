@@ -58,7 +58,7 @@ describe('micromatch string patterns', function () {
 
     it('should match files with the given extension:', function () {
       mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
-      mm(['a.md', 'a.min.js', 'b.js', 'c.txt'], '!*.{min.js,txt}').should.eql(['a.md']);
+      mm(['a.md', 'a.min.js', 'b.js', 'c.txt'], '!*.{min.js,txt}').should.eql(['a.md', 'b.js']);
       mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
       mm(['a.md', 'b.js', 'c.txt', 'a/b.js', 'a/b.md'], '!{,**/}*.{js,txt}').should.eql(['a.md', 'a/b.md']);
       mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']).should.eql(['a.md', 'd.json']);
