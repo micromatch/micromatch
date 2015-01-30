@@ -1,10 +1,3 @@
-#1: braces-no-glob.js
-  micromatch.js x 546,609 ops/sec ±0.64% (95 runs sampled)
-  minimatch.js x 26,657 ops/sec ±1.51% (89 runs sampled)
-  wildmatch.js x 8,630 ops/sec ±0.73% (96 runs sampled)
-
-  fastest is micromatch.js
-➜  micromatch git:(master) ✗ node benchmark
 #1: basename-braces.js
   micromatch.js x 31,537 ops/sec ±0.56% (97 runs sampled)
   minimatch.js x 3,585 ops/sec ±1.04% (96 runs sampled)
