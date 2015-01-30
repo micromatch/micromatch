@@ -1,70 +1,76 @@
-#1: basename.js
-  micromatch.js x 27,492 ops/sec ±0.79% (90 runs sampled)
-  minimatch.js x 3,577 ops/sec ±1.10% (95 runs sampled)
-  wildmatch.js x 548 ops/sec ±1.15% (92 runs sampled)
+#1: basename-braces.js
+  micromatch.js x 28,913 ops/sec ±0.66% (95 runs sampled)
+  minimatch.js x 3,561 ops/sec ±1.33% (93 runs sampled)
+  wildmatch.js x 513 ops/sec ±0.72% (97 runs sampled)
 
   fastest is micromatch.js
-#2: braces-no-glob.js
-  micromatch.js x 446,697 ops/sec ±1.05% (91 runs sampled)
-  minimatch.js x 27,592 ops/sec ±1.82% (89 runs sampled)
-  wildmatch.js x 8,381 ops/sec ±1.19% (86 runs sampled)
+#2: basename.js
+  micromatch.js x 25,833 ops/sec ±0.79% (94 runs sampled)
+  minimatch.js x 4,557 ops/sec ±1.28% (96 runs sampled)
+  wildmatch.js x 801 ops/sec ±0.88% (96 runs sampled)
 
   fastest is micromatch.js
-#3: braces.js
-  micromatch.js x 44,366 ops/sec ±1.07% (88 runs sampled)
-  minimatch.js x 4,017 ops/sec ±1.09% (97 runs sampled)
-  wildmatch.js x 810 ops/sec ±0.72% (97 runs sampled)
+#3: braces-no-glob.js
+  micromatch.js x 497,846 ops/sec ±1.19% (92 runs sampled)
+  minimatch.js x 28,221 ops/sec ±1.86% (87 runs sampled)
+  wildmatch.js x 8,851 ops/sec ±0.93% (95 runs sampled)
 
   fastest is micromatch.js
-#4: immediate.js
-  micromatch.js x 19,831 ops/sec ±0.96% (95 runs sampled)
-  minimatch.js x 4,527 ops/sec ±1.11% (96 runs sampled)
-  wildmatch.js x 325 ops/sec ±0.58% (89 runs sampled)
+#4: braces.js
+  micromatch.js x 44,952 ops/sec ±1.08% (95 runs sampled)
+  minimatch.js x 4,046 ops/sec ±1.29% (95 runs sampled)
+  wildmatch.js x 834 ops/sec ±0.62% (96 runs sampled)
 
   fastest is micromatch.js
-#5: large.js
-  micromatch.js x 786 ops/sec ±0.66% (95 runs sampled)
-  minimatch.js x 26.85 ops/sec ±0.98% (47 runs sampled)
-  wildmatch.js x 13.34 ops/sec ±1.09% (35 runs sampled)
+#5: immediate.js
+  micromatch.js x 23,143 ops/sec ±0.74% (96 runs sampled)
+  minimatch.js x 4,814 ops/sec ±1.14% (98 runs sampled)
+  wildmatch.js x 323 ops/sec ±0.81% (90 runs sampled)
 
   fastest is micromatch.js
-#6: long.js
-  micromatch.js x 6,674 ops/sec ±0.70% (95 runs sampled)
-  minimatch.js x 618 ops/sec ±0.86% (93 runs sampled)
-  wildmatch.js x 136 ops/sec ±0.87% (79 runs sampled)
+#6: large.js
+  micromatch.js x 700 ops/sec ±0.70% (94 runs sampled)
+  minimatch.js x 26.08 ops/sec ±0.90% (47 runs sampled)
+  wildmatch.js x 13.42 ops/sec ±1.05% (36 runs sampled)
 
   fastest is micromatch.js
-#7: mid.js
-  micromatch.js x 47,210 ops/sec ±0.77% (90 runs sampled)
-  minimatch.js x 2,719 ops/sec ±1.10% (96 runs sampled)
-  wildmatch.js x 586 ops/sec ±0.86% (95 runs sampled)
+#7: long.js
+  micromatch.js x 7,873 ops/sec ±0.66% (95 runs sampled)
+  minimatch.js x 641 ops/sec ±0.94% (96 runs sampled)
+  wildmatch.js x 166 ops/sec ±0.83% (82 runs sampled)
 
   fastest is micromatch.js
-#8: multi-patterns.js
-  micromatch.js x 13,203 ops/sec ±0.75% (94 runs sampled)
-  minimatch.js x 2,916 ops/sec ±1.58% (92 runs sampled)
-  wildmatch.js x 4,545 ops/sec ±0.93% (95 runs sampled)
+#8: mid.js
+  micromatch.js x 46,366 ops/sec ±0.60% (96 runs sampled)
+  minimatch.js x 2,459 ops/sec ±1.13% (96 runs sampled)
+  wildmatch.js x 606 ops/sec ±0.59% (94 runs sampled)
 
   fastest is micromatch.js
-#9: no-glob.js
-  micromatch.js x 448,864 ops/sec ±0.63% (98 runs sampled)
-  minimatch.js x 58,772 ops/sec ±2.16% (88 runs sampled)
-  wildmatch.js x 11,287 ops/sec ±0.85% (96 runs sampled)
+#9: multi-patterns.js
+  micromatch.js x 13,558 ops/sec ±0.85% (96 runs sampled)
+  minimatch.js x 2,911 ops/sec ±1.46% (96 runs sampled)
+  wildmatch.js x 4,668 ops/sec ±0.92% (98 runs sampled)
 
   fastest is micromatch.js
-#10: range.js
-  micromatch.js x 480,251 ops/sec ±1.12% (95 runs sampled)
-  minimatch.js x 11,551 ops/sec ±2.61% (88 runs sampled)
-  wildmatch.js x 5,415 ops/sec ±0.81% (100 runs sampled)
+#10: no-glob.js
+  micromatch.js x 473,728 ops/sec ±0.70% (95 runs sampled)
+  minimatch.js x 50,717 ops/sec ±2.16% (85 runs sampled)
+  wildmatch.js x 12,634 ops/sec ±1.09% (96 runs sampled)
 
   fastest is micromatch.js
-#11: shallow.js
-  micromatch.js x 254,613 ops/sec ±1.17% (89 runs sampled)
-  minimatch.js x 25,126 ops/sec ±2.19% (91 runs sampled)
-  wildmatch.js x 3,433 ops/sec ±0.88% (94 runs sampled)
+#11: range.js
+  micromatch.js x 446,637 ops/sec ±0.48% (99 runs sampled)
+  minimatch.js x 14,132 ops/sec ±2.30% (89 runs sampled)
+  wildmatch.js x 5,504 ops/sec ±1.00% (97 runs sampled)
 
   fastest is micromatch.js
-#12: short.js
-  micromatch.js x 676,097 ops/sec ±0.73% (96 runs sampled)
-  minimatch.js x 68,548 ops/sec ±2.85% (85 runs sampled)
-  wildmatch.js x 11,195 ops/sec ±1.34% (95 runs sampled)
+#12: shallow.js
+  micromatch.js x 246,925 ops/sec ±0.75% (97 runs sampled)
+  minimatch.js x 25,516 ops/sec ±2.19% (89 runs sampled)
+  wildmatch.js x 3,544 ops/sec ±1.17% (94 runs sampled)
+
+  fastest is micromatch.js
+#13: short.js
+  micromatch.js x 743,624 ops/sec ±0.64% (90 runs sampled)
+  minimatch.js x 69,231 ops/sec ±2.67% (85 runs sampled)
+  wildmatch.js x 11,701 ops/sec ±1.10% (96 runs sampled)
