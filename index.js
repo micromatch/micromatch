@@ -7,11 +7,10 @@
 
 'use strict';
 
-var path = require('path');
-var fileRe = require('filename-regex');
 var diff = require('arr-diff');
-var braces = require('braces');
-var win32 = process.platform === 'win32';
+var fileRe = require('filename-regex');
+var expand = require('./lib/expand');
+var utils = require('./lib/utils');
 
 /**
  * The main function. Pass an array of filepaths,
@@ -28,7 +27,7 @@ function micromatch(files, patterns, opts) {
     return [];
   }
 
-  files = arrayify(files);
+  files = utils.arrayify(files);
   opts = opts || {};
 
   if (typeof patterns === 'string') {
@@ -39,6 +38,21 @@ function micromatch(files, patterns, opts) {
   var neg = [], res = [];
   var i = 0;
 
+  // while (len--) {
+  //   var glob = patterns[i++];
+  //   var negated = glob.charCodeAt(0) === 33; /* ! */
+  //   if (opts.inclusive) {
+  //     return files.filter(filter(glob, {negated: negated}));
+
+  //   } else {
+  //     if (negated) {
+  //       neg.push.apply(neg, match(files, glob.slice(1), opts));
+  //     } else {
+  //       res.push.apply(res, match(files, glob, opts));
+  //     }
+  //   }
+  // }
+
   while (len--) {
     var glob = patterns[i++];
     if (glob.charCodeAt(0) === 33) {
@@ -47,7 +61,6 @@ function micromatch(files, patterns, opts) {
       res.push.apply(res, match(files, glob, opts));
     }
   }
-
   return diff(res, neg);
 }
 
@@ -69,10 +82,11 @@ function match(files, pattern, opts) {
     throw new Error('micromatch.match() expects a string or array.');
   }
 
-  files = arrayify(files);
+  files = utils.arrayify(files);
   opts = opts || {};
 
   var negate = opts.negate || false;
+
   if (opts.nonegate !== true) {
     negate = pattern.charAt(0) === '!';
     if (negate) {
@@ -80,24 +94,23 @@ function match(files, pattern, opts) {
     }
   }
 
-  var regex = makeRe(pattern, opts);
+  if (!(pattern instanceof RegExp)) {
+    pattern = makeRe(pattern, opts);
+  }
+
   var len = files.length;
   var res = [];
   var i = 0;
 
   while (i < len) {
     var file = files[i++];
-    var fp = unixify(file, opts);
+    var fp = utils.unixify(file, opts);
 
-    if (!isMatch(fp, regex, opts)) {
-      continue;
-    }
+    if (!isMatch(fp, pattern, opts)) { continue; }
     res.push(fp);
   }
 
-  if (negate) {
-    return diff(files, res);
-  }
+  if (negate) { return diff(files, res); }
 
   if (opts.nonull && !res.length) {
     return pattern;
@@ -136,77 +149,68 @@ function isMatch(fp, pattern, opts) {
  */
 
 function filter(pattern, opts) {
-  var re = !(pattern instanceof RegExp)
+  opts = opts || {};
+
+  pattern = !(pattern instanceof RegExp)
     ? makeRe(pattern, opts)
     : pattern;
 
   return function (files) {
     if (typeof files === 'string') {
-      return isMatch(files, pattern, opts);
+      var m1 = isMatch(files, pattern, opts);
+      if (opts.inclusive && m1 !== false) {
+        return true;
+      }
+      return m1;
     }
 
     var res = files.slice();
     var len = files.length;
+    var m2;
 
     while (len--) {
-      if (!isMatch(files[len], pattern, opts)) {
-        res.splice(len, 1);
+      m2 = isMatch(files[len], pattern, opts);
+      if (m2) {
+        continue;
       }
+      res.splice(len, 1);
     }
+
     return res;
   };
 }
 
 /**
- * Convert a file path to a unix path.
+ * Filter the keys in an object.
+ *
+ * @param  {*} val
+ * @return {Array}
  */
 
-function unixify(fp, opts) {
-  if (opts && opts.normalize || win32 || path.sep === '\\') {
-    return fp.replace(/[\\\/]+/g, '/');
+function matchKeys(pattern, obj, options) {
+  var re = !(pattern instanceof RegExp)
+    ? makeRe(pattern, options)
+    : pattern;
+
+  var keys = Object.keys(obj);
+  var len = keys.length;
+  var res = {};
+
+  while (len--) {
+    var key = keys[len];
+    if (re.test(key)) {
+      res[key] = obj[key];
+    }
   }
-  return fp;
+  return res;
 }
 
 /**
- * Special patterns to be converted to regex.
- * Heuristics are used to simplify patterns
- * and speed up processing.
- */
-
-var dot         = '\\.';
-var dots        = dot + '{1,2}';
-var slashQ      = esc('[^/]*?');
-var lookahead   = esc('(?=.)');
-var start       = '(?:^|\\/)';
-var end         = '(?:\\/|$)';
-
-function esc(str) {
-  return str.replace(/\?/g, '%~')
-    .replace(/\*/g, '%%');
-}
-
-function unesc(str) {
-  return str.replace(/%~/g, '?')
-    .replace(/%%/g, '*');
-}
-
-function dotstarbase(dotfile) {
-  var re = dotfile ? (start + '(?:' + dots + ')' + end) : dot;
-  return esc('(?!' + re + ')' + lookahead);
-}
-
-function doublestar() {
-  return '(?:(?!' + start + dot + ').)*?';
-}
-
-function stardot(dotfile) {
-  return dotstarbase(dotfile) + slashQ;
-}
-
-/**
- * Create a regular expression for matching
+ * Create and cache a regular expression for matching
  * file paths.
+ *
+ * If the leading character in the `glob` is `!` a negation
+ * regex is returned.
  *
  * @param  {String} glob
  * @param  {Object} options
@@ -215,6 +219,7 @@ function stardot(dotfile) {
 
 function makeRe(glob, options) {
   var opts = options || {};
+  var flags = opts.flags || '';
 
   // reset cache, recompile regex if options change
   optsCache = typeof optsCache !== 'undefined'
@@ -232,7 +237,7 @@ function makeRe(glob, options) {
     : glob;
 
   if (cache !== glob) {
-    glob = unixify(glob, opts);
+    glob = utils.unixify(glob, opts);
     cache = glob;
     globRe = null;
   }
@@ -240,74 +245,17 @@ function makeRe(glob, options) {
   // if `true`, then we can just return
   // the regex that was previously cached
   if (globRe instanceof RegExp) {
-  console.log(globRe)
     return globRe;
   }
 
-  function replace(re, str) {
-    glob = glob.replace(re, str);
-  }
+  if (opts.nocase) { flags += 'i'; }
 
-  function unescape() {
-    glob = unesc(glob);
-  }
-
-  var negate = glob.charCodeAt(0) === 33; /* '!' */
-  if (negate) {
-    glob = glob.slice(1);
-  }
-
-  // see if there is at least one star
-  var twoStars = glob.indexOf('**');
-  var flags = opts.flags || '';
-
-  if (twoStars === 0 && glob.length === 2 && !opts.dot) {
-    glob = doublestar();
-  } else {
-
-    var oneStar = glob.indexOf('*');
-
-    // expandBraces `{1..5}` braces
-    if (glob.indexOf('{') !== -1 && !opts.nobraces) {
-      glob = expandBraces(glob, options);
-    }
-
-    // windows drives
-    replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2');
-    replace(/\[/g, dotstarbase(opts.dot) + '[');
-
-    // glob stars
-    if (twoStars !== -1) {
-      replace(/\*\*\//g, esc('.*\\/?'));
-      replace(/\*\*/g, esc('.*'));
-    }
-
-    // question marks
-    replace(/\?\./g, esc('?\\.'));
-    replace(/\?:/g, esc('?:'));
-    // consecutive `?` chars
-    replace(/\?/g, '.');
-    replace(/\//g, '\\/');
-
-    if (oneStar !== -1) {
-      // last chars are '/*'
-      replace(/\/\*$/g, '\\/' + stardot(opts.dot));
-      // last char is '*', no slashes
-      replace(/(?!\/)\*$/g, slashQ);
-      //=> '^.*'
-      replace(/\*/g, stardot(opts.dot));
-    }
-
-    replace(/\.(\w+|$)/g, '\\.$1');
-    replace(/\[\^\\\/\]/g, '[^/]');
-    replace(/[\\]+\//g, '\\/');
-    unescape();
-  }
-
-  if (opts.nocase) flags += 'i';
+  var parsed = expand(glob, opts);
+  opts.negated = opts.negated || parsed.negated || false;
+  glob = wrapGlob(parsed.glob, opts.negated);
 
   // cache regex
-  globRe = new RegExp(globRegex(glob, negate), flags);
+  globRe = new RegExp(glob, flags);
   return globRe;
 }
 
@@ -317,36 +265,12 @@ function makeRe(glob, options) {
  * a negation regex is returned.
  *
  * @param {String} `glob`
- * @param {String} `flags`
+ * @param {Boolean} `negate`
  */
 
-function globRegex(glob, negate) {
+function wrapGlob(glob, negate) {
   glob = ('(?:' + glob + ')$');
-  glob = negate
-    ? ('(?!^' + glob + ').*$')
-    : glob;
-  return '^' + glob;
-}
-
-/**
- * Expand braces in the given glob pattern.
- *
- * We only need to use the [braces] lib when
- * patterns are nested.
- *
- * @param  {String} `glob`
- * @return {String}
- */
-
-function expandBraces(glob, options) {
-  options = options || {};
-  options.makeRe = options.makeRe || true;
-  var a = glob.match(/[\{\(\[]/g);
-  var b = glob.match(/[\}\)\]]/g);
-  if (a && b && (a.length !== b.length)) {
-    options.makeRe = false;
-  }
-  return braces(glob, options).join('|');
+  return '^' + (negate ? ('(?!^' + glob + ').*$') : glob);
 }
 
 /**
@@ -363,27 +287,11 @@ function expandBraces(glob, options) {
 function equal(a, b) {
   if (!b) return false;
   for (var prop in b) {
-    if (!a.hasOwnProperty(prop)) {
-      return false;
-    }
-    if (a[prop] !== b[prop]) {
+    if (!a.hasOwnProperty(prop) || a[prop] !== b[prop]) {
       return false;
     }
   }
   return true;
-}
-
-/**
- * Coerce `val` to an array
- *
- * @param  {*} val
- * @return {Array}
- */
-
-function arrayify(val) {
-  return !Array.isArray(val)
-    ? [val]
-    : val;
 }
 
 /**
@@ -393,6 +301,10 @@ function arrayify(val) {
 var globRe;
 var cache;
 var optsCache;
+
+
+// no, this isn't permanent. I will organize
+// the following when the API is locked.
 
 /**
  * Expose `micromatch`
@@ -422,4 +334,22 @@ module.exports.makeRe = makeRe;
  * Expose `micromatch.braces`
  */
 
-module.exports.braces = braces;
+module.exports.braces = require('braces');
+
+/**
+ * Expose `micromatch.filter`
+ */
+
+module.exports.filter = filter;
+
+/**
+ * Expose `micromatch.expand`
+ */
+
+module.exports.expand = expand;
+
+/**
+ * Expose `micromatch.matchKeys`
+ */
+
+module.exports.matchKeys = matchKeys;

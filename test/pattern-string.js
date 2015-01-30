@@ -12,7 +12,7 @@ var should = require('should');
 var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
 
-if ('multimatch' in argv) {
+if ('multimatch' in argv || 'minimatch' in argv) {
   mm = require('multimatch');
 }
 
@@ -57,6 +57,8 @@ describe('micromatch string patterns', function () {
     });
 
     it('should match files with the given extension:', function () {
+      mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
+      mm(['a.md', 'a.min.js', 'b.js', 'c.txt'], '!*.{min.js,txt}').should.eql(['a.md', 'b.js']);
       mm(['a.md', 'b.js', 'c.txt'], '!*.{js,txt}').should.eql(['a.md']);
       mm(['a.md', 'b.js', 'c.txt', 'a/b.js', 'a/b.md'], '!{,**/}*.{js,txt}').should.eql(['a.md', 'a/b.md']);
       mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.*', '!*.{js,txt}']).should.eql(['a.md', 'd.json']);
@@ -123,14 +125,16 @@ describe('micromatch string patterns', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm(['.md'], '!.md').should.eql([]);
       mm(['d.md'], '!.md').should.eql(['d.md']);
-      mm(['d.md'], ['!.md']).should.eql([]);
-      mm(['d.md'], ['*', '!.md']).should.eql(['d.md']);
+      mm(['d.md'], '!*.md').should.eql([]);
     });
 
     it('should be inclusive by default when the pattern is a string:', function () {
       mm(['abc.md'], '!*.md').should.eql([]);
       mm(['abc.md', 'abc.txt'], '!*.md').should.eql(['abc.txt']);
       mm(['abc.txt'], '!*.md').should.eql(['abc.txt']);
+    });
+
+    it('should not be inclusive of dotfiles by default unless `dot: true` is set:', function () {
       mm(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
       mm(['.dotfile.md'], '!.*.md').should.eql([]);
       mm(['.a.txt', '.a.md'], '!.*.md').should.eql(['.a.txt']);
@@ -188,7 +192,6 @@ describe('micromatch string patterns', function () {
     });
   });
 
-
   describe('options', function () {
     it('should support the `matchBase` option:', function () {
       mm(['a/b/c/d.md'], '*.md').should.eql([]);
@@ -203,19 +206,20 @@ describe('micromatch string patterns', function () {
     });
 
     it('should match dotfiles when `dotfile` is true:', function () {
+      mm(['.dotfile'], '*.*', {dot: true}).should.eql(['.dotfile']);
+      mm(['.dotfile'], '*.md', {dot: true}).should.eql([]);
       mm(['.dotfile'], '.dotfile', {dot: true}).should.eql(['.dotfile']);
-      mm(['d.md'], '*.md', {dot: true}).should.eql(['d.md']);
+      mm(['.dotfile.md'], '.*.md', {dot: true}).should.eql(['.dotfile.md']);
+      mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
       mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
       mm(['a/b/c/.dotfile'], '*.md', {dot: true}).should.eql([]);
-      mm(['a/b/c/.dotfile.md'], '*.md', {dot: true}).should.eql([]);
-      mm(['.verb.txt'], '*.md', {dot: true}).should.eql([]);
-      mm(['.dotfile'], '*.md', {dot: true}).should.eql([]);
-      mm(['.dotfile'], '*.*', {dot: true}).should.eql(['.dotfile']);
-      mm(['.dotfile.md'], '*.md', {dot: true}).should.eql(['.dotfile.md']);
-      mm(['a/b/c/.dotfile.md'], '*.md').should.eql([]);
-      mm(['a/b/c/.dotfile.md'], '**/.*.md').should.eql(['a/b/c/.dotfile.md']);
+      mm(['a/b/c/.dotfile.md'], '**/*.md', {dot: true}).should.eql(['a/b/c/.dotfile.md']);
       mm(['a/b/c/.dotfile.md'], '**/.*').should.eql(['a/b/c/.dotfile.md']);
+      mm(['a/b/c/.dotfile.md'], '**/.*.md').should.eql(['a/b/c/.dotfile.md']);
+      mm(['a/b/c/.dotfile.md'], '*.md').should.eql([]);
+      mm(['a/b/c/.dotfile.md'], '*.md', {dot: true}).should.eql([]);
       mm(['a/b/c/.verb.md'], '**/*.md', {dot: true}).should.eql(['a/b/c/.verb.md']);
+      mm(['d.md'], '*.md', {dot: true}).should.eql(['d.md']);
     });
   });
 });

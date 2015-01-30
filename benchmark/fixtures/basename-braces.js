@@ -859,5 +859,5 @@ module.exports = [
     "y10.txt",
     "z10.txt"
   ],
-  "c*3.txt"
+  "{k10,a01}.*"
 ];

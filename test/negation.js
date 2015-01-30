@@ -25,6 +25,7 @@ describe('negation patterns', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm.match(['.md'], '!.md').should.eql([]);
       mm.match(['foo.md'], '!.md').should.eql(['foo.md']);
+      mm.match(['foo.md'], '!*.md').should.eql([]);
     });
 
     it('should negate files with extensions:', function () {

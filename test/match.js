@@ -19,7 +19,7 @@ if ('wildmatch' in argv) {
   mm = ref.wildmatch;
 }
 
-describe('micromatch', function () {
+describe('.match()', function () {
   describe('basic patterns:', function () {
     it('should correctly deal with empty globs', function () {
       mm.match(['ab'], '').should.eql([]);
@@ -32,7 +32,23 @@ describe('micromatch', function () {
       mm.match(['ab'], 'ab').should.eql(['ab']);
       mm.match(['ab', 'a'], 'a').should.eql(['a']);
       mm.match(['ab', 'a'], '/a').should.eql([]);
+      mm.match(['ab', 'a'], 'aa').should.eql([]);
       mm.match(['/ab', '/a'], '/a').should.eql(['/a']);
+    });
+  });
+
+  describe('characters:', function () {
+    it('should match question marks', function () {
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], '?a').should.eql([]);
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], '?/?').should.eql(['a/b', 'b/c']);
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], 'a?b').should.eql([]);
+      mm.match(['ab', 'a/b', 'bb', 'b/c'], '?b').should.eql(['ab', 'bb']);
+    });
+
+    it('should match one character per question mark', function () {
+      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '?').should.eql([]);
+      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '??').should.eql(['ab', 'bb']);
+      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '???').should.eql(['bbc']);
     });
   });
 
@@ -46,11 +62,18 @@ describe('micromatch', function () {
     });
 
     it('should match one directory level:', function () {
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/c/*').should.eql(['a/b/c/e']);
       mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/*/e').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/*/*/e').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], '*/*/*/e').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], '*/*/*/*').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'b/*/*/*').should.eql([]);
       mm.match(['a/b/c/e', 'b/b/c/e', 'a/b/c/d/e'], '*/b/*/e').should.eql(['a/b/c/e', 'b/b/c/e']);
     });
 
     it('should match multiple directory levels:', function () {
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/**/c/*').should.eql(['a/b/c/e']);
+      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/**/e').should.eql(['a/b/c/e', 'a/b/c/d/e']);
       mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/**/e').should.eql(['a/b/c/e', 'a/b/c/d/e']);
     });
   });
@@ -60,41 +83,44 @@ describe('micromatch', function () {
     it('should match files with the given extension:', function () {
       mm.match(['.md', '.txt'], '*.md').should.eql([]);
       mm.match(['.md', '.txt'], '.md').should.eql(['.md']);
-      mm.match(['.foo.md'], '*.md').should.eql([]);
-      mm.match(['foo.md'], '*.md').should.eql(['foo.md']);
-      mm.match(['a/b/c/foo.md'], '*.md').should.eql([]);
+      mm.match(['x.md'], '*.md').should.eql(['x.md']);
+      mm.match(['a/b/c/x.md'], '*.md').should.eql([]);
     });
 
     it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {
-      mm.match(['.foo.md'], '*.md').should.eql([]);
-      mm.match(['a/.foo.md'], '*.md').should.eql([]);
-      mm.match(['a/.foo.md'], 'a/.foo.md').should.eql(['a/.foo.md']);
       mm.match(['.a'], '*.md').should.eql([]);
-      mm.match(['.verb.txt'], '*.md').should.eql([]);
-      mm.match(['a/b/c/.xyz.md'], 'a/b/c/.*.md').should.eql(['a/b/c/.xyz.md']);
-      mm.match(['.md'], '.md').should.eql(['.md']);
-      mm.match(['.txt'], '.md').should.eql([]);
-      mm.match(['.a'], '.md').should.eql([]);
-      mm.match(['.a'], '.a').should.eql(['.a']);
-      mm.match(['.b'], '.b*').should.eql(['.b']);
-      mm.match(['.ab', '.a', '.b'], '.a*').should.eql(['.ab', '.a']);
-      mm.match(['.ab', '.a', '.b'], '.*').should.eql(['.ab', '.a', '.b']);
-      mm.match(['.ab', '.a', '.b'], '*.*').should.eql([]);
       mm.match(['.a'], 'a/b/c/*.md').should.eql([]);
       mm.match(['.a.md'], 'a/b/c/*.md').should.eql([]);
+      mm.match(['.x.md'], '*.md').should.eql([]);
+      mm.match(['.y.txt'], '*.md').should.eql([]);
+      mm.match(['a/.x.md'], '*.md').should.eql([]);
+      mm.match(['a/.x.md'], 'a/.x.md').should.eql(['a/.x.md']);
+      mm.match(['a/b/c/.xyz.md'], 'a/b/c/.*.md').should.eql(['a/b/c/.xyz.md']);
       mm.match(['a/b/c/d.a.md'], 'a/b/c/*.md').should.eql(['a/b/c/d.a.md']);
       mm.match(['a/b/d/.a'], 'a/b/c/*.md').should.eql([]);
     });
 
+    it('should match dotfiles when the filename pattern begins with a dot:', function () {
+      mm.match(['.b'], '.b*').should.eql(['.b']);
+      mm.match(['.md', '.txt'], '.md').should.eql(['.md']);
+      mm.match(['.a', 'a'], '.a').should.eql(['.a']);
+      mm.match(['.ab', '.a', '.b', 'a', 'b'], '.*').should.eql(['.ab', '.a', '.b']);
+      mm.match(['.ab', '.a', '.b'], '.a*').should.eql(['.ab', '.a']);
+    });
+
     it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
-      mm.match(['.foo.md'], '*.md', {dot: true}).should.eql(['.foo.md']);
-      mm.match(['.foo.md'], '.*', {dot: true}).should.eql(['.foo.md']);
+      mm.match(['.ab', '.a', '.b'], '*.*', {dot: true}).should.eql(['.ab', '.a', '.b']);
+      mm.match(['.x.md'], '*.md', {dot: true}).should.eql(['.x.md']);
+      mm.match(['.x.md'], '.*', {dot: true}).should.eql(['.x.md']);
       mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', {dot: true}).should.eql(['a/b/c/.xyz.md']);
     });
   });
 
   describe('paths/filepaths:', function () {
     it('should match file paths:', function () {
+      mm.match(['a/b/c/xyz.md'], '**/*.md').should.eql(['a/b/c/xyz.md']);
+      mm.match(['a/b/c/.dotfile'], '**/.*').should.eql(['a/b/c/.dotfile']);
+      mm.match(['a/b/c/xyz.min.md'], '**/*.md').should.eql(['a/b/c/xyz.min.md']);
       mm.match(['a/b/c/xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/xyz.md']);
       mm.match(['a/bb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bb/c/xyz.md']);
       mm.match(['a/bbbb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bbbb/c/xyz.md']);
@@ -108,34 +134,29 @@ describe('micromatch', function () {
     it('should match full file paths:', function () {
       mm.match(['.a'], 'a/**/z/*.md').should.eql([]);
       mm.match(['a/b/z/.a'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
+      mm.match(['a/b/c/d/e/z/x.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/x.md']);
 
-      mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql([]);
-      mm.match(['a/b/c/j/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/j/e/z/foo.md']);
-      mm.match(['a/b/c/d/e/j/n/p/o/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
-      mm.match(['a/b/c/j/e/z/foo.txt'], 'a/**/j/**/z/*.md').should.eql([]);
+      mm.match(['a/b/c/d/e/z/x.md'], 'a/**/j/**/z/*.md').should.eql([]);
+      mm.match(['a/b/c/j/e/z/x.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/j/e/z/x.md']);
+      mm.match(['a/b/c/d/e/j/n/p/o/z/x.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/d/e/j/n/p/o/z/x.md']);
+      mm.match(['a/b/c/j/e/z/x.txt'], 'a/**/j/**/z/*.md').should.eql([]);
 
       mm.match(['a/b/d/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
       mm.match(['a/b/c/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
-      mm.match(['a/b/foo/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/foo/cd/bar/xyz.md']);
+      mm.match(['a/b/x/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/x/cd/bar/xyz.md']);
       mm.match(['a/b/baz/ce/fez/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/baz/ce/fez/xyz.md']);
     });
 
     it('should match paths with leading `./`:', function () {
       mm.match(['./.a'], 'a/**/z/*.md').should.eql([]);
       mm.match(['./a/b/z/.a'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['./a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['./a/b/c/d/e/z/foo.md'], './a/**/z/*.md').should.eql(['./a/b/c/d/e/z/foo.md']);
+      mm.match(['./a/b/c/d/e/z/x.md'], 'a/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/c/d/e/z/x.md'], './a/**/z/*.md').should.eql(['./a/b/c/d/e/z/x.md']);
 
-      mm.match(['./a/b/c/d/e/z/foo.md'], './a/**/j/**/z/*.md').should.eql([]);
-      mm.match(['./a/b/c/j/e/z/foo.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/j/e/z/foo.md']);
-      mm.match(['./a/b/c/d/e/j/n/p/o/z/foo.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/d/e/j/n/p/o/z/foo.md']);
-      mm.match(['./a/b/c/j/e/z/foo.txt'], './a/**/j/**/z/*.md').should.eql([]);
-
-      mm.match(['./a/b/d/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
-      mm.match(['./a/b/c/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
-      mm.match(['./a/b/foo/cd/bar/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql(['./a/b/foo/cd/bar/xyz.md']);
-      mm.match(['./a/b/baz/ce/fez/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql(['./a/b/baz/ce/fez/xyz.md']);
+      mm.match(['./a/b/c/d/e/z/x.md'], './a/**/j/**/z/*.md').should.eql([]);
+      mm.match(['./a/b/c/j/e/z/x.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/j/e/z/x.md']);
+      mm.match(['./a/b/c/d/e/j/n/p/o/z/x.md'], './a/**/j/**/z/*.md').should.eql(['./a/b/c/d/e/j/n/p/o/z/x.md']);
+      mm.match(['./a/b/c/j/e/z/x.txt'], './a/**/j/**/z/*.md').should.eql([]);
     });
   });
 });

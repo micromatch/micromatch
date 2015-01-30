@@ -15,11 +15,8 @@ var mm = require('..');
 if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
-if ('wildmatch' in argv) {
-  mm = ref.wildmatch;
-}
 
-describe('micromatch', function () {
+describe('.filter()', function () {
   it('should create a filter function to filter files', function () {
     mm.filter('*').should.be.a.function;
   });

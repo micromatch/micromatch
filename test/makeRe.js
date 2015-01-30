@@ -15,7 +15,7 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
-describe('micromatch.makeRe', function () {
+describe('.makeRe()', function () {
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
       mm.makeRe('.md').should.eql(/^(?:\.md)$/);
@@ -134,6 +134,7 @@ describe('micromatch.makeRe', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm.makeRe('!.md').test('.md').should.be.false;
       mm.makeRe('!.md').test('foo.md').should.be.true;
+      mm.makeRe('!*.md').test('foo.md').should.be.false;
     });
 
     it('should create a regular expression for negating files with extensions:', function () {
@@ -201,19 +202,23 @@ describe('micromatch.makeRe', function () {
     });
 
     it('should match dotfiles when `dotfile` is true:', function () {
-      mm.makeRe('.gitignore', {dot: true}).test('.gitignore').should.be.true;
-      mm.makeRe('*.md', {dot: true}).test('foo.md').should.be.true;
-      mm.makeRe('*.md', {dot: true}).test('.verb.txt').should.be.false;
-      mm.makeRe('*.md', {dot: true}).test('a/b/c/.gitignore').should.be.false;
-      mm.makeRe('*.md', {dot: true}).test('a/b/c/.gitignore.md').should.be.false;
-      mm.makeRe('*.md', {dot: true}).test('.verb.txt').should.be.false;
-      mm.makeRe('*.md', {dot: true}).test('.gitignore').should.be.false;
-      mm.makeRe('*.*', {dot: true}).test('.gitignore').should.be.true;
-      mm.makeRe('*.md', {dot: true}).test('.gitignore.md').should.be.true;
+      var opts = {dot: true};
+
+      mm.makeRe('.gitignore', opts).test('.gitignore').should.be.true;
+      mm.makeRe('*.md', opts).test('foo.md').should.be.true;
+      mm.makeRe('*.md', opts).test('.verb.txt').should.be.false;
+      mm.makeRe('*.md', opts).test('a/b/c/.gitignore').should.be.false;
+      mm.makeRe('*.md', opts).test('a/b/c/.gitignore.md').should.be.false;
+      mm.makeRe('**/*.md', opts).test('a/b/c/.gitignore.md').should.be.true;
+      mm.makeRe('*.md', opts).test('.verb.txt').should.be.false;
+      mm.makeRe('*.md', opts).test('.gitignore').should.be.false;
+      mm.makeRe('*.*', opts).test('.gitignore').should.be.true;
+      mm.makeRe('*.md', opts).test('.gitignore.md').should.be.true;
+      mm.makeRe('**/*.md', opts).test('a/b/c/.verb.md').should.be.true;
+
       mm.makeRe('*.md').test('a/b/c/.gitignore.md').should.be.false;
       mm.makeRe('**/.*.md').test('a/b/c/.gitignore.md').should.be.true;
       mm.makeRe('**/.*').test('a/b/c/.gitignore.md').should.be.true;
-      mm.makeRe('**/*.md', {dot: true}).test('a/b/c/.verb.md').should.be.true;
     });
   });
 });
