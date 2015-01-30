@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A faster alternative to minimatch (10-20x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": {
     "name": "Jon Schlinkert",
@@ -32,11 +32,9 @@
   "dependencies": {
     "arr-diff": "^1.0.1",
     "braces": "^1.4.0",
-    "extend-shallow": "^0.2.0",
     "filename-regex": "^2.0.0",
     "glob-path-regex": "^1.0.0",
-    "is-glob": "^1.1.0",
-    "preserve": "^0.2.0"
+    "is-glob": "^1.1.0"
   },
   "devDependencies": {
     "benchmarked": "^0.1.3",
@@ -46,7 +44,6 @@
     "minimist": "^1.1.0",
     "multimatch": "^2.0.0",
     "should": "^4.6.1",
-    "wildmatch": "^0.1.0",
     "write": "^0.1.1"
   },
   "keywords": [
