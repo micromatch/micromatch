@@ -8,9 +8,7 @@
 'use strict';
 
 var diff = require('arr-diff');
-var isGlob = require('is-glob');
 var fileRe = require('filename-regex');
-var extend = require('extend-shallow');
 var expand = require('./lib/expand');
 var utils = require('./lib/utils');
 
@@ -267,7 +265,7 @@ function makeRe(glob, options) {
  * a negation regex is returned.
  *
  * @param {String} `glob`
- * @param {String} `flags`
+ * @param {Boolean} `negate`
  */
 
 function wrapGlob(glob, negate) {
