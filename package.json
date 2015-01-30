@@ -1,6 +1,6 @@
 {
   "name": "micromatch",
-  "description": "Glob matching for javascript/node.js. A faster alternative to minimatch (10-20x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.",
+  "description": "Glob matching for javascript/node.js. A faster alternative to minimatch (10-45x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.",
   "version": "1.2.2",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": {

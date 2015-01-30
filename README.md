@@ -1,6 +1,6 @@
 # micromatch [![NPM version](https://badge.fury.io/js/micromatch.svg)](http://badge.fury.io/js/micromatch)
 
-> Glob matching for javascript/node.js. A faster alternative to minimatch (10-20x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.
+> Glob matching for javascript/node.js. A faster alternative to minimatch (10-45x faster on avg), with all the features you're used to using in your Grunt and gulp tasks.
 
  - 10-20x faster than [minimatch] on average ([see benchmarks](#benchmarks))
  - Focus on core Bash 4.3 specification features that are actually used (or can be used) in node.js
