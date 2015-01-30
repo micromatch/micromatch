@@ -38,21 +38,6 @@ function micromatch(files, patterns, opts) {
   var neg = [], res = [];
   var i = 0;
 
-  // while (len--) {
-  //   var glob = patterns[i++];
-  //   var negated = glob.charCodeAt(0) === 33; /* ! */
-  //   if (opts.inclusive) {
-  //     return files.filter(filter(glob, {negated: negated}));
-
-  //   } else {
-  //     if (negated) {
-  //       neg.push.apply(neg, match(files, glob.slice(1), opts));
-  //     } else {
-  //       res.push.apply(res, match(files, glob, opts));
-  //     }
-  //   }
-  // }
-
   while (len--) {
     var glob = patterns[i++];
     if (glob.charCodeAt(0) === 33) {
@@ -140,47 +125,6 @@ function isMatch(fp, pattern, opts) {
 }
 
 /**
- * Filter files with the given pattern.
- *
- * @param  {String|Array} `pattern`
- * @param  {Array} `files`
- * @param  {Options} `opts`
- * @return {Array}
- */
-
-function filter(pattern, opts) {
-  opts = opts || {};
-
-  pattern = !(pattern instanceof RegExp)
-    ? makeRe(pattern, opts)
-    : pattern;
-
-  return function (files) {
-    if (typeof files === 'string') {
-      var m1 = isMatch(files, pattern, opts);
-      if (opts.inclusive && m1 !== false) {
-        return true;
-      }
-      return m1;
-    }
-
-    var res = files.slice();
-    var len = files.length;
-    var m2;
-
-    while (len--) {
-      m2 = isMatch(files[len], pattern, opts);
-      if (m2) {
-        continue;
-      }
-      res.splice(len, 1);
-    }
-
-    return res;
-  };
-}
-
-/**
  * Filter the keys in an object.
  *
  * @param  {*} val
@@ -203,6 +147,47 @@ function matchKeys(pattern, obj, options) {
     }
   }
   return res;
+}
+
+/**
+ * Filter files with the given pattern.
+ *
+ * @param  {String|Array} `pattern`
+ * @param  {Array} `files`
+ * @param  {Options} `opts`
+ * @return {Array}
+ */
+
+function filter(pattern, opts) {
+  opts = opts || {};
+
+  pattern = !(pattern instanceof RegExp)
+    ? makeRe(pattern, opts)
+    : pattern;
+
+  return function (files) {
+    if (typeof files === 'string') {
+      var match = isMatch(files, pattern, opts);
+      if (opts.inclusive && match !== false) {
+        return true;
+      }
+      return match;
+    }
+
+    var res = files.slice();
+    var len = files.length;
+    var m;
+
+    while (len--) {
+      m = isMatch(files[len], pattern, opts);
+      if (m) {
+        continue;
+      }
+      res.splice(len, 1);
+    }
+
+    return res;
+  };
 }
 
 /**
@@ -325,6 +310,12 @@ module.exports.match = match;
 module.exports.isMatch = isMatch;
 
 /**
+ * Expose `micromatch.matchKeys`
+ */
+
+module.exports.matchKeys = matchKeys;
+
+/**
  * Expose `micromatch.makeRe`
  */
 
@@ -347,9 +338,3 @@ module.exports.filter = filter;
  */
 
 module.exports.expand = expand;
-
-/**
- * Expose `micromatch.matchKeys`
- */
-
-module.exports.matchKeys = matchKeys;
