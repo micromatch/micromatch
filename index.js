@@ -29,7 +29,7 @@ function micromatch(files, patterns, opts) {
     return [];
   }
 
-  files = arrayify(files);
+  files = utils.arrayify(files);
   opts = opts || {};
 
   if (typeof patterns === 'string') {
@@ -84,10 +84,11 @@ function match(files, pattern, opts) {
     throw new Error('micromatch.match() expects a string or array.');
   }
 
-  files = arrayify(files);
+  files = utils.arrayify(files);
   opts = opts || {};
 
   var negate = opts.negate || false;
+
   if (opts.nonegate !== true) {
     negate = pattern.charAt(0) === '!';
     if (negate) {
@@ -293,19 +294,6 @@ function equal(a, b) {
     }
   }
   return true;
-}
-
-/**
- * Coerce `val` to an array
- *
- * @param  {*} val
- * @return {Array}
- */
-
-function arrayify(val) {
-  return !Array.isArray(val)
-    ? [val]
-    : val;
 }
 
 /**
