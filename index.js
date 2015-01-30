@@ -7,13 +7,12 @@
 
 'use strict';
 
-var win32 = process.platform === 'win32';
-var path = require('path');
+var diff = require('arr-diff');
+var isGlob = require('is-glob');
 var fileRe = require('filename-regex');
 var extend = require('extend-shallow');
-var braces = require('braces');
-var diff = require('arr-diff');
-var parse = require('./lib/parse');
+var expand = require('./lib/expand');
+var utils = require('./lib/utils');
 
 /**
  * The main function. Pass an array of filepaths,
@@ -96,13 +95,17 @@ function match(files, pattern, opts) {
     }
   }
 
+  if (!(pattern instanceof RegExp)) {
+    pattern = makeRe(pattern, opts);
+  }
+
   var len = files.length;
   var res = [];
   var i = 0;
 
   while (i < len) {
     var file = files[i++];
-    var fp = unixify(file, opts);
+    var fp = utils.unixify(file, opts);
 
     if (!isMatch(fp, pattern, opts)) { continue; }
     res.push(fp);
@@ -207,6 +210,9 @@ function matchKeys(pattern, obj, options) {
  * Create and cache a regular expression for matching
  * file paths.
  *
+ * If the leading character in the `glob` is `!` a negation
+ * regex is returned.
+ *
  * @param  {String} glob
  * @param  {Object} options
  * @return {RegExp}
@@ -232,7 +238,7 @@ function makeRe(glob, options) {
     : glob;
 
   if (cache !== glob) {
-    glob = unixify(glob, opts);
+    glob = utils.unixify(glob, opts);
     cache = glob;
     globRe = null;
   }
@@ -245,7 +251,7 @@ function makeRe(glob, options) {
 
   if (opts.nocase) { flags += 'i'; }
 
-  var parsed = parse(glob, opts);
+  var parsed = expand(glob, opts);
   opts.negated = opts.negated || parsed.negated || false;
   glob = wrapGlob(parsed.glob, opts.negated);
 
@@ -287,17 +293,6 @@ function equal(a, b) {
     }
   }
   return true;
-}
-
-/**
- * Convert a file path to a unix path.
- */
-
-function unixify(fp, opts) {
-  if (opts && opts.normalize || win32 || path.sep === '\\') {
-    return fp.replace(/[\\\/]+/g, '/');
-  }
-  return fp;
 }
 
 /**
@@ -353,7 +348,7 @@ module.exports.makeRe = makeRe;
  * Expose `micromatch.braces`
  */
 
-module.exports.braces = braces;
+module.exports.braces = require('braces');
 
 /**
  * Expose `micromatch.filter`
@@ -365,7 +360,7 @@ module.exports.filter = filter;
  * Expose `micromatch.expand`
  */
 
-module.exports.expand = parse;
+module.exports.expand = expand;
 
 /**
  * Expose `micromatch.matchKeys`
