@@ -47,7 +47,7 @@ describe('options', function () {
       });
 
       it('should use negation patterns on dotfiles:', function () {
-        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c', 'c.md']);
         mm.match(['.a', '.b', 'c', 'c.md'], '!.b').should.eql(['.a', 'c', 'c.md']);
       });
     });
@@ -71,7 +71,7 @@ describe('options', function () {
         mm.match(['.dotfile'], '*.md', opts).should.eql([]);
         mm.match(['.verb.txt'], '*.md', opts).should.eql([]);
         mm.match(['a/b/c/.dotfile'], '*.md', opts).should.eql([]);
-        mm.match(['a/b/c/.dotfile.md'], '*.md', opts).should.eql(['a/b/c/.dotfile.md']);
+        mm.match(['a/b/c/.dotfile.md'], '*.md', opts).should.eql([]);
         mm.match(['a/b/c/.verb.md'], '**/*.md', opts).should.eql(['a/b/c/.verb.md']);
         mm.match(['foo.md'], '*.md', opts).should.eql(['foo.md']);
       });
@@ -79,7 +79,7 @@ describe('options', function () {
       it('should use negation patterns on dotfiles:', function () {
         var opts = { dot: true };
         mm.match(['.a', '.b', 'c', 'c.md'], '!*.*').should.eql(['.a', '.b', 'c']);
-        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c', 'c.md']);
       });
     });
   });

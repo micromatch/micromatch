@@ -20,7 +20,7 @@ if ('wildmatch' in argv) {
   mm = ref.wildmatch;
 }
 
-describe('extglob1a', function () {
+describe.skip('extglob1a', function () {
   it('should match character classes:', function () {
     mm.match(['a', 'ab'], 'a!(x)').should.eql(['a', 'ab']);
     mm.match(['a'], 'a?(x)').should.eql(['a']);

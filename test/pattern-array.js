@@ -132,8 +132,9 @@ describe('micromatch array patterns', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm(['.md'], ['!.md']).should.eql([]);
       mm(['d.md'], ['!.md']).should.eql([]);
-      mm(['d.md'], ['*', '!.md']).should.eql([]); // result differs from multimatch, but not minimatch
-      mm(['d.md', 'c.txt'], ['*', '!.md']).should.eql(['c.txt']);
+      mm(['d.md'], ['*', '!.md']).should.eql(['d.md']);
+      mm(['d.md', 'c.txt'], ['*', '!.md']).should.eql(['d.md', 'c.txt']);
+      mm(['d.md', 'c.txt'], ['*', '!*.md']).should.eql(['c.txt']);
     });
 
     it('should negate files:', function () {
@@ -204,17 +205,20 @@ describe('micromatch array patterns', function () {
     });
 
     it('should match dotfiles when `dotfile` is true:', function () {
-      mm(['.gitignore'], ['.gitignore'], {dot: true}).should.eql(['.gitignore']);
-      mm(['d.md'], ['*.md'], {dot: true}).should.eql(['d.md']);
-      mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
-      mm(['a/b/c/.gitignore'], ['*.md'], {dot: true}).should.eql([]);
-      mm(['a/b/c/.gitignore.md'], ['*.md'], {dot: true}).should.eql(['a/b/c/.gitignore.md']);
-      mm(['.verb.txt'], ['*.md'], {dot: true}).should.eql([]);
-      mm(['.gitignore'], ['*.md'], {dot: true}).should.eql([]);
-      mm(['.gitignore'], ['*.*'], {dot: true}).should.eql(['.gitignore']);
-      mm(['.gitignore.md'], ['.*.md'], {dot: true}).should.eql(['.gitignore.md']);
-      mm(['.gitignore.md'], ['*.md'], {dot: true}).should.eql(['.gitignore.md']);
-      mm(['a/b/c/.verb.md'], ['**/*.md'], {dot: true}).should.eql(['a/b/c/.verb.md']);
+      var opts = { dot: true };
+
+      mm(['.gitignore'], ['.gitignore'], opts).should.eql(['.gitignore']);
+      mm(['d.md'], ['*.md'], opts).should.eql(['d.md']);
+      mm(['.verb.txt'], ['*.md'], opts).should.eql([]);
+      mm(['a/b/c/.gitignore'], ['*.md'], opts).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], ['*.md'], opts).should.eql([]);
+      mm(['a/b/c/.gitignore.md'], ['**/*.md'], opts).should.eql(['a/b/c/.gitignore.md']);
+      mm(['.verb.txt'], ['*.md'], opts).should.eql([]);
+      mm(['.gitignore'], ['*.md'], opts).should.eql([]);
+      mm(['.gitignore'], ['*.*'], opts).should.eql(['.gitignore']);
+      mm(['.gitignore.md'], ['.*.md'], opts).should.eql(['.gitignore.md']);
+      mm(['.gitignore.md'], ['*.md'], opts).should.eql(['.gitignore.md']);
+      mm(['a/b/c/.verb.md'], ['**/*.md'], opts).should.eql(['a/b/c/.verb.md']);
 
       mm(['a/b/c/.gitignore.md'], ['*.md']).should.eql([]);
       mm(['a/b/c/.gitignore.md'], ['**/.*.md']).should.eql(['a/b/c/.gitignore.md']);

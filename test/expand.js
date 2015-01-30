@@ -32,6 +32,6 @@ describe('expand()', function () {
 
   it('should expand extglobs', function () {
     mm.makeRe('?(a*|b)').should.eql(/^(?:[^/](a(?!\.)(?=.)[^/]*?|b))$/);
-    mm.expand('?(a*|b)').glob.should.equal('(?:a(?!\\.)(?=.)[^/]*?|b\\/(?!\\.)(?=.)[^/])');
+    mm.expand('?(a*|b)').glob.should.equal('[^/](a(?!\\.)(?=.)[^/]*?|b)');
   });
 });

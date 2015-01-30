@@ -18,8 +18,8 @@ if ('minimatch' in argv) {
 describe('.makeRe()', function () {
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
-      mm.makeRe('.md').should.eql(/^(?:(?:(?!(?:\/|^)(?:\.{1,2})($|\/)).)*?\.md)$/);
-      mm.makeRe('.txt').should.eql(/^(?:(?:(?!(?:\/|^)(?:\.{1,2})($|\/)).)*?\.txt)$/);
+      mm.makeRe('.md').should.eql(/^(?:\.md)$/);
+      mm.makeRe('.txt').should.eql(/^(?:\.txt)$/);
       mm.makeRe('.md').test('.md').should.be.true;
       mm.makeRe('.md').test('.txt').should.be.false;
       mm.makeRe('.md').test('.gitignore').should.be.false;
@@ -133,7 +133,8 @@ describe('.makeRe()', function () {
   describe('negation', function () {
     it('should create a regular expression for negating extensions:', function () {
       mm.makeRe('!.md').test('.md').should.be.false;
-      mm.makeRe('!.md').test('foo.md').should.be.false;
+      mm.makeRe('!.md').test('foo.md').should.be.true;
+      mm.makeRe('!*.md').test('foo.md').should.be.false;
     });
 
     it('should create a regular expression for negating files with extensions:', function () {
@@ -207,7 +208,8 @@ describe('.makeRe()', function () {
       mm.makeRe('*.md', opts).test('foo.md').should.be.true;
       mm.makeRe('*.md', opts).test('.verb.txt').should.be.false;
       mm.makeRe('*.md', opts).test('a/b/c/.gitignore').should.be.false;
-      mm.makeRe('*.md', opts).test('a/b/c/.gitignore.md').should.be.true;
+      mm.makeRe('*.md', opts).test('a/b/c/.gitignore.md').should.be.false;
+      mm.makeRe('**/*.md', opts).test('a/b/c/.gitignore.md').should.be.true;
       mm.makeRe('*.md', opts).test('.verb.txt').should.be.false;
       mm.makeRe('*.md', opts).test('.gitignore').should.be.false;
       mm.makeRe('*.*', opts).test('.gitignore').should.be.true;
