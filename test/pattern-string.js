@@ -20,8 +20,7 @@ var files = ['a', 'b', 'c', 'd', 'a/a', 'a/b', 'a/b.js', 'a/c.js', 'a/b/c/d.js',
 
 describe('micromatch string patterns', function () {
   it('should unixify file paths', function () {
-    path.sep = '\\';
-    mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    mm(['a\\b\\c.md'], '**/*.md', {normalize: true}).should.eql(['a/b/c.md']);
     mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
     mm(['E:/a/b/c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
     mm(['E:\\a\\b\\c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);

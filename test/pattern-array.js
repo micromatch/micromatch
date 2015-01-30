@@ -16,7 +16,6 @@ if ('multimatch' in argv) {
   mm = require('multimatch');
 }
 
-
 describe('micromatch array patterns', function () {
   it('should match file extensions:', function () {
     mm(['.md'], ['.md']).should.eql(['.md']);

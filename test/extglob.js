@@ -16,9 +16,6 @@ var mm = require('..');
 if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
-if ('wildmatch' in argv) {
-  mm = ref.wildmatch;
-}
 
 describe('extglob', function () {
   it('should match extglobs:', function () {

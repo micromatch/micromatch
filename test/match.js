@@ -15,9 +15,6 @@ var mm = require('..');
 if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
-if ('wildmatch' in argv) {
-  mm = ref.wildmatch;
-}
 
 describe('.match()', function () {
   describe('basic patterns:', function () {
