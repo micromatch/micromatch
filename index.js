@@ -30,23 +30,28 @@ function micromatch(files, patterns, opts) {
   files = utils.arrayify(files);
   opts = opts || {};
 
+  if (typeof opts.cache === 'undefined') {
+    opts.cache = true;
+  }
+
   if (typeof patterns === 'string') {
     return match(files, patterns, opts);
   }
 
   var len = patterns.length;
-  var neg = [], res = [];
+  var omit = [], keep = [];
   var i = 0;
 
   while (len--) {
     var glob = patterns[i++];
-    if (glob.charCodeAt(0) === 33) {
-      neg.push.apply(neg, match(files, glob.slice(1), opts));
+    if (glob.charCodeAt(0) === 33 /* ! */) {
+      omit.push.apply(omit, match(files, glob.slice(1), opts));
     } else {
-      res.push.apply(res, match(files, glob, opts));
+      keep.push.apply(keep, match(files, glob, opts));
     }
   }
-  return diff(res, neg);
+
+  return diff(keep, omit);
 }
 
 /**
@@ -95,11 +100,11 @@ function match(files, pattern, opts) {
     res.push(fp);
   }
 
-  if (negate) { return diff(files, res); }
-
   if (opts.nonull && !res.length) {
     return pattern;
   }
+
+  if (negate) { return diff(files, res); }
   return res;
 }
 
@@ -115,8 +120,6 @@ function isMatch(fp, pattern, opts) {
 
   if (opts && opts.matchBase) {
     var matches = fileRe().exec(fp);
-
-    // don't return if not `true`
     if (pattern.test(matches[0])) {
       return true;
     }
@@ -167,20 +170,15 @@ function filter(pattern, opts) {
 
   return function (files) {
     if (typeof files === 'string') {
-      var match = isMatch(files, pattern, opts);
-      if (opts.inclusive && match !== false) {
-        return true;
-      }
-      return match;
+      return isMatch(files, pattern, opts);
     }
 
     var res = files.slice();
     var len = files.length;
-    var m;
 
     while (len--) {
-      m = isMatch(files[len], pattern, opts);
-      if (m) {
+      var match = isMatch(files[len], pattern, opts);
+      if (match) {
         continue;
       }
       res.splice(len, 1);
@@ -235,6 +233,8 @@ function makeRe(glob, options) {
 
   if (opts.nocase) { flags += 'i'; }
 
+  // pass in tokens to avoid parsing more than once
+  // var parsed = !tokens ? expand(glob, opts) : tokens;
   var parsed = expand(glob, opts);
   opts.negated = opts.negated || parsed.negated || false;
   glob = wrapGlob(parsed.glob, opts.negated);
