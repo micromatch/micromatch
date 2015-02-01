@@ -10,3 +10,4 @@ vendor
 *.DS_Store
 staging
 wip
+test/bash
