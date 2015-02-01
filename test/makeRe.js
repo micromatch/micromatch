@@ -53,6 +53,9 @@ describe('.makeRe()', function () {
 
   describe('file paths:', function () {
     it('should create a regular expression for file paths:', function () {
+      var re = mm.makeRe('**/*.js');
+      re.test('a/b.js').should.be.true;
+      re.test('b.js').should.be.true;
       mm.makeRe('a/b/c/*.md').test('.gitignore').should.be.false;
       mm.makeRe('a/b/c/*.md').test('.gitignore.md').should.be.false;
       mm.makeRe('a/b/c/*.md').test('a/b/c/d.gitignore.md').should.be.true;

@@ -52,6 +52,7 @@ describe('.match()', function () {
   describe('paths/extensions', function () {
     it('should match with common glob patterns', function () {
       mm.match(['/ab', '/cd', 'ef'], '/*').should.eql(['/ab', '/cd']);
+      mm.match(['a/b/c/d', 'a/c/d', 'a/f/jjj/acd'], '**/d').should.eql(['a/b/c/d', 'a/c/d']);
       mm.match(['ab'], './*').should.eql([]);
       mm.match(['./ab'], './*').should.eql(['./ab']);
       mm.match(['ab'], '*').should.eql(['ab']);
