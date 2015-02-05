@@ -60,28 +60,33 @@ describe('.match()', function () {
     });
 
     it('should match one directory level:', function () {
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/c/*').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/*/e').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/*/*/e').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], '*/*/*/e').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], '*/*/*/*').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'b/*/*/*').should.eql([]);
+      var dirs = ['a/b/c/e', 'a/b/c/d/e'];
+      mm.match(dirs, 'a/b/c/*').should.eql(['a/b/c/e']);
+      mm.match(dirs, 'a/b/*/e').should.eql(['a/b/c/e']);
+      mm.match(dirs, 'a/*/*/e').should.eql(['a/b/c/e']);
+      mm.match(dirs, '*/*/*/e').should.eql(['a/b/c/e']);
+      mm.match(dirs, '*/*/*/*').should.eql(['a/b/c/e']);
+      mm.match(dirs, 'b/*/*/*').should.eql([]);
       mm.match(['a/b/c/e', 'b/b/c/e', 'a/b/c/d/e'], '*/b/*/e').should.eql(['a/b/c/e', 'b/b/c/e']);
     });
 
     it('should match multiple directory levels:', function () {
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/**/c/*').should.eql(['a/b/c/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/**/e').should.eql(['a/b/c/e', 'a/b/c/d/e']);
-      mm.match(['a/b/c/e', 'a/b/c/d/e'], 'a/b/**/e').should.eql(['a/b/c/e', 'a/b/c/d/e']);
+      var dirs = ['a/b/c/e', 'a/b/c/d/e'];
+      mm.match(dirs, 'a/***').should.eql(['a/b/c/e', 'a/b/c/d/e']);
+      mm.match(dirs, 'a/**c*').should.eql([]);
+      mm.match(dirs, 'a/**c/*').should.eql(['a/b/c/e']);
+      mm.match(dirs, 'a/**/c/*').should.eql(['a/b/c/e']);
+      mm.match(dirs, 'a/**/e').should.eql(dirs);
+      mm.match(dirs, 'a/b/**/e').should.eql(dirs);
     });
   });
-
 
   describe('paths/filenames:', function () {
     it('should match files with the given extension:', function () {
       mm.match(['.md', '.txt'], '*.md').should.eql([]);
       mm.match(['.md', '.txt'], '.md').should.eql(['.md']);
       mm.match(['x.md'], '*.md').should.eql(['x.md']);
+      mm.match(['x.js.min'], '*.js').should.eql([]);
       mm.match(['a/b/c/x.md'], '*.md').should.eql([]);
     });
 
