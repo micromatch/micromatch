@@ -295,55 +295,20 @@ var cache;
 var original;
 var optsCache;
 
+/**
+ * Public methods
+ */
 
-// no, this isn't permanent. I will organize
-// the following when the API is locked.
+micromatch.braces    = micromatch.braceExpand = require('braces');
+micromatch.expand    = expand;
+micromatch.filter    = filter;
+micromatch.isMatch   = isMatch;
+micromatch.makeRe    = makeRe;
+micromatch.match     = match;
+micromatch.matchKeys = matchKeys;
 
 /**
  * Expose `micromatch`
  */
 
 module.exports = micromatch;
-
-/**
- * Expose `micromatch.match`
- */
-
-module.exports.match = match;
-
-/**
- * Expose `micromatch.isMatch`
- */
-
-module.exports.isMatch = isMatch;
-
-/**
- * Expose `micromatch.matchKeys`
- */
-
-module.exports.matchKeys = matchKeys;
-
-/**
- * Expose `micromatch.makeRe`
- */
-
-module.exports.makeRe = makeRe;
-
-/**
- * Expose `micromatch.braces`
- */
-
-module.exports.braces = require('braces');
-module.exports.braceExpand = module.exports.braces;
-
-/**
- * Expose `micromatch.filter`
- */
-
-module.exports.filter = filter;
-
-/**
- * Expose `micromatch.expand`
- */
-
-module.exports.expand = expand;
