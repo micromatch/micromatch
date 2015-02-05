@@ -76,8 +76,19 @@ describe('options', function () {
         mm.match(['foo.md'], '*.md', opts).should.eql(['foo.md']);
       });
 
+      it('should match dotfiles when there is not a leading dot:', function () {
+        var opts = { dotfiles: true };
+        mm.match(['.dotfile'], '*.*', opts).should.eql(['.dotfile']);
+        mm.match(['.a', '.b', 'c', 'c.md'], '*.*', opts).should.eql(['.a', '.b', 'c.md']);
+        mm.match(['.dotfile'], '*.md', opts).should.eql([]);
+        mm.match(['.verb.txt'], '*.md', opts).should.eql([]);
+        mm.match(['a/b/c/.dotfile'], '*.md', opts).should.eql([]);
+        mm.match(['a/b/c/.dotfile.md'], '*.md', opts).should.eql([]);
+        mm.match(['a/b/c/.verb.md'], '**/*.md', opts).should.eql(['a/b/c/.verb.md']);
+        mm.match(['foo.md'], '*.md', opts).should.eql(['foo.md']);
+      });
+
       it('should use negation patterns on dotfiles:', function () {
-        var opts = { dot: true };
         mm.match(['.a', '.b', 'c', 'c.md'], '!*.*').should.eql(['.a', '.b', 'c']);
         mm.match(['.a', '.b', 'c', 'c.md'], '!.*').should.eql(['c', 'c.md']);
       });
