@@ -100,8 +100,12 @@ function match(files, pattern, opts) {
     res.push(fp);
   }
 
-  if (opts.nonull && !res.length) {
-    return pattern;
+  if (opts.failglob && !res.length) {
+    throw new Error('micromatch found no matches for: "' + original + '".');
+  }
+
+  if ((opts.nonull || opts.nullglob) && !res.length) {
+    res.push(original.replace(/[\\"']/g, ''));
   }
 
   if (negate) { return diff(files, res); }
@@ -117,10 +121,11 @@ function isMatch(fp, pattern, opts) {
   if (!(pattern instanceof RegExp)) {
     pattern = makeRe(pattern, opts);
   }
-
+  
   if (opts && opts.matchBase) {
     var matches = fileRe().exec(fp);
-    if (pattern.test(matches[0])) {
+    // only return if `true`
+    if (matches && pattern.test(matches[0])) {
       return true;
     }
   }
@@ -139,14 +144,13 @@ function matchKeys(pattern, obj, options) {
     ? makeRe(pattern, options)
     : pattern;
 
-  var keys = Object.keys(obj);
-  var len = keys.length;
   var res = {};
 
-  while (len--) {
-    var key = keys[len];
-    if (re.test(key)) {
-      res[key] = obj[key];
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      if (re.test(key)) {
+        res[key] = obj[key];
+      }
     }
   }
   return res;
