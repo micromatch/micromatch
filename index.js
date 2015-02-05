@@ -209,11 +209,11 @@ function makeRe(glob, options) {
   var flags = opts.flags || '';
 
   // reset cache, recompile regex if options change
-  optsCache = typeof optsCache !== 'undefined'
-    ? optsCache
-    : opts;
+  optsCache =  optsCache || opts;
 
+  original = original || glob;
   if (!equal(optsCache, opts)) {
+    original = glob;
     cache = glob;
     globRe = null;
   }
@@ -225,6 +225,7 @@ function makeRe(glob, options) {
 
   if (cache !== glob) {
     glob = utils.unixify(glob, opts);
+    original = glob;
     cache = glob;
     globRe = null;
   }
@@ -238,7 +239,6 @@ function makeRe(glob, options) {
   if (opts.nocase) { flags += 'i'; }
 
   // pass in tokens to avoid parsing more than once
-  // var parsed = !tokens ? expand(glob, opts) : tokens;
   var parsed = expand(glob, opts);
   opts.negated = opts.negated || parsed.negated || false;
   glob = wrapGlob(parsed.glob, opts.negated);
@@ -274,9 +274,12 @@ function wrapGlob(glob, negate) {
  */
 
 function equal(a, b) {
-  if (!b) return false;
+  if (!b) { return false; }
   for (var prop in b) {
-    if (!a.hasOwnProperty(prop) || a[prop] !== b[prop]) {
+    if (!a.hasOwnProperty(prop)) {
+      return false;
+    }
+    if (a[prop] !== b[prop]) {
       return false;
     }
   }
@@ -289,6 +292,7 @@ function equal(a, b) {
 
 var globRe;
 var cache;
+var original;
 var optsCache;
 
 
