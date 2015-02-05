@@ -121,7 +121,7 @@ function isMatch(fp, pattern, opts) {
   if (!(pattern instanceof RegExp)) {
     pattern = makeRe(pattern, opts);
   }
-  
+
   if (opts && opts.matchBase) {
     var matches = fileRe().exec(fp);
     // only return if `true`
@@ -334,6 +334,7 @@ module.exports.makeRe = makeRe;
  */
 
 module.exports.braces = require('braces');
+module.exports.braceExpand = module.exports.braces;
 
 /**
  * Expose `micromatch.filter`
