@@ -16,6 +16,17 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
+describe('options.flags', function () {
+  it('should support the `flags` option:', function () {
+    mm.match(['a/b/d/e.md'], 'a/b/D/*.md').should.eql([], 'should not match a dirname');
+    mm.match(['a/b/d/e.md'], 'a/b/D/*.md', {flags: 'i'}).should.eql(['a/b/d/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/*/E.md').should.eql([], 'should not match a basename');
+    mm.match(['a/b/c/e.md'], 'A/b/*/E.md', {flags: 'i'}).should.eql(['a/b/c/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/C/*.MD').should.eql([], 'should not match a file extension');
+    mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {flags: 'i'}).should.eql(['a/b/c/e.md']);
+  });
+});
+
 describe('options.nocase', function () {
   it('should support the `nocase` option:', function () {
     mm.match(['a/b/d/e.md'], 'a/b/D/*.md').should.eql([], 'should not match a dirname');
@@ -25,12 +36,24 @@ describe('options.nocase', function () {
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD').should.eql([], 'should not match a file extension');
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
   });
+
+  it('should use correct flags when `flags` and `nocase` are used (no double `i`):', function () {
+    var opts = {nocase: true, flags: 'i'};
+    mm.match(['a/b/d/e.md'], 'a/b/D/*.md').should.eql([], 'should not match a dirname');
+    mm.match(['a/b/d/e.md'], 'a/b/D/*.md', opts).should.eql(['a/b/d/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/*/E.md').should.eql([], 'should not match a basename');
+    mm.match(['a/b/c/e.md'], 'A/b/*/E.md', opts).should.eql(['a/b/c/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/C/*.MD').should.eql([], 'should not match a file extension');
+    mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', opts).should.eql(['a/b/c/e.md']);
+  });
 });
 
 describe('options.ignore', function () {
   it('should support the `ignore` option:', function () {
-    mm.match(['a/b', 'a/c', 'a/d', 'a/e'], '**').should.eql(['a/b', 'a/c', 'a/d', 'a/e']);
+    mm.match(['a/b', 'a/c', 'a/d', 'a/e'], '**').should.eql(['a/b', 'a/c', 'a/d', 'a/e'], 'nothing is ignored');
     mm.match(['a/b', 'a/c', 'a/d', 'a/e'], '**', {ignore: ['*/d', '*/e']}).should.eql(['a/b', 'a/c']);
+    mm.match(['a/b', 'a/c', 'a/d', 'a/e'], '**', {ignore: ['**']}).should.eql([]);
+    mm.match(['a/b', 'a/c', 'a/d', 'a/e'], '**', {ignore: ['**', '!*/d']}).should.eql(['a/d']);
   });
 });
 
