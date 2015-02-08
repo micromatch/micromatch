@@ -24,13 +24,31 @@ describe('.match()', function () {
       mm.match(['.'], '').should.eql([]);
     });
 
-    it('should match with non-glob patterns', function () {
+    it('should support matching with non-glob patterns', function () {
       mm.match(['.'], '.').should.eql(['.']);
       mm.match(['ab'], 'ab').should.eql(['ab']);
       mm.match(['ab', 'a'], 'a').should.eql(['a']);
       mm.match(['ab', 'a'], '/a').should.eql([]);
       mm.match(['ab', 'a'], 'aa').should.eql([]);
       mm.match(['/ab', '/a'], '/a').should.eql(['/a']);
+    });
+
+    it('should support matching with glob patterns', function () {
+      mm.match(['.'], '{.,*}').should.eql(['.']);
+      mm.match(['ab'], '*').should.eql(['ab']);
+      mm.match(['ab', 'a'], '?').should.eql(['a']);
+      mm.match(['ab', 'a'], '*b').should.eql(['ab']);
+      mm.match(['ab', 'a', 'bb'], '[ab][ab]').should.eql(['ab', 'bb']);
+      mm.match(['/ab', '/a'], '/*').should.eql(['/ab', '/a']);
+    });
+
+    it('should support matching with regex', function () {
+      mm.match(['.'], /\./).should.eql(['.']);
+      mm.match(['ab'], /ab/).should.eql(['ab']);
+      mm.match(['ab', 'a'], /a$/).should.eql(['a']);
+      mm.match(['ab', 'a'], /\/a/).should.eql([]);
+      mm.match(['ab', 'a'], /aa/).should.eql([]);
+      mm.match(['/ab', '/a'], /\/a$/).should.eql(['/a']);
     });
   });
 
