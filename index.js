@@ -157,14 +157,25 @@ function matcher(pattern, opts) {
 }
 
 /**
- * Returns true if the filepath contains the
- * given pattern.
+ * Returns true if the filepath contains the given
+ * pattern. Can also return a function for matching.
+ *
+ * ```js
+ * isMatch('foo.md', '*.md', {});
+ * //=> true
+ *
+ * isMatch('*.md', {})('foo.md')
+ * //=> true
+ * ```
+ *
+ * @param  {String} `fp`
+ * @param  {String} `pattern`
+ * @param  {Object} `opts`
+ * @return {Boolean}
  */
 
 function isMatch(fp, pattern, opts) {
   if (typeOf(pattern) === 'object') {
-    // allow isMatch to return a function
-    // => isMatch('*.md', {})('foo.md');
     return matcher(fp, pattern);
   }
   return matcher(pattern, opts)(fp);
@@ -267,7 +278,8 @@ function toRegex(glob, options) {
   // pass in tokens to avoid parsing more than once
   var parsed = expand(glob, opts);
   opts.negated = opts.negated || parsed.negated;
-  glob = wrapGlob(parsed.glob, { negate: opts.negated });
+  opts.negate = opts.negated;
+  glob = wrapGlob(parsed.glob, opts);
 
   try {
     return new RegExp(glob, flags);
@@ -295,7 +307,8 @@ function makeRe(glob, opts) {
 
 function wrapGlob(glob, opts) {
   var prefix = (opts && !opts.contains) ? '^' : '';
-  glob = ('(?:' + glob + ')$');
+  var after = (opts && !opts.contains) ? '$' : '';
+  glob = ('(?:' + glob + ')' + after);
   if (opts && opts.negate) {
     return prefix + ('(?!^' + glob + ').*$');
   }
