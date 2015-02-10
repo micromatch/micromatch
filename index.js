@@ -8,7 +8,10 @@
 'use strict';
 
 var diff = require('arr-diff');
-var fileRe = require('filename-regex');
+var typeOf = require('kind-of');
+var cache = require('regex-cache');
+var isGlob = require('is-glob');
+var extglob = require('extglob');
 var expand = require('./lib/expand');
 var utils = require('./lib/utils');
 
@@ -76,18 +79,16 @@ function match(files, pattern, opts) {
   opts = opts || {};
 
   var negate = opts.negate || false;
+  var orig = pattern;
 
-  if (opts.nonegate !== true) {
+  if (typeof pattern === 'string' && opts.nonegate !== true) {
     negate = pattern.charAt(0) === '!';
     if (negate) {
       pattern = pattern.slice(1);
     }
   }
 
-  if (!(pattern instanceof RegExp)) {
-    pattern = makeRe(pattern, opts);
-  }
-
+  var isMatch = matcher(pattern, opts);
   var len = files.length;
   var res = [];
   var i = 0;
@@ -96,40 +97,91 @@ function match(files, pattern, opts) {
     var file = files[i++];
     var fp = utils.unixify(file, opts);
 
-    if (!isMatch(fp, pattern, opts)) { continue; }
+    if (!isMatch(fp)) { continue; }
     res.push(fp);
   }
 
-  if (opts.failglob && !res.length) {
-    throw new Error('micromatch found no matches for: "' + original + '".');
+  if (res.length === 0) {
+    if (opts.failglob === true) {
+      throw new Error('micromatch found no matches for: "' + orig + '".');
+    }
+
+    if (opts.nonull || opts.nullglob) {
+      res.push(utils.unescapeGlob(orig));
+    }
   }
 
-  if ((opts.nonull || opts.nullglob) && !res.length) {
-    res.push(original.replace(/[\\"']/g, ''));
-  }
+  // if `negate` was diffined, diff negated files
+  if (negate) { res = diff(files, res); }
 
-  if (negate) { return diff(files, res); }
+  // if `ignore` was defined, diff ignored filed
+  if (opts.ignore && opts.ignore.length) {
+    pattern = opts.ignore;
+    delete opts.ignore;
+    return diff(res, micromatch(res, pattern, opts));
+  }
   return res;
 }
 
 /**
- * Returns true if the filepath matches the given
- * pattern.
+ * Return a function for matching based on the
+ * given `pattern` and `options`.
+ *
+ * @param  {String} `pattern`
+ * @param  {Object} `options`
+ * @return {Function}
+ */
+
+function matcher(pattern, opts) {
+  // pattern is a function
+  if (typeof pattern === 'function') {
+    return pattern;
+  }
+  // pattern is a string
+  if (!(pattern instanceof RegExp)) {
+    if (!isGlob(pattern)) {
+      return utils.matchPath(pattern, opts);
+    }
+    var re = makeRe(pattern, opts);
+    if (opts && opts.matchBase) {
+      return utils.hasFilename(re, opts);
+    }
+    return function (fp) {
+      return re.test(fp);
+    };
+  }
+  // pattern is already a regex
+  return function (fp) {
+    return pattern.test(fp);
+  };
+}
+
+/**
+ * Returns true if the filepath contains the
+ * given pattern.
  */
 
 function isMatch(fp, pattern, opts) {
-  if (!(pattern instanceof RegExp)) {
-    pattern = makeRe(pattern, opts);
+  if (typeOf(pattern) === 'object') {
+    // allow isMatch to return a function
+    // => isMatch('*.md', {})('foo.md');
+    return matcher(fp, pattern);
   }
+  return matcher(pattern, opts)(fp);
+}
 
-  if (opts && opts.matchBase) {
-    var matches = fileRe().exec(fp);
-    // only return if `true`
-    if (matches && pattern.test(matches[0])) {
-      return true;
-    }
+/**
+ * Returns true if the filepath matches the
+ * given pattern.
+ */
+
+function contains(fp, pattern, opts) {
+  opts = opts || {};
+  opts.contains = (pattern !== '');
+  if (opts.contains && !isGlob(pattern)) {
+    return fp.indexOf(pattern) !== -1;
   }
-  return pattern.test(fp);
+  return matcher(pattern, opts)(fp);
 }
 
 /**
@@ -187,7 +239,6 @@ function filter(pattern, opts) {
       }
       res.splice(len, 1);
     }
-
     return res;
   };
 }
@@ -204,48 +255,33 @@ function filter(pattern, opts) {
  * @return {RegExp}
  */
 
-function makeRe(glob, options) {
-  var opts = options || {};
+function toRegex(glob, options) {
+  // clone options to prevent mutating upstream variables
+  var opts = Object.create(options || {});
+
   var flags = opts.flags || '';
-
-  // reset cache, recompile regex if options change
-  optsCache =  optsCache || opts;
-
-  original = original || glob;
-  if (!equal(optsCache, opts)) {
-    original = glob;
-    cache = glob;
-    globRe = null;
+  if (opts.nocase && !/i/.test(flags)) {
+    flags += 'i';
   }
-
-  // reset cache, recompile regex if glob changes
-  cache = typeof cache !== 'undefined'
-    ? cache
-    : glob;
-
-  if (cache !== glob) {
-    glob = utils.unixify(glob, opts);
-    original = glob;
-    cache = glob;
-    globRe = null;
-  }
-
-  // if `true`, then we can just return
-  // the regex that was previously cached
-  if (globRe instanceof RegExp) {
-    return globRe;
-  }
-
-  if (opts.nocase) { flags += 'i'; }
 
   // pass in tokens to avoid parsing more than once
   var parsed = expand(glob, opts);
-  opts.negated = opts.negated || parsed.negated || false;
-  glob = wrapGlob(parsed.glob, opts.negated);
+  opts.negated = opts.negated || parsed.negated;
+  glob = wrapGlob(parsed.glob, { negate: opts.negated });
 
-  // cache regex
-  globRe = new RegExp(glob, flags);
-  return globRe;
+  try {
+    return new RegExp(glob, flags);
+  } catch (err) {}
+  return /^$/;
+}
+
+/**
+ * Wrap `toRegex` to memoize the generated regex
+ * the string and options don't change
+ */
+
+function makeRe(glob, opts) {
+  return cache(toRegex, glob, opts);
 }
 
 /**
@@ -257,43 +293,14 @@ function makeRe(glob, options) {
  * @param {Boolean} `negate`
  */
 
-function wrapGlob(glob, negate) {
+function wrapGlob(glob, opts) {
+  var prefix = (opts && !opts.contains) ? '^' : '';
   glob = ('(?:' + glob + ')$');
-  return '^' + (negate ? ('(?!^' + glob + ').*$') : glob);
-}
-
-/**
- * Return true if object A is equal (enough)
- * to object B. Used for options caching. All
- * we need to know is if the object has changed
- * in any way.
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Boolean}
- */
-
-function equal(a, b) {
-  if (!b) { return false; }
-  for (var prop in b) {
-    if (!a.hasOwnProperty(prop)) {
-      return false;
-    }
-    if (a[prop] !== b[prop]) {
-      return false;
-    }
+  if (opts && opts.negate) {
+    return prefix + ('(?!^' + glob + ').*$');
   }
-  return true;
+  return prefix + glob;
 }
-
-/**
- * Results cache
- */
-
-var globRe;
-var cache;
-var original;
-var optsCache;
 
 /**
  * Public methods
@@ -303,6 +310,7 @@ micromatch.braces    = micromatch.braceExpand = require('braces');
 micromatch.expand    = expand;
 micromatch.filter    = filter;
 micromatch.isMatch   = isMatch;
+micromatch.contains  = contains;
 micromatch.makeRe    = makeRe;
 micromatch.match     = match;
 micromatch.matchKeys = matchKeys;
