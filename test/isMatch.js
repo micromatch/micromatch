@@ -18,6 +18,9 @@ describe('.isMatch()', function () {
     mm.isMatch('ab', '/a').should.be.false;
     mm.isMatch('ab', 'a').should.be.false;
     mm.isMatch('ab', 'ab').should.be.true;
+    mm.isMatch('abcd', 'cd').should.be.false;
+    mm.isMatch('abcd', 'bc').should.be.false;
+    mm.isMatch('abcd', 'ab').should.be.false;
   });
 
   it('should match with common glob patterns', function () {
