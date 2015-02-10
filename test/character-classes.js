@@ -19,6 +19,7 @@ if ('minimatch' in argv) {
 
 describe('brace expansion', function () {
   it('should match character classes:', function () {
+    mm.match(['ab', 'a', 'bb'], '[ab][ab]').should.eql(['ab', 'bb']);
     mm.match(['abc', 'abd', 'abe', 'ab', 'ac'], '[a-c]b*').should.eql(['abc', 'abd', 'abe', 'ab']);
     mm.match(['abc', 'abd', 'abe', 'aa', 'ab', 'ac'], '[a-j]*[^c]').should.eql(['abd', 'abe', 'aa', 'ab']);
     mm.match(['abc', 'abd', 'abe'], 'a*[^c]').should.eql(['abd', 'abe']);

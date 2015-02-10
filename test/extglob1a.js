@@ -18,16 +18,16 @@ if ('minimatch' in argv) {
 }
 
 describe('extglob1a', function () {
-  it('should match character classes:', function () {
-    // mm.match(['a', 'ab', 'x'], 'a!(x)').should.eql(['a', 'ab']);
-    // mm.match(['a'], 'a?(x)').should.eql(['a']);
-    mm.match(['ba'], 'a!(x)').should.eql([]);
-    mm.match(['ba'], 'a*?(x)').should.eql([]);
-    mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c').should.eql([]);
-    mm.match(['ab', 'ba'], 'a?(x)').should.eql([]);
-    mm.match(['ba'], 'a*!(x)').should.eql([]);
-    // mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)').should.eql(['a.md', 'a.', 'd.js.d']);
-  });
+  // it('should match character classes:', function () {
+  //   mm.match(['a', 'ab', 'x'], 'a!(x)').should.eql(['a', 'ab']);
+  //   mm.match(['a'], 'a?(x)').should.eql(['a']);
+  //   mm.match(['ba'], 'a!(x)').should.eql([]);
+  //   mm.match(['ba'], 'a*?(x)').should.eql([]);
+  //   mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c').should.eql([]);
+  //   mm.match(['ab', 'ba'], 'a?(x)').should.eql([]);
+  //   mm.match(['ba'], 'a*!(x)').should.eql([]);
+  //   mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)').should.eql(['a.md', 'a.', 'd.js.d']);
+  // });
 
   it.skip('failing:', function () {
     mm.match(['a', 'ab'], 'a*?(x)').should.eql(['a', 'ab']);
