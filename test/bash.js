@@ -19,6 +19,13 @@ if ('minimatch' in argv) {
 
 // from the Bash 4.3 specification/unit tests
 var arr = ['a','b','c','d','abc','abd','abe','bb','bcd','ca','cb','dd','de','Beware','bdir/', '*'];
+describe('failglob:', function () {
+  it('should throw an error when no matches are found:', function () {
+    (function () {
+      mm.match(arr, '\\^', {failglob: true})
+    }).should.throw('micromatch found no matches for: "\\^".');
+  });
+});
 
 // $echo a/{1..3}/b
 describe('bash', function () {
@@ -51,16 +58,7 @@ describe('bash', function () {
     mm.match(arr, '"*"*', {nonull: true}).should.eql(['**']);
     mm.match(arr, '"*"*').should.eql([]);
 
-    mm.match(arr, '\\**', {nonull: true}).should.eql(['*']);
     mm.match(arr, '\\**').should.eql(['*']); // `*` is in the fixtures array
-  });
-
-  describe('failglob:', function () {
-    it('should throw an error when no matches are found:', function () {
-      (function () {
-        mm.match(arr, '\\^', {failglob: true})
-      }).should.throw('micromatch found no matches for: "\\^".');
-    });
   });
 
   it('should work for escaped paths/dots:', function () {
@@ -89,6 +87,7 @@ describe('bash', function () {
   });
 
   it('tests with multiple `*\'s:', function () {
+    mm.match(['bbc','abc', 'bbd'], 'a**c').should.eql(['abc']);
     mm.match(['bbc','abc', 'bbd'], 'a***c').should.eql(['abc']);
     mm.match(['bbc','abc', 'bbc'], 'a*****?c').should.eql(['abc']);
     mm.match(['bbc','abc'], '?*****??').should.eql(['bbc', 'abc']);
