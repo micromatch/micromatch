@@ -11,7 +11,6 @@ var diff = require('arr-diff');
 var typeOf = require('kind-of');
 var cache = require('regex-cache');
 var isGlob = require('is-glob');
-var extglob = require('extglob');
 var expand = require('./lib/expand');
 var utils = require('./lib/utils');
 
