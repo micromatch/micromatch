@@ -279,7 +279,7 @@ function toRegex(glob, options) {
   var parsed = expand(glob, opts);
   opts.negated = opts.negated || parsed.negated;
   opts.negate = opts.negated;
-  glob = wrapGlob(parsed.glob, opts);
+  glob = wrapGlob(parsed.pattern, opts);
 
   try {
     return new RegExp(glob, flags);
