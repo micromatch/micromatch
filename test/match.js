@@ -61,9 +61,24 @@ describe('.match()', function () {
     });
 
     it('should match one character per question mark', function () {
-      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '?').should.eql([]);
-      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '??').should.eql(['ab', 'bb']);
-      mm.match(['ab', 'a/bc', 'bb', 'bbc', 'b/c'], '???').should.eql(['bbc']);
+      var files = ['ab', 'a/bc', 'bb', 'bbc', 'b/c', 'a/b/c.js', 'a/b/c.md', 'a/bb/c.js', 'a/bb/c.md', 'a/bbb/c.js', 'a/bbb/c.md', 'a/bbbb/c.js', 'a/bbbb/c.md', 'a/b/c/d/eeeeeee/f.js', 'a/b/c/d/eeeeeee/f.md', 'a/b/c/d/e.js', 'a/b/c/d/e.md', 'a/b/c/ddd/e.js', 'a/b/c/ddd/e.md'];
+      mm.match(files, '?').should.eql([]);
+      mm.match(files, '??').should.eql(['ab', 'bb']);
+      mm.match(files, '???').should.eql(['bbc']);
+      mm.match(files, 'a/?/c.js').should.eql(['a/b/c.js']);
+      mm.match(files, 'a/?/c.md').should.eql(['a/b/c.md']);
+      mm.match(files, 'a/?/c/?/*/f.js').should.eql(['a/b/c/d/eeeeeee/f.js']);
+      mm.match(files, 'a/?/c/?/*/f.md').should.eql(['a/b/c/d/eeeeeee/f.md']);
+      mm.match(files, 'a/?/c/?/e.js').should.eql(['a/b/c/d/e.js']);
+      mm.match(files, 'a/?/c/?/e.md').should.eql(['a/b/c/d/e.md']);
+      mm.match(files, 'a/?/c/???/e.js').should.eql(['a/b/c/ddd/e.js']);
+      mm.match(files, 'a/?/c/???/e.md').should.eql(['a/b/c/ddd/e.md']);
+      mm.match(files, 'a/??/c.js').should.eql(['a/bb/c.js']);
+      mm.match(files, 'a/??/c.md').should.eql(['a/bb/c.md']);
+      mm.match(files, 'a/???/c.js').should.eql(['a/bbb/c.js']);
+      mm.match(files, 'a/???/c.md').should.eql(['a/bbb/c.md']);
+      mm.match(files, 'a/????/c.js').should.eql(['a/bbbb/c.js']);
+      mm.match(files, 'a/????/c.md').should.eql(['a/bbbb/c.md']);
     });
   });
 
