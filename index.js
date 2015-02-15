@@ -274,8 +274,9 @@ function toRegex(glob, options) {
     flags += 'i';
   }
 
-  // pass in tokens to avoid parsing more than once
   var parsed = expand(glob, opts);
+
+  // pass in tokens to avoid parsing more than once
   opts.negated = opts.negated || parsed.negated;
   opts.negate = opts.negated;
   glob = wrapGlob(parsed.pattern, opts);
@@ -319,10 +320,10 @@ function wrapGlob(glob, opts) {
  */
 
 micromatch.braces    = micromatch.braceExpand = require('braces');
+micromatch.contains  = contains;
 micromatch.expand    = expand;
 micromatch.filter    = filter;
 micromatch.isMatch   = isMatch;
-micromatch.contains  = contains;
 micromatch.makeRe    = makeRe;
 micromatch.match     = match;
 micromatch.matchKeys = matchKeys;
