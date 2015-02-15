@@ -149,13 +149,14 @@ describe('.match()', function () {
       mm.match(['.x.md'], '*.md', {dot: true}).should.eql(['.x.md']);
       mm.match(['.x.md'], '.*', {dot: true}).should.eql(['.x.md']);
       mm.match(['a/b/c/.xyz.md'], 'a/b/c/*.md', {dot: true}).should.eql(['a/b/c/.xyz.md']);
+      mm.match(['c/.dotfile', 'c/a', 'c/b'], '**/.*', {dot: true}).should.eql(['c/.dotfile']);
     });
   });
 
   describe('paths/filepaths:', function () {
     it('should match file paths:', function () {
       mm.match(['a/b/c/xyz.md'], '**/*.md').should.eql(['a/b/c/xyz.md']);
-      mm.match(['a/b/c/.dotfile'], '**/.*').should.eql(['a/b/c/.dotfile']);
+      mm.match(['c/.dotfile', 'c/a', 'c/b'], '**/.*').should.eql(['c/.dotfile']);
       mm.match(['a/b/c/xyz.min.md'], '**/*.md').should.eql(['a/b/c/xyz.min.md']);
       mm.match(['a/b/c/xyz.md'], 'a/b/c/*.md').should.eql(['a/b/c/xyz.md']);
       mm.match(['a/bb/c/xyz.md'], 'a/*/c/*.md').should.eql(['a/bb/c/xyz.md']);
