@@ -1,6 +1,6 @@
 'use strict';
 
-var should = require('should');
+require('should');
 var mm = require('..');
 
 describe('.contains()', function () {

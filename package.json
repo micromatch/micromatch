@@ -7,17 +7,15 @@
     "name": "Jon Schlinkert",
     "url": "https://github.com/jonschlinkert"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/micromatch.git"
-  },
+  "repository": "jonschlinkert/micromatch",
   "bugs": {
     "url": "https://github.com/jonschlinkert/micromatch/issues"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/jonschlinkert/micromatch/blob/master/LICENSE"
-  },
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib/"
+  ],
   "main": "index.js",
   "engines": {
     "node": ">=0.10.0"
@@ -27,10 +25,6 @@
     "benchmark": "node benchmark",
     "deps": "deps -e wip,benchmark"
   },
-  "files": [
-    "index.js",
-    "lib/"
-  ],
   "dependencies": {
     "arr-diff": "^1.0.1",
     "braces": "^1.7.0",

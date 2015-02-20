@@ -5,7 +5,7 @@
  *   https://github.com/git/git/blob/70a8fc999d9f0afbc793b21bbb911ecde4e24367/t/t3070-wildmatch.sh
  */
 
-var should = require('should');
+require('should');
 var mm = require('..');
 
 
