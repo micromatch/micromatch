@@ -320,13 +320,14 @@ function wrapGlob(glob, opts) {
  */
 
 micromatch.braces    = micromatch.braceExpand = require('braces');
-micromatch.contains  = contains;
 micromatch.expand    = expand;
-micromatch.filter    = filter;
-micromatch.isMatch   = isMatch;
 micromatch.makeRe    = makeRe;
-micromatch.match     = match;
+micromatch.contains  = contains;
+micromatch.isMatch   = isMatch;
+micromatch.filter    = filter;
 micromatch.matchKeys = matchKeys;
+micromatch.match     = match;
+micromatch.matcher   = matcher;
 
 /**
  * Expose `micromatch`
