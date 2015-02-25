@@ -266,11 +266,11 @@ function filter(pattern, opts) {
  */
 
 function toRegex(glob, options) {
-  // clone options to prevent mutating upstream variables
+  // clone options to prevent mutating upstream values
   var opts = Object.create(options || {});
 
   var flags = opts.flags || '';
-  if (opts.nocase && !/i/.test(flags)) {
+  if (opts.nocase && flags.indexOf('i') === -1) {
     flags += 'i';
   }
 
