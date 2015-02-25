@@ -7,7 +7,7 @@
 
 'use strict';
 
-var should = require('should');
+require('should');
 var argv = require('minimist')(process.argv.slice(2));
 var ref = require('./support/reference');
 var mm = require('..');

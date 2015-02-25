@@ -44,7 +44,7 @@
     "minimist": "^1.1.0",
     "mocha": "^2.1.0",
     "multimatch": "^2.0.0",
-    "should": "^4.6.1",
+    "should": "^5.0.1",
     "write": "^0.1.1"
   },
   "keywords": [
