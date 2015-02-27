@@ -22,8 +22,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "benchmark": "node benchmark",
-    "deps": "deps -e wip,benchmark"
+    "benchmark": "node benchmark"
   },
   "dependencies": {
     "arr-diff": "^1.0.1",
@@ -31,10 +30,11 @@
     "expand-brackets": "^0.1.1",
     "extglob": "^0.2.0",
     "filename-regex": "^2.0.0",
-    "is-glob": "^1.1.0",
+    "is-glob": "^1.1.1",
     "kind-of": "^1.1.0",
-    "parse-glob": "^2.0.0",
-    "regex-cache": "^0.2.0"
+    "object.omit": "^0.2.1",
+    "parse-glob": "^2.0.1",
+    "regex-cache": "^0.3.0"
   },
   "devDependencies": {
     "benchmarked": "^0.1.3",
