@@ -9,6 +9,7 @@
 
 var diff = require('arr-diff');
 var typeOf = require('kind-of');
+var omit = require('object.omit');
 var cache = require('regex-cache');
 var isGlob = require('is-glob');
 var expand = require('./lib/expand');
@@ -29,7 +30,6 @@ function micromatch(files, patterns, opts) {
     return [];
   }
 
-  files = utils.arrayify(files);
   opts = opts || {};
 
   if (typeof opts.cache === 'undefined') {
@@ -40,9 +40,8 @@ function micromatch(files, patterns, opts) {
     return match(files, patterns, opts);
   }
 
-  var len = patterns.length;
+  var len = patterns.length, i = 0;
   var omit = [], keep = [];
-  var i = 0;
 
   while (len--) {
     var glob = patterns[i++];
@@ -88,9 +87,8 @@ function match(files, pattern, opts) {
   }
 
   var isMatch = matcher(pattern, opts);
-  var len = files.length;
+  var len = files.length, i = 0;
   var res = [];
-  var i = 0;
 
   while (i < len) {
     var file = files[i++];
@@ -110,13 +108,13 @@ function match(files, pattern, opts) {
     }
   }
 
-  // if `negate` was diffined, diff negated files
+  // if `negate` was defined, diff negated files
   if (negate) { res = diff(files, res); }
 
   // if `ignore` was defined, diff ignored filed
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
-    delete opts.ignore;
+    opts = omit(opts, ['ignore']);
     return diff(res, micromatch(res, pattern, opts));
   }
   return res;
@@ -136,7 +134,7 @@ function matcher(pattern, opts) {
   if (typeof pattern === 'function') {
     return pattern;
   }
-  // pattern is a string
+  // pattern is a string, make a regex
   if (!(pattern instanceof RegExp)) {
     if (!isGlob(pattern)) {
       return utils.matchPath(pattern, opts);
@@ -145,12 +143,12 @@ function matcher(pattern, opts) {
     if (opts && opts.matchBase) {
       return utils.hasFilename(re, opts);
     }
-    return function (fp) {
+    return function(fp) {
       return re.test(fp);
     };
   }
   // pattern is already a regex
-  return function (fp) {
+  return function(fp) {
     return pattern.test(fp);
   };
 }
@@ -192,6 +190,34 @@ function contains(fp, pattern, opts) {
     return fp.indexOf(pattern) !== -1;
   }
   return matcher(pattern, opts)(fp);
+}
+
+/**
+ * Returns true if a file path matches any of the
+ * given patterns.
+ *
+ * @param  {String} `fp` The filepath to test.
+ * @param  {String|Array} `patterns` Glob patterns to use.
+ * @param  {Object} `opts` Options to pass to the `matcher()` function.
+ * @return {String}
+ */
+
+function any(fp, patterns, opts) {
+  if (!Array.isArray(patterns) && typeof patterns !== 'string') {
+    throw new TypeError('micromatch.any() expects a string or array.');
+  }
+
+  patterns = utils.arrayify(patterns);
+  var len = patterns.length;
+  var matches = false;
+
+  while (len--) {
+    var isMatch = matcher(patterns[len], opts);
+    if (isMatch(fp)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -323,6 +349,7 @@ micromatch.braces    = micromatch.braceExpand = require('braces');
 micromatch.expand    = expand;
 micromatch.makeRe    = makeRe;
 micromatch.contains  = contains;
+micromatch.any       = any;
 micromatch.isMatch   = isMatch;
 micromatch.filter    = filter;
 micromatch.matchKeys = matchKeys;
