@@ -8,10 +8,10 @@
 'use strict';
 
 var path = require('path');
-require('should');
 var argv = require('minimist')(process.argv.slice(2));
 var ref = require('./support/reference');
 var mm = require('..');
+require('should');
 
 if ('minimatch' in argv) {
   mm = ref.minimatch;
