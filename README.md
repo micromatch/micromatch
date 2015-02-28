@@ -91,9 +91,11 @@ mm.isMatch('.verb.md', '*.md', {dot: true});
 
 ### .contains
 
-Returns true if a file path contains a match for the given glob pattern.
+Returns true if any part of a file path match the given glob pattern. Think of this is "has path" versus "is path".
 
 **Example**
+
+`.isMatch()` would return false for both of the following:
 
 ```js
 mm.contains('a/b/c', 'a/b');
@@ -107,6 +109,14 @@ mm.contains('a/b/c', 'a/*');
 ### .matcher
 
 Returns a function for matching using the supplied pattern. e.g. create your own "matcher". The advantage of this method is that the pattern can be compiled outside of a loop.
+
+**Pattern**
+
+Can be any of the following:
+
+- `glob/string`
+- `regex`
+- `function`
 
 **Example**
 
@@ -123,9 +133,11 @@ var files = [];
 
 ### .filter
 
-Returns a function for filtering files with the given pattern.
+Returns a function for filtering files that match the given pattern.
 
 **Example**
+
+Both of the following signatures work:
 
 ```js
 var fn = mm.filter('*.md', {dot: true});
@@ -139,16 +151,30 @@ Returns an object with a regex-compatible string and tokens.
 
 ```js
 mm.expand('*.js');
-// results in:
-// { glob: '(?!\\.)(?=.)[^/]*?\\.js',
-//   tokens:
-//    { pattern: '*.js',
-//      dirname: '',
-//      filename: '*.js',
-//      basename: '*',
-//      extname: '.js',
-//      isDotGlob: false },
-//   options: {} }
+
+// when `track` is enabled (for debugging), the `history` array is used
+// to record each mutation to the glob pattern as it's converted to regex
+{ options: { track: false, dot: undefined, makeRe: true, negated: false },
+  pattern: '(.*\\/|^)bar\\/(?:(?!(?:^|\\/)\\.).)*?',
+  history: [],
+  tokens:
+   { path:
+      { whole: '**/bar/**',
+        dirname: '**/bar/',
+        filename: '**',
+        basename: '**',
+        extname: '',
+        ext: '' },
+     is:
+      { glob: true,
+        negated: false,
+        globstar: true,
+        dotfile: false,
+        dotdir: false },
+     match: {},
+     original: '**/bar/**',
+     pattern: '**/bar/**',
+     base: '' } }
 ```
 
 ### .makeRe
@@ -227,33 +253,26 @@ Type: `{Boolean}`
 Default: `true`
 
 
-## Special characters
+## Other features
 
-> With the exception of brace expansion (`{a,b}`, `{1..5}`, etc), most of the special characters convert directly to regex, so you can expect them to follow the same rules and produce the same results as regex.
+Micromatch also supports the following.
 
-**Square brackets**
+### Extended globbing
 
-Given `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
+Extended globbing as described by the bash man page:
 
- - `[ac].js`: matches both `a` and `c`, returning `['a.js', 'c.js']`
- - `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
- - `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
- - `a/[A-Z].js`: matches and uppercase letter, returning `['a/E.md']`
+| **pattern** | **regex equivalent** | **description** |
+| --- | --- |
+| `?(pattern-list)` | `(...|...)?` |  Matches zero or one occurrence of the given patterns |
+| `*(pattern-list)` | `(...|...)*` |  Matches zero or more occurrences of the given patterns |
+| `+(pattern-list)` | `(...|...)+` |  Matches one or more occurrences of the given patterns |
+| `@(pattern-list)` | `(...|...)` <sup>*</sup> |  Matches one of the given patterns |
+| `!(pattern-list)` | N/A |  Matches anything except one of the given patterns |
 
-Learn about [regex character classes][character-classes].
+<sup><strong>*</strong></sup> `@` isn't a RegEx character.
 
 
-**Parentheses**
-
-Given `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
-
- - `(a|c).js`: would match either `a` or `c`, returning `['a.js', 'c.js']`
- - `(b|d).js`: would match either `b` or `d`, returning `['b.js', 'd.js']`
- - `(b|[A-Z]).js`: would match either `b` or an uppercase letter, returning `['b.js', 'E.js']`
-
-As with regex, parenthese can be nested, so patterns like `((a|b)|c)/b` will work. But it might be easier to achieve your goal using brace expansion.
-
-**Brace Expansion**
+### Brace Expansion
 
 In simple cases, brace expansion appears to work the same way as the logical `OR` operator. For example, `(a|b)` will achieve the same result as `{a,b}`.
 
@@ -266,6 +285,30 @@ Here are some powerful features unique to brace expansion (versus character clas
 Learn about [brace expansion][braces], or visit [braces][braces] to ask questions and create an issue related to brace-expansion, or to see the full range of features and options related to brace expansion.
 
 
+### Regex character classes
+
+With the exception of brace expansion (`{a,b}`, `{1..5}`, etc), most of the special characters convert directly to regex, so you can expect them to follow the same rules and produce the same results as regex.
+
+For example, given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
+
+ - `[ac].js`: matches both `a` and `c`, returning `['a.js', 'c.js']`
+ - `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
+ - `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
+ - `a/[A-Z].js`: matches and uppercase letter, returning `['a/E.md']`
+
+Learn about [regex character classes][character-classes].
+
+### Regex groups
+
+Given `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
+
+ - `(a|c).js`: would match either `a` or `c`, returning `['a.js', 'c.js']`
+ - `(b|d).js`: would match either `b` or `d`, returning `['b.js', 'd.js']`
+ - `(b|[A-Z]).js`: would match either `b` or an uppercase letter, returning `['b.js', 'E.js']`
+
+As with regex, parenthese can be nested, so patterns like `((a|b)|c)/b` will work. But it might be easier to achieve your goal using brace expansion.
+
+
 ## Benchmarks
 
 Run the [benchmarks](./benchmark):
@@ -274,7 +317,7 @@ Run the [benchmarks](./benchmark):
 npm run benchmark
 ```
 
-As of February 25, 2015:
+As of February 26, 2015:
 
 ```bash
 #1: basename-braces.js
@@ -357,11 +400,15 @@ Released under the  license
 
 ***
 
-_This file was generated by [verb](https://github.com/assemble/verb) on February 25, 2015._
+_This file was generated by [verb-cli](https://github.com/assemble/verb-cli) on February 26, 2015._
 
-[extended]: http://mywiki.wooledge.org/BashGuide/Patterns#Extended_Globs
+[brace expansion]: https://github.com/jonschlinkert/braces
 [braces]: https://github.com/jonschlinkert/braces
+[bracket expressions]: https://github.com/jonschlinkert/expand-brackets
 [character-classes]: http://www.regular-expressions.info/charclass.html
+[expand]: https://github.com/jonschlinkert/micromatch#expand
+[extended]: http://mywiki.wooledge.org/BashGuide/Patterns#Extended_Globs
+[extglobs]: https://github.com/jonschlinkert/extglob
 
 
 
