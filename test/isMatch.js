@@ -43,6 +43,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/c.md', 'a/*.md').should.be.false;
     mm.isMatch('a/b/c.md', 'a/*/*.md').should.be.true;
     mm.isMatch('a/b/c.md', '**/*.md').should.be.true;
+    mm.isMatch('a/b/c.js', 'a/**/*.*').should.be.true;
   });
 
   it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {
