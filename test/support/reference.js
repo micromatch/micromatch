@@ -1,5 +1,6 @@
 'use strict';
 
-var reference = module.exports;
+var mm = require('minimatch');
+mm.isMatch = mm;
 
-reference.minimatch = require('minimatch');
+module.exports = mm;

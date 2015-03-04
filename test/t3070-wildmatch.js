@@ -42,36 +42,6 @@ describe('original wildmatch', function() {
     mm.isMatch('3', '[1-3]').should.be.true;
   });
 
-  it('Extended slash-matching features', function() {
-    mm.isMatch('foo/baz/bar', 'foo*bar').should.be.false;
-    mm.isMatch('foo/baz/bar', 'foo**bar').should.be.false;
-    mm.isMatch('foobazbar', 'foo**bar').should.be.true;
-    mm.isMatch('foo/baz/bar', 'foo/**/bar').should.be.true;
-    mm.isMatch('foo/baz/bar', 'foo/**/**/bar').should.be.false;
-    mm.isMatch('foo/b/a/z/bar', 'foo/**/bar').should.be.true;
-    mm.isMatch('foo/b/a/z/bar', 'foo/**/**/bar').should.be.true;
-    mm.isMatch('foo/bar', 'foo/**/bar').should.be.false;
-    mm.isMatch('foo/bar', 'foo/**/**/bar').should.be.false;
-    mm.isMatch('foo/bar', 'foo?bar').should.be.false;
-    mm.isMatch('foo/bar', 'foo[/]bar').should.be.true;
-    // mm.isMatch('foo/bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r').should.be.false;
-    mm.isMatch('foo-bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r').should.be.true;
-    mm.isMatch('foo', '**/foo').should.be.true;
-    mm.isMatch('XXX/foo', '**/foo').should.be.true;
-    mm.isMatch('bar/baz/foo', '**/foo').should.be.true;
-    mm.isMatch('bar/baz/foo', '*/foo').should.be.false;
-    mm.isMatch('foo/bar/baz', '**/bar*').should.be.false;
-    mm.isMatch('deep/foo/bar/baz', '**/bar/*').should.be.true;
-    mm.isMatch('deep/foo/bar/baz/', '**/bar/*').should.be.false;
-    mm.isMatch('deep/foo/bar/baz/', '**/bar/**').should.be.true;
-    mm.isMatch('deep/foo/bar', '**/bar/*').should.be.false;
-    mm.isMatch('deep/foo/bar/', '**/bar/**').should.be.true;
-    mm.isMatch('foo/bar/baz', '**/bar**').should.be.false;
-    mm.isMatch('foo/bar/baz/x', '*/bar/**').should.be.true;
-    mm.isMatch('deep/foo/bar/baz/x', '*/bar/**').should.be.false;
-    mm.isMatch('deep/foo/bar/baz/x', '**/bar/*/*').should.be.true;
-  });
-
   it('Various additional tests', function() {
     mm.isMatch('acrt', 'a[c-c]st').should.be.false;
     mm.isMatch('acrt', 'a[c-c]rt').should.be.true;
