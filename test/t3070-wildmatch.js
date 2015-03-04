@@ -1,13 +1,12 @@
-/**
- * Based on tests from https://github.com/vmeurisse/wildmatch,
+/*!
+ * Based on tests from <https://github.com/vmeurisse/wildmatch>,
  * which were extracted from the `github.com/git/git` repository
- * Version used:
- *   https://github.com/git/git/blob/70a8fc999d9f0afbc793b21bbb911ecde4e24367/t/t3070-wildmatch.sh
+ * Version used: http://git.io/xDZI
+ * @attribution
  */
 
-require('should');
 var mm = require('..');
-
+require('should');
 
 describe('original wildmatch', function() {
   it('Basic wildmat features', function() {
