@@ -1,51 +1,51 @@
 #1: basename-braces.js
-  micromatch.js x 28,266 ops/sec ±0.69% (95 runs sampled)
-  minimatch.js x 3,448 ops/sec ±1.20% (95 runs sampled)
+  micromatch.js x 29,233 ops/sec ±1.05% (94 runs sampled)
+  minimatch.js x 2,872 ops/sec ±0.93% (96 runs sampled)
 
 #2: basename.js
-  micromatch.js x 27,664 ops/sec ±0.58% (98 runs sampled)
-  minimatch.js x 4,246 ops/sec ±0.95% (97 runs sampled)
+  micromatch.js x 28,951 ops/sec ±0.82% (95 runs sampled)
+  minimatch.js x 4,281 ops/sec ±0.94% (95 runs sampled)
 
 #3: braces-no-glob.js
-  micromatch.js x 234,445 ops/sec ±1.06% (95 runs sampled)
-  minimatch.js x 28,320 ops/sec ±2.05% (86 runs sampled)
+  micromatch.js x 341,277 ops/sec ±0.98% (88 runs sampled)
+  minimatch.js x 32,503 ops/sec ±1.05% (96 runs sampled)
 
 #4: braces.js
-  micromatch.js x 60,375 ops/sec ±1.00% (94 runs sampled)
-  minimatch.js x 3,987 ops/sec ±1.27% (97 runs sampled)
+  micromatch.js x 53,424 ops/sec ±0.91% (96 runs sampled)
+  minimatch.js x 2,884 ops/sec ±1.04% (95 runs sampled)
 
 #5: immediate.js
-  micromatch.js x 25,995 ops/sec ±0.58% (95 runs sampled)
-  minimatch.js x 4,817 ops/sec ±1.32% (93 runs sampled)
+  micromatch.js x 24,465 ops/sec ±1.05% (95 runs sampled)
+  minimatch.js x 4,190 ops/sec ±1.00% (96 runs sampled)
 
 #6: large.js
-  micromatch.js x 800 ops/sec ±0.43% (98 runs sampled)
-  minimatch.js x 27.21 ops/sec ±0.57% (49 runs sampled)
+  micromatch.js x 805 ops/sec ±0.83% (96 runs sampled)
+  minimatch.js x 16.16 ops/sec ±1.38% (42 runs sampled)
 
 #7: long.js
-  micromatch.js x 8,520 ops/sec ±0.42% (96 runs sampled)
-  minimatch.js x 635 ops/sec ±0.43% (96 runs sampled)
+  micromatch.js x 7,810 ops/sec ±0.74% (93 runs sampled)
+  minimatch.js x 507 ops/sec ±1.02% (92 runs sampled)
 
 #8: mid.js
-  micromatch.js x 71,446 ops/sec ±0.64% (97 runs sampled)
-  minimatch.js x 2,747 ops/sec ±1.02% (99 runs sampled)
+  micromatch.js x 49,721 ops/sec ±0.99% (97 runs sampled)
+  minimatch.js x 1,759 ops/sec ±1.01% (94 runs sampled)
 
 #9: multi-patterns.js
-  micromatch.js x 25,916 ops/sec ±0.56% (97 runs sampled)
-  minimatch.js x 2,936 ops/sec ±1.39% (96 runs sampled)
+  micromatch.js x 19,354 ops/sec ±1.15% (98 runs sampled)
+  minimatch.js x 1,949 ops/sec ±0.93% (97 runs sampled)
 
 #10: no-glob.js
-  micromatch.js x 958,083 ops/sec ±0.72% (97 runs sampled)
-  minimatch.js x 59,353 ops/sec ±2.08% (89 runs sampled)
+  micromatch.js x 805,598 ops/sec ±1.05% (95 runs sampled)
+  minimatch.js x 52,263 ops/sec ±0.86% (92 runs sampled)
 
 #11: range.js
-  micromatch.js x 257,495 ops/sec ±0.78% (98 runs sampled)
-  minimatch.js x 11,046 ops/sec ±2.21% (87 runs sampled)
+  micromatch.js x 303,423 ops/sec ±0.77% (96 runs sampled)
+  minimatch.js x 13,764 ops/sec ±1.17% (95 runs sampled)
 
 #12: shallow.js
-  micromatch.js x 201,829 ops/sec ±0.67% (96 runs sampled)
-  minimatch.js x 21,433 ops/sec ±1.98% (92 runs sampled)
+  micromatch.js x 187,437 ops/sec ±0.95% (96 runs sampled)
+  minimatch.js x 20,274 ops/sec ±1.19% (94 runs sampled)
 
 #13: short.js
-  micromatch.js x 355,475 ops/sec ±0.62% (98 runs sampled)
-  minimatch.js x 54,193 ops/sec ±2.38% (87 runs sampled)
+  micromatch.js x 465,096 ops/sec ±0.94% (97 runs sampled)
+  minimatch.js x 61,269 ops/sec ±1.06% (93 runs sampled)
