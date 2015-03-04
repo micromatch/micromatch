@@ -7,11 +7,17 @@
     "name": "Jon Schlinkert",
     "url": "https://github.com/jonschlinkert"
   },
-  "repository": "jonschlinkert/micromatch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonschlinkert/micromatch.git"
+  },
   "bugs": {
     "url": "https://github.com/jonschlinkert/micromatch/issues"
   },
-  "license": "MIT",
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/jonschlinkert/micromatch/blob/master/LICENSE-MIT"
+  },
   "files": [
     "index.js",
     "lib/"

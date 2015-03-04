@@ -209,7 +209,6 @@ function any(fp, patterns, opts) {
 
   patterns = utils.arrayify(patterns);
   var len = patterns.length;
-  var matches = false;
 
   while (len--) {
     var isMatch = matcher(patterns[len], opts);
