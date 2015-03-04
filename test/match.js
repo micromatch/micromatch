@@ -7,13 +7,13 @@
 
 'use strict';
 
-require('should');
 var argv = require('minimist')(process.argv.slice(2));
-var ref = require('./support/reference');
+var minimatch = require('./support/reference');
 var mm = require('..');
+require('should');
 
 if ('minimatch' in argv) {
-  mm = ref.minimatch;
+  mm = minimatch;
 }
 
 describe('.match()', function () {

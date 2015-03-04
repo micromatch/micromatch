@@ -1,7 +1,13 @@
 'use strict';
 
-require('should');
+var argv = require('minimist')(process.argv.slice(2));
+var minimatch = require('./support/reference');
 var mm = require('..');
+require('should');
+
+if ('minimatch' in argv) {
+  mm = minimatch;
+}
 
 describe('.isMatch()', function () {
   it('should correctly deal with empty globs', function () {
@@ -44,6 +50,66 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/c.md', 'a/*/*.md').should.be.true;
     mm.isMatch('a/b/c.md', '**/*.md').should.be.true;
     mm.isMatch('a/b/c.js', 'a/**/*.*').should.be.true;
+  });
+
+  it('should match globstars:', function () {
+    mm.isMatch('a/b/c/z.js', '**/*.js').should.be.true;
+    mm.isMatch('a/b/z.js', '**/*.js').should.be.true;
+    mm.isMatch('a/z.js', '**/*.js').should.be.true;
+    mm.isMatch('z.js', '**/*.js').should.be.true;
+
+    mm.isMatch('a/b/c/d/e/z.js', 'a/b/**/*.js').should.be.true;
+    mm.isMatch('a/b/c/d/z.js', 'a/b/**/*.js').should.be.true;
+    mm.isMatch('a/b/c/z.js', 'a/b/c/**/*.js').should.be.true;
+    mm.isMatch('a/b/c/z.js', 'a/b/c**/*.js').should.be.true;
+    mm.isMatch('a/b/c/z.js', 'a/b/**/*.js').should.be.true;
+    mm.isMatch('a/b/z.js', 'a/b/**/*.js').should.be.true;
+
+    mm.isMatch('a/z.js', 'a/b/**/*.js').should.be.false;
+    mm.isMatch('z.js', 'a/b/**/*.js').should.be.false;
+  });
+
+  /**
+   * 1. micromatch differs from spec
+   * 2. minimatch differs from spec
+   * 3. both micromatch and minimatch differ from spec
+   */
+
+  it('Extended slash-matching features', function() {
+    mm.isMatch('foo/baz/bar', 'foo*bar').should.be.false;
+    mm.isMatch('foo/baz/bar', 'foo**bar').should.be.false;
+    mm.isMatch('foobazbar', 'foo**bar').should.be.true; // 3
+    mm.isMatch('foo/baz/bar', 'foo/**/bar').should.be.true;
+    mm.isMatch('foo/baz/bar', 'foo/**/**/bar').should.be.true;
+    mm.isMatch('foo/b/a/z/bar', 'foo/**/bar').should.be.true;
+    mm.isMatch('foo/b/a/z/bar', 'foo/**/**/bar').should.be.true;
+    mm.isMatch('foo/bar', 'foo/**/bar').should.be.true;
+    mm.isMatch('foo/bar', 'foo/**/**/bar').should.be.true;
+    mm.isMatch('foo/bar', 'foo?bar').should.be.false;
+    mm.isMatch('foo/bar', 'foo[/]bar').should.be.true; // 2
+    mm.isMatch('foo/bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r').should.be.false;
+    mm.isMatch('foo-bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r').should.be.true;
+    mm.isMatch('foo', '**/foo').should.be.true;
+    mm.isMatch('foo', 'foo/**').should.be.false;
+    mm.isMatch('XXX/foo', '**/foo').should.be.true;
+    mm.isMatch('bar/baz/foo', '**/foo').should.be.true;
+    mm.isMatch('bar/baz/foo', '*/foo').should.be.false;
+    mm.isMatch('foo/bar/baz', '**/bar*').should.be.false;
+    mm.isMatch('deep/foo/bar/baz', '**/bar/*').should.be.true;
+    mm.isMatch('deep/foo/bar/baz/', '**/bar/*').should.be.false;
+    mm.isMatch('deep/foo/bar/baz/', '**/bar/**').should.be.true;
+    mm.isMatch('deep/foo/bar', '**/bar/*').should.be.false;
+    mm.isMatch('deep/foo/bar/', '**/bar/**').should.be.true;
+    mm.isMatch('foo/bar/baz', '**/bar**').should.be.false;
+    mm.isMatch('foo/bar/baz/x', '*/bar/**').should.be.true;
+    mm.isMatch('deep/foo/bar/baz/x', '*/bar/**').should.be.false;
+    mm.isMatch('deep/foo/bar/baz/x', '**/bar/*/*').should.be.true;
+    mm.isMatch('a/j/z/x.md', 'a/**/j/**/z/*.md').should.be.true;
+    mm.isMatch('a/b/j/c/z/x.md', 'a/**/j/**/z/*.md').should.be.true;
+  });
+
+  it('question marks should not match slashes:', function () {
+    mm.isMatch('aaa/bbb', 'aaa?bbb').should.be.false;
   });
 
   it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {

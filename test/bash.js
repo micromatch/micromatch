@@ -72,7 +72,7 @@ describe('bash', function () {
   });
 
   it('Make sure character classes work properly:', function () {
-    mm.match(arr, '[a-y]*[^c]').should.eql(['abd','abe','bb','bcd','ca','cb','dd','de','bdir/']);
+    mm.match(arr, '[a-y]*[^c]').should.eql(['abd','abe','bb','bcd','ca','cb','dd','de']);
     mm.match(arr, 'a*[^c]').should.eql(['abd','abe']);
 
     mm.match(['a-b','aXb'], 'a[X-]b').should.eql(['a-b','aXb']);

@@ -126,8 +126,35 @@ describe('.contains()', function () {
     mm.contains('a/b/c/d/e/z/c.md', 'a/**/z/*.md').should.be.true;
     mm.contains('a/b/c/d/e/z/c.md', 'b/c/d/e').should.be.true;
     mm.contains('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md').should.be.true;
-    mm.contains('a/b/c/cd/bar/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
+    mm.contains('a/b/c/cd/bbb/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
     mm.contains('a/b/baz/ce/fez/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
+  });
+
+  it('question marks should not match slashes:', function () {
+    mm.contains('aaa/bbb', 'aaa?bbb').should.be.false;
+  });
+
+  it('should match path segments:', function () {
+    mm.contains('aaa', 'aaa').should.be.true;
+    mm.contains('aaa', 'aa').should.be.true;
+    mm.contains('aaa/bbb', 'aaa/bbb').should.be.true;
+    mm.contains('aaa/bbb', 'aaa/*').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa/*').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa/**').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa*').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa**').should.be.true;
+    // mm.contains('aaa/bba/ccc', 'aaa/*ccc').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa/**ccc').should.be.true;
+    mm.contains('aaa/bba/ccc', 'aaa/*z').should.be.false;
+    mm.contains('aaa/bba/ccc', 'aaa/**z').should.be.false;
+    mm.contains('aaa/bbb', 'aaa[/]bbb').should.be.true;
+    mm.contains('aaa', '*/*/*').should.be.false;
+    mm.contains('aaa/bbb', '*/*/*').should.be.false;
+    mm.contains('aaa/bba/ccc', '*/*/*').should.be.true;
+    mm.contains('aaa/bb/aa/rr', '*/*/*').should.be.true;
+    mm.contains('abzzzejklhi', '*j*i').should.be.true;
+    mm.contains('ab/zzz/ejkl/hi', '*/*z*/*/*i').should.be.true;
+    mm.contains('ab/zzz/ejkl/hi', '*/*jk*/*i').should.be.true;
   });
 
   it('should return false when full file paths are not matched:', function () {
@@ -153,7 +180,7 @@ describe('.contains()', function () {
     mm.contains('./a/b/c/j/e/z/c.txt', './a/**/j/**/z/*.md').should.be.false;
     mm.contains('./a/b/d/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false;
     mm.contains('./a/b/c/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false;
-    mm.contains('./a/b/c/cd/bar/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
+    mm.contains('./a/b/c/cd/bbb/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
     mm.contains('./a/b/baz/ce/fez/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true;
   });
 });
