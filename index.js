@@ -8,6 +8,7 @@
 'use strict';
 
 var diff = require('arr-diff');
+var debug = require('debug')('micromatch');
 var typeOf = require('kind-of');
 var omit = require('object.omit');
 var cache = require('regex-cache');
@@ -311,8 +312,10 @@ function toRegex(glob, options) {
 
   try {
     return new RegExp(glob, flags);
-  } catch (err) {}
-  return /^$/;
+  } catch (err) {
+    debug('toRegex', err);
+  }
+  return /$^/;
 }
 
 /**
@@ -366,16 +369,16 @@ function msg(method, what, type) {
  * Public methods
  */
 
-micromatch.braces    = micromatch.braceExpand = require('braces');
-micromatch.expand    = expand;
-micromatch.makeRe    = makeRe;
-micromatch.contains  = contains;
 micromatch.any       = any;
-micromatch.isMatch   = isMatch;
+micromatch.braces    = micromatch.braceExpand = require('braces');
+micromatch.contains  = contains;
+micromatch.expand    = expand;
 micromatch.filter    = filter;
-micromatch.matchKeys = matchKeys;
+micromatch.isMatch   = isMatch;
+micromatch.makeRe    = makeRe;
 micromatch.match     = match;
 micromatch.matcher   = matcher;
+micromatch.matchKeys = matchKeys;
 
 /**
  * Expose `micromatch`
