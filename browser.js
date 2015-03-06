@@ -119,31 +119,37 @@ function match(files, pattern, opts) {
 }
 
 /**
- * Filter files with the given pattern.
+ * Returns a function that takes a glob pattern or array of glob patterns
+ * to be used with `Array#filter()`. (Internally this function generates
+ * the matching function using the [matcher] method).
  *
- * @param  {String|Array} `pattern`
- * @param  {Array} `files`
- * @param  {Options} `opts`
- * @return {Array}
+ * ```js
+ * var fn = mm.filter('[a-c]');
+ * ['a', 'b', 'c', 'd', 'e'].filter(fn);
+ * //=> ['a', 'b', 'c']
+ * ```
+ *
+ * @param  {String|Array} `patterns` Can be a glob or array of globs.
+ * @param  {Options} `opts` Options to pass to the [matcher] method.
+ * @return {Function} Filter function to be passed to `Array#filter()`.
  */
 
-function filter(pattern, opts) {
-  if (typeof pattern !== 'string') {
-    throw new TypeError(msg('filter', 'pattern', 'a string'));
+function filter(patterns, opts) {
+  if (!Array.isArray(patterns) && typeof patterns !== 'string') {
+    throw new TypeError(msg('filter', 'patterns', 'a string or array'));
   }
 
-  var fn = matcher(pattern, opts);
-  return function (files) {
-    if (!Array.isArray(files)) {
-      return fn(files);
-    }
+  patterns = utils.arrayify(patterns);
+  return function (fp) {
+    if (fp == null) return [];
+    var len = patterns.length, i = 0;
+    var res = true;
 
-    var res = files.slice();
-    var len = files.length;
-
-    while (len--) {
-      if (!fn(files[len])) {
-        res.splice(len, 1);
+    while (i < len) {
+      var fn = matcher(patterns[i++], opts);
+      if (!fn(fp)) {
+        res = false;
+        break;
       }
     }
     return res;
