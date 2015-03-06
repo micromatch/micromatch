@@ -387,7 +387,7 @@ micromatch.matchKeys = matchKeys;
 
 module.exports = micromatch;
 
-},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"braces":8,"debug":29,"is-glob":40,"kind-of":41,"object.omit":42,"regex-cache":48}],2:[function(require,module,exports){
+},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"braces":8,"debug":29,"is-glob":40,"kind-of":41,"object.omit":42,"regex-cache":50}],2:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5571,7 +5571,7 @@ micromatch.matcher   = matcher;
 
 module.exports = micromatch;
 
-},{"./lib/expand":36,"./lib/utils":38,"arr-diff":6,"braces":8,"is-glob":40,"kind-of":41,"object.omit":42,"regex-cache":48}],35:[function(require,module,exports){
+},{"./lib/expand":36,"./lib/utils":38,"arr-diff":6,"braces":8,"is-glob":40,"kind-of":41,"object.omit":42,"regex-cache":50}],35:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
 },{"dup":2}],36:[function(require,module,exports){
 /*!
@@ -5976,12 +5976,13 @@ arguments[4][18][0].apply(exports,arguments)
 /*!
  * parse-glob <https://github.com/jonschlinkert/parse-glob>
  *
- * Copyright (c) 2015 Jon Schlinkert.
- * Licensed under the MIT license.
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
 
+var findBase = require('glob-base');
 var pathRe = require('glob-path-regex');
 var isGlob = require('is-glob');
 
@@ -6007,8 +6008,8 @@ module.exports = function (pattern, getbase) {
 
 function parseGlob(pattern, getbase) {
   var glob = pattern;
-  var path = {};
   var tok = {path: {}, is: {}, match: {}};
+  var path = {};
 
   // store original pattern
   tok.original = pattern;
@@ -6016,9 +6017,9 @@ function parseGlob(pattern, getbase) {
   path.whole = tok.pattern;
 
   // Boolean values
-  tok.is.glob      = isGlob(glob);
-  tok.is.negated   = glob.charAt(0) === '!';
-  tok.is.globstar  = glob.indexOf('**') !== -1;
+  tok.is.glob = isGlob(glob);
+  tok.is.negated = glob.charAt(0) === '!';
+  tok.is.globstar = glob.indexOf('**') !== -1;
 
   var braces = glob.indexOf('{') !== -1;
   if (tok.is.glob && braces) {
@@ -6068,7 +6069,6 @@ function parseGlob(pattern, getbase) {
     }
 
     path.ext = path.extname.split('.').slice(-1)[0];
-
     // remove any escaping that was applied for braces
     if (braces) {
       path = unscapeBraces(path);
@@ -6081,7 +6081,7 @@ function parseGlob(pattern, getbase) {
 
   // get the `base` from glob pattern
   if (getbase) {
-    var segs = findBase(tok);
+    var segs = findBase(tok.pattern);
     tok.pattern = segs.pattern;
     tok.base = segs.base;
 
@@ -6135,44 +6135,6 @@ function unscapeBraces(path) {
 }
 
 /**
- * Extract the `base` path from a glob
- * pattern.
- *
- * @param  {Object} `tok` The tokens object
- * @return {Object}
- */
-
-function findBase(tok) {
-  var glob = tok.pattern;
-  var res = {base: '', pattern: glob};
-
-  var segs = glob.split('/');
-  var len = segs.length, i = 0;
-  var base = [];
-
-  while (len--) {
-    var seg = segs[i++];
-
-    if (!seg || isGlob(seg)) {
-      break;
-    }
-    base.push(seg);
-  }
-
-  if (i === 0) { return null; }
-
-  var num = (segs.length - base.length);
-  var end = base.join('/');
-  if (end.indexOf('./') === 0) {
-    end = end.slice(2);
-  }
-
-  res.base = end;
-  res.pattern = segs.slice(-num).join('/');
-  return res;
-}
-
-/**
  * Cache the glob string to avoid parsing the same
  * pattern more than once.
  *
@@ -6216,14 +6178,71 @@ function unescape(str) {
   return str;
 }
 
-function trim(str, ch) {
-  if (str.slice(-ch.length)[0] === ch) {
-    return str.slice(0, str.length - ch.length);
+},{"glob-base":47,"glob-path-regex":49,"is-glob":40}],47:[function(require,module,exports){
+/*!
+ * glob-base <https://github.com/jonschlinkert/glob-base>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+var path = require('path');
+var isGlob = require('is-glob');
+var parent = require('glob-parent');
+
+module.exports = function globBase(glob) {
+  if (typeof glob !== 'string') {
+    throw new TypeError('glob-base expects a string.');
   }
-  return str;
+
+  var res = {};
+  res.base = parent(glob);
+
+  if (res.base !== '.') {
+    res.pattern = glob.substr(res.base.length);
+    if (res.pattern.charAt(0) === '/') {
+      res.pattern = res.pattern.substr(1);
+    }
+  } else {
+    res.pattern = glob;
+  }
+
+  if (res.base === glob) {
+    res.base = dirname(glob);
+    res.pattern = res.base === '.' ? glob : glob.substr(res.base.length);
+  }
+
+  if (res.pattern.substr(0, 2) === './') {
+    res.pattern = res.pattern.substr(2);
+  }
+
+  if (res.pattern.charAt(0) === '/') {
+    res.pattern = res.pattern.substr(1);
+  }
+  return res;
 }
 
-},{"glob-path-regex":47,"is-glob":40}],47:[function(require,module,exports){
+function dirname(glob) {
+  if (glob[glob.length - 1] === '/') {
+    return glob;
+  }
+  return path.dirname(glob);
+}
+
+},{"glob-parent":48,"is-glob":40,"path":27}],48:[function(require,module,exports){
+'use strict';
+
+var path = require('path');
+var isglob = require('is-glob');
+
+module.exports = function globParent(str) {
+	while (isglob(str)) str = path.dirname(str);
+	return str;
+};
+
+},{"is-glob":40,"path":27}],49:[function(require,module,exports){
 /*!
  * glob-path-regex <https://github.com/regexps/glob-path-regex>
  *
@@ -6235,7 +6254,7 @@ module.exports = function globPathRegex() {
   return /^(.*?)(([\w*]*|[.\\*]*\{[^}]*\})((\.([\w*]*))*))$/;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*!
  * regex-cache <https://github.com/jonschlinkert/regex-cache>
  *
@@ -6289,7 +6308,7 @@ function regexCache(fn, str, options) {
 
 var cache = module.exports.cache = {};
 
-},{"to-key":49}],49:[function(require,module,exports){
+},{"to-key":51}],51:[function(require,module,exports){
 (function (Buffer){
 /*!
  * to-key <https://github.com/jonschlinkert/to-key>
@@ -6362,8 +6381,8 @@ function toString(obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"arr-map":50,"buffer":23,"for-in":51}],50:[function(require,module,exports){
+},{"arr-map":52,"buffer":23,"for-in":53}],52:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],51:[function(require,module,exports){
+},{"dup":14}],53:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
 },{"dup":13}]},{},[1]);
