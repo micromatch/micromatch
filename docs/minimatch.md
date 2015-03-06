@@ -6,14 +6,25 @@
 
 Both libraries work by converting glob expressions into JavaScript `RegExp` objects. However, there are key differences in approach.
 
-**Parse > Expand > Convert**
+**Parse > Tokenize > Convert to regex**
 
 For the most part, both libraries follow this formula. 
 
 - glob pattern is parsed into tokens
 - if applicable, pattern is expanded to multiple patterns, as with brace patterns (`/{a,b}/*.js`)
-- 
 
+
+**Major implementation differences**
+
+Micromatch's huge speed advantage comes from a few different areas:
+
+- basic caching
+- tokenization strategy
+- regex optimizations
+- single responsibility functions
+
+
+**Example compiled regex**
 
 ```js
 micro.makeRe('*.{yml,json}');
@@ -22,6 +33,7 @@ micro.makeRe('*.{yml,json}');
 mini.makeRe('*.{yml,json}');
 //=> /^(?:(?!\.)(?=.)[^/]*?\.yml|(?!\.)(?=.)[^/]*?\.json)$/ 
 ```
+
 
 ## Usage
 
@@ -70,53 +82,10 @@ var mm = new Minimatch(pattern, options);
 
 **Micromatch**
 
-No support. If you need access to "pre-regex" tokens, you can use `micromatch.expand()`.
+No support. If you need access to tokens as they are generated (to avoid parsing the glob more than once), you can use `micromatch.expand()`.
 
-
-### Params
-
-* `pattern` The original pattern the minimatch object represents.
-* `options` The options supplied to the constructor.
-* `set` A 2-dimensional array of regexp or string expressions.
-  Each row in the
-  array corresponds to a brace-expanded pattern.  Each item in the row
-  corresponds to a single path-part.  For example, the pattern
-  `{a,b/c}/d` would expand to a set of patterns like:
-
-        [ [ a, d ]
-        , [ b, c, d ] ]
-
-    If a portion of the pattern doesn't have any "magic" in it
-    (that is, it's something like `"foo"` rather than `fo*o?`), then it
-    will be left as a string rather than converted to a regular
-    expression.
-
-* `regexp` Created by the `makeRe` method.  A single regular expression
-  expressing the entire pattern.  This is useful in cases where you wish
-  to use the pattern somewhat like `fnmatch(3)` with `FNM_PATH` enabled.
-* `negate` True if the pattern is negated.
-* `comment` True if the pattern is a comment.
-* `empty` True if the pattern is `""`.
-
-### Methods
-
-* `makeRe` Generate the `regexp` member if necessary, and return it.
-  Will return `false` if the pattern is invalid.
-* `match(fname)` Return true if the filename matches the pattern, or
-  false otherwise.
-* `matchOne(fileArray, patternArray, partial)` Take a `/`-split
-  filename, and match it against a single row in the `regExpSet`.  This
-  method is mainly for internal use, but is exposed so that it can be
-  used by a glob-walker that needs to avoid excessive filesystem calls.
-
-All other methods are internal, and will be called as necessary.
 
 ## Functions
-
-The top-level exported function has a `cache` property, which is an LRU
-cache set to store 100 items.  So, calling these methods repeatedly
-with the same pattern and options will use the same Minimatch object,
-saving the cost of parsing it multiple times.
 
 ### minimatch(path, pattern, options)
 

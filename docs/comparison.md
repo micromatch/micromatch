@@ -10,6 +10,21 @@ For mainstream features, I tried to keep as much parity as possible between micr
 - the main micromatch function, `micromatch()`, works like [multimatch](https://github.com/sindresorhus/multimatch), with support for multiple patterns.
 - micromatch optimizes patterns to generate the leanest possible regex to use for matching without sacrificing accuracy. 
 
+## Caching
+
+Micromatch uses multiple levels of caching, each basic and specifically designed for where it's being used. Glob patterns are parsed into tokens, which are then used to generate the regex to be used for matching. Like Minimatch, these patterns, tokens and resulting regex are cached to avoid repeatedly parsing the same pattern and options. 
+
+It's worth noting that in the past minimatch used caching as well, but using a different strategy that offered little advantage. 
+
+## Tokenization strategy
+
+Key points:
+
+- **faster regex**: spend more time tokenizing the glob pattern since the time to parse and compile to regex is a fraction of the time it takes to do the actual matching against large sets. In other words, the "easy" way is to use a small set of replacement patterns for a given set of glob characters, but the end result is a huge un-optimized regex that takes much longer to do the actual matching. We want fast regex matching.
+- **avoid parsing entirely**: use [is-glob] and similar checks to avoid completely parsing the pattern when it's not necessary 
+- **specialized functions**: for brace expansiona and range expansion, dedication libraries were created along with extensive unit tests and granular benchmarks. In some of these benchmarks, micromatch is more than 100x faster than minimatch.
+
+
 ## Optimized regular expressions
 
 Micromatch's optimizations are achieved in a number of different ways.
@@ -21,8 +36,6 @@ It's not uncommon to do this in a gulp or Grunt task:
 ```js
 src('*.{yml,json}');
 ```
-
-
 
 
 ## Features
