@@ -17,6 +17,19 @@ if ('minimatch' in argv) {
 }
 
 describe('.filter()', function () {
+  describe('errors:', function () {
+    it('should throw on undefined args:', function () {
+      (function () {
+        mm.filter();
+      }).should.throw('micromatch.filter(): pattern should be a string.');
+    });
+
+    it('should throw on bad args:', function () {
+      (function () {
+        mm.filter({});
+      }).should.throw('micromatch.filter(): pattern should be a string.');
+    });
+  });
   it('should create a filter function to filter files', function () {
     mm.filter('*').should.be.a.function;
   });

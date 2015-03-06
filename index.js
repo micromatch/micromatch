@@ -26,17 +26,14 @@ var utils = require('./lib/utils');
  */
 
 function micromatch(files, patterns, opts) {
-  if (!files || !patterns) {
-    return [];
-  }
-
+  if (!files || !patterns) return [];
   opts = opts || {};
 
   if (typeof opts.cache === 'undefined') {
     opts.cache = true;
   }
 
-  if (typeof patterns === 'string') {
+  if (!Array.isArray(patterns)) {
     return match(files, patterns, opts);
   }
 
@@ -51,7 +48,6 @@ function micromatch(files, patterns, opts) {
       keep.push.apply(keep, match(files, glob, opts));
     }
   }
-
   return diff(keep, omit);
 }
 
@@ -69,8 +65,8 @@ function micromatch(files, patterns, opts) {
  */
 
 function match(files, pattern, opts) {
-  if (typeof files !== 'string' && !Array.isArray(files)) {
-    throw new Error('micromatch.match() expects a string or array.');
+  if (typeOf(files) !== 'string' && !Array.isArray(files)) {
+    throw new Error(msg('match', 'files', 'a string or array'));
   }
 
   files = utils.arrayify(files);
@@ -86,7 +82,7 @@ function match(files, pattern, opts) {
     }
   }
 
-  var isMatch = matcher(pattern, opts);
+  var _isMatch = matcher(pattern, opts);
   var len = files.length, i = 0;
   var res = [];
 
@@ -94,13 +90,13 @@ function match(files, pattern, opts) {
     var file = files[i++];
     var fp = utils.unixify(file, opts);
 
-    if (!isMatch(fp)) { continue; }
+    if (!_isMatch(fp)) { continue; }
     res.push(fp);
   }
 
   if (res.length === 0) {
     if (opts.failglob === true) {
-      throw new Error('micromatch found no matches for: "' + orig + '".');
+      throw new Error('micromatch.match() found no matches for: "' + orig + '".');
     }
 
     if (opts.nonull || opts.nullglob) {
@@ -121,35 +117,34 @@ function match(files, pattern, opts) {
 }
 
 /**
- * Return a function for matching based on the
- * given `pattern` and `options`.
+ * Filter files with the given pattern.
  *
- * @param  {String} `pattern`
- * @param  {Object} `options`
- * @return {Function}
+ * @param  {String|Array} `pattern`
+ * @param  {Array} `files`
+ * @param  {Options} `opts`
+ * @return {Array}
  */
 
-function matcher(pattern, opts) {
-  // pattern is a function
-  if (typeof pattern === 'function') {
-    return pattern;
+function filter(pattern, opts) {
+  if (typeof pattern !== 'string') {
+    throw new TypeError(msg('filter', 'pattern', 'a string'));
   }
-  // pattern is a string, make a regex
-  if (!(pattern instanceof RegExp)) {
-    if (!isGlob(pattern)) {
-      return utils.matchPath(pattern, opts);
+
+  var fn = matcher(pattern, opts);
+  return function (files) {
+    if (!Array.isArray(files)) {
+      return fn(files);
     }
-    var re = makeRe(pattern, opts);
-    if (opts && opts.matchBase) {
-      return utils.hasFilename(re, opts);
+
+    var res = files.slice();
+    var len = files.length;
+
+    while (len--) {
+      if (!fn(files[len])) {
+        res.splice(len, 1);
+      }
     }
-    return function(fp) {
-      return re.test(fp);
-    };
-  }
-  // pattern is already a regex
-  return function(fp) {
-    return pattern.test(fp);
+    return res;
   };
 }
 
@@ -172,6 +167,10 @@ function matcher(pattern, opts) {
  */
 
 function isMatch(fp, pattern, opts) {
+  if (typeof fp !== 'string') {
+    throw new TypeError(msg('isMatch', 'filepath', 'a string'));
+  }
+
   if (typeOf(pattern) === 'object') {
     return matcher(fp, pattern);
   }
@@ -204,7 +203,7 @@ function contains(fp, pattern, opts) {
 
 function any(fp, patterns, opts) {
   if (!Array.isArray(patterns) && typeof patterns !== 'string') {
-    throw new TypeError('micromatch.any() expects a string or array.');
+    throw new TypeError(msg('any', 'patterns', 'a string or array'));
   }
 
   patterns = utils.arrayify(patterns);
@@ -226,55 +225,56 @@ function any(fp, patterns, opts) {
  * @return {Array}
  */
 
-function matchKeys(pattern, obj, options) {
-  var re = !(pattern instanceof RegExp)
-    ? makeRe(pattern, options)
-    : pattern;
+function matchKeys(obj, pattern, options) {
+  if (typeOf(obj) !== 'object') {
+    throw new TypeError(msg('matchKeys', 'first argument', 'an object'));
+  }
 
+  var fn = matcher(pattern, options);
   var res = {};
 
   for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (re.test(key)) {
-        res[key] = obj[key];
-      }
+    if (obj.hasOwnProperty(key) && fn(key)) {
+      res[key] = obj[key];
     }
   }
   return res;
 }
 
 /**
- * Filter files with the given pattern.
+ * Return a function for matching based on the
+ * given `pattern` and `options`.
  *
- * @param  {String|Array} `pattern`
- * @param  {Array} `files`
- * @param  {Options} `opts`
- * @return {Array}
+ * @param  {String} `pattern`
+ * @param  {Object} `options`
+ * @return {Function}
  */
 
-function filter(pattern, opts) {
-  opts = opts || {};
+function matcher(pattern, opts) {
+  // pattern is a function
+  if (typeof pattern === 'function') {
+    return pattern;
+  }
+  // pattern is a regex
+  if (pattern instanceof RegExp) {
+    return function(fp) {
+      return pattern.test(fp);
+    };
+  }
+  // pattern is a non-glob string
+  if (!isGlob(pattern)) {
+    return utils.matchPath(pattern, opts);
+  }
+  // pattern is a glob string
+  var re = makeRe(pattern, opts);
 
-  pattern = !(pattern instanceof RegExp)
-    ? makeRe(pattern, opts)
-    : pattern;
-
-  return function (files) {
-    if (typeof files === 'string') {
-      return isMatch(files, pattern, opts);
-    }
-
-    var res = files.slice();
-    var len = files.length;
-
-    while (len--) {
-      var match = isMatch(files[len], pattern, opts);
-      if (match) {
-        continue;
-      }
-      res.splice(len, 1);
-    }
-    return res;
+  // `matchBase` is defined
+  if (opts && opts.matchBase) {
+    return utils.hasFilename(re, opts);
+  }
+  // `matchBase` is not defined
+  return function(fp) {
+    return re.test(fp);
   };
 }
 
@@ -291,9 +291,12 @@ function filter(pattern, opts) {
  */
 
 function toRegex(glob, options) {
-  // clone options to prevent mutating upstream values
-  var opts = Object.create(options || {});
+  if (typeOf(glob) !== 'string') {
+    throw new Error(msg('toRegex', 'glob', 'a string'));
+  }
 
+  // clone options to prevent  mutating the original object
+  var opts = Object.create(options || {});
   var flags = opts.flags || '';
   if (opts.nocase && flags.indexOf('i') === -1) {
     flags += 'i';
@@ -338,6 +341,25 @@ function wrapGlob(glob, opts) {
     return prefix + ('(?!^' + glob + ').*$');
   }
   return prefix + glob;
+}
+
+/**
+ * Make error messages consistent. Follows this format:
+ *
+ * ```js
+ * msg(methodName, argNumber, nativeType);
+ * // example:
+ * msg('matchKeys', 'first', 'an object');
+ * ```
+ *
+ * @param  {String} `method`
+ * @param  {String} `num`
+ * @param  {String} `type`
+ * @return {String}
+ */
+
+function msg(method, what, type) {
+  return 'micromatch.' + method + '(): ' + what + ' should be ' + type + '.';
 }
 
 /**

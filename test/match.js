@@ -17,6 +17,20 @@ if ('minimatch' in argv) {
 }
 
 describe('.match()', function () {
+  describe('errors:', function () {
+    it('should throw on undefined args:', function () {
+      (function () {
+        mm.match();
+      }).should.throw('micromatch.match(): files should be a string or array.');
+    });
+
+    it('should throw on bad args:', function () {
+      (function () {
+        mm.match({});
+      }).should.throw('micromatch.match(): files should be a string or array.');
+    });
+  });
+
   describe('basic patterns:', function () {
     it('should correctly deal with empty globs', function () {
       mm.match(['ab'], '').should.eql([]);
@@ -49,6 +63,13 @@ describe('.match()', function () {
       mm.match(['ab', 'a'], /\/a/).should.eql([]);
       mm.match(['ab', 'a'], /aa/).should.eql([]);
       mm.match(['/ab', '/a'], /\/a$/).should.eql(['/a']);
+    });
+
+    it('should support matching with a function:', function () {
+      var matches = mm.match(['a', 'aa', 'aaa', 'aaaa'], function (fp) {
+        return fp.length >= 3;
+      })
+      matches.should.eql(['aaa', 'aaaa']);
     });
   });
 

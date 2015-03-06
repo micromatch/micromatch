@@ -10,6 +10,20 @@ if ('minimatch' in argv) {
 }
 
 describe('.isMatch()', function () {
+  describe('errors:', function () {
+    it('should throw on undefined args:', function () {
+      (function () {
+        mm.isMatch();
+      }).should.throw('micromatch.isMatch(): filepath should be a string.');
+    });
+
+    it('should throw on bad args:', function () {
+      (function () {
+        mm.isMatch({});
+      }).should.throw('micromatch.isMatch(): filepath should be a string.');
+    });
+  });
+
   it('should correctly deal with empty globs', function () {
     mm.isMatch('ab', '').should.be.false;
     mm.isMatch('a', '').should.be.false;
