@@ -7,8 +7,8 @@
 
 'use strict';
 
-var path = require('path');
 require('should');
+var path = require('path');
 var argv = require('minimist')(process.argv.slice(2));
 var ref = require('./support/reference');
 var mm = require('..');
@@ -17,7 +17,7 @@ if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
 
-describe('extglob', function () {
+describe('basic extglobs', function () {
   it('should match extglobs:', function () {
     mm.match(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
     // mm.match(['axb'], 'a?(b*)').should.eql([]);

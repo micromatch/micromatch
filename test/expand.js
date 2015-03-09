@@ -17,6 +17,20 @@ if ('minimatch' in argv) {
 }
 
 describe('expand()', function () {
+  describe('errors:', function () {
+    it('should throw on undefined args:', function () {
+      (function () {
+        mm.expand();
+      }).should.throw('micromatch.expand(): argument should be a string.');
+    });
+
+    it('should throw on bad args:', function () {
+      (function () {
+        mm.expand({});
+      }).should.throw('micromatch.expand(): argument should be a string.');
+    });
+  });
+
   it('should return an object with information about the glob pattern', function () {
     mm.expand('*').should.be.an.object;
     mm.expand('*').should.have.properties('options', 'pattern');
@@ -36,7 +50,7 @@ describe('expand()', function () {
   it('should expand patterns for file names:', function () {
     mm.expand('*.md').pattern.should.equal('(?!\\.)(?=.)[^/]*?\\.md');
     mm.expand('*.md', {dot: true}).pattern.should.equal('[^/]*?\\.md');
-    mm.expand('.*.md').pattern.should.equal('.[^/]*?.md');
+    mm.expand('.*.md').pattern.should.equal('\\.[^/]*?.md');
   });
 
   it('should expand extglobs', function () {
