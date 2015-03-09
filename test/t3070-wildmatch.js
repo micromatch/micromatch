@@ -21,7 +21,7 @@ describe('original wildmatch', function() {
     mm.isMatch('foo', '*foo*').should.be.true;
     mm.isMatch('foobar', '*ob*a*r*').should.be.true;
     mm.isMatch('aaaaaaabababab', '*ab').should.be.true;
-    // mm.isMatch('foo*', 'foo\\*').should.be.true;
+    mm.isMatch('foo*', 'foo\\*').should.be.true;
     mm.isMatch('foobar', 'foo\\*bar').should.be.false;
     // mm.isMatch('f\\oo', 'f\\\\oo').should.be.true;
     mm.isMatch('ball', '*[al]?').should.be.true;
@@ -47,18 +47,18 @@ describe('original wildmatch', function() {
     mm.isMatch(']', '[!]-]').should.be.false;
     // mm.isMatch('a', '[!]-]').should.be.true;
     mm.isMatch('', '\\').should.be.false;
-    // mm.isMatch('\\', '\\').should.be.true;
+    mm.isMatch('\\', '\\').should.be.true;
     mm.isMatch('XXX/\\', '\\').should.be.false;
     // mm.isMatch('XXX/\\', '*/\\\\').should.be.true;
     mm.isMatch('foo', 'foo').should.be.true;
     mm.isMatch('@foo', '@foo').should.be.true;
     mm.isMatch('foo', '@foo').should.be.false;
-    // mm.isMatch('[ab]', '\\[ab]').should.be.true;
+    mm.isMatch('[ab]', '\\[ab]').should.be.true;
     mm.isMatch('[ab]', '[[]ab]').should.be.false;
     // mm.isMatch('[ab]', '[[:]ab]').should.be.true;
     mm.isMatch('[ab]', '[[::]ab]').should.be.false;
     mm.isMatch('[ab]', '[\\[:]ab]').should.be.false;
-    // mm.isMatch('?a?b', '\\??\\?b').should.be.true;
+    mm.isMatch('?a?b', '\\??\\?b').should.be.true;
     // mm.isMatch('abc', '\\a\\b\\c').should.be.true;
     mm.isMatch('foo', '').should.be.false;
     mm.isMatch('foo/bar/baz/to', '**/t[o]').should.be.true;
@@ -88,13 +88,13 @@ describe('original wildmatch', function() {
     mm.isMatch('q', '[a-c[:digit:]x-z]').should.be.false;
   });
 
-  it('Additional tests, including some malformed wildmats', function() {
+  it('malformed wildmats:', function() {
     mm.isMatch(']', '[\\\\-^]').should.be.true;
-    // mm.isMatch('[', '[\\\\-^]').should.be.false;
-    // mm.isMatch('-', '[\\-_]').should.be.true;
+    mm.isMatch('[', '[\\\\-^]').should.be.false;
+    mm.isMatch('-', '[\\-_]').should.be.true;
     // mm.isMatch(']', '[\\]]').should.be.true;
-    // mm.isMatch('\\]', '[\\]]').should.be.false;
-    // mm.isMatch('\\', '[\\]]').should.be.false;
+    mm.isMatch('\\]', '[\\]]').should.be.false;
+    mm.isMatch('\\', '[\\]]').should.be.false;
     mm.isMatch('ab', 'a[]b').should.be.false;
     mm.isMatch('a[]b', 'a[]b').should.be.true;
     mm.isMatch('ab[', 'ab[').should.be.true;
@@ -121,24 +121,24 @@ describe('original wildmatch', function() {
     mm.isMatch('^', '[a^bc]').should.be.true;
     // mm.isMatch('-b]', '[a-]b]').should.be.true;
     mm.isMatch('\\', '[\\]').should.be.false;
-    // mm.isMatch('\\', '[\\\\]').should.be.true;
+    mm.isMatch('\\', '[\\\\]').should.be.true;
     // mm.isMatch('\\', '[!\\\\]').should.be.false;
-    // mm.isMatch('G', '[A-\\\\]').should.be.true;
+    mm.isMatch('G', '[A-\\\\]').should.be.true;
     mm.isMatch('aaabbb', 'b*a').should.be.false;
     mm.isMatch('aabcaa', '*ba*').should.be.false;
     mm.isMatch(',', '[,]').should.be.true;
     // mm.isMatch(',', '[\\\\,]').should.be.true;
-    // mm.isMatch('\\', '[\\\\,]').should.be.true;
+    mm.isMatch('\\', '[\\\\,]').should.be.true;
     mm.isMatch('-', '[,-.]').should.be.true;
     mm.isMatch('+', '[,-.]').should.be.false;
     mm.isMatch('-.]', '[,-.]').should.be.false;
     // mm.isMatch('2', '[\\1-\\3]').should.be.true;
     // mm.isMatch('3', '[\\1-\\3]').should.be.true;
-    // mm.isMatch('4', '[\\1-\\3]').should.be.false;
-    // mm.isMatch('\\', '[[-\\]]').should.be.true;
-    // mm.isMatch('[', '[[-\\]]').should.be.true;
-    // mm.isMatch(']', '[[-\\]]').should.be.true;
-    // mm.isMatch('-', '[[-\\]]').should.be.false;
+    mm.isMatch('4', '[\\1-\\3]').should.be.false;
+    mm.isMatch('\\', '[[-\\]]').should.be.true;
+    mm.isMatch('[', '[[-\\]]').should.be.true;
+    mm.isMatch(']', '[[-\\]]').should.be.true;
+    mm.isMatch('-', '[[-\\]]').should.be.false;
   });
 
   it('Test recursion and the abort code', function() {
@@ -185,10 +185,10 @@ describe('original wildmatch', function() {
   });
 
   it('Case-sensitivy features', function() {
-    // mm.isMatch('A', '[[:lower:]]').should.be.false;
-    // mm.isMatch('a', '[[:lower:]]').should.be.true;
-    // mm.isMatch('a', '[[:upper:]]').should.be.false;
-    // mm.isMatch('A', '[[:upper:]]').should.be.true;
+    mm.isMatch('A', '[[:lower:]]').should.be.false;
+    mm.isMatch('a', '[[:lower:]]').should.be.true;
+    mm.isMatch('a', '[[:upper:]]').should.be.false;
+    mm.isMatch('A', '[[:upper:]]').should.be.true;
     mm.isMatch('a', '[A-Z]').should.be.false;
     mm.isMatch('A', '[a-z]').should.be.false;
     mm.isMatch('A', '[A-Z]').should.be.true;
