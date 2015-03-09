@@ -190,6 +190,10 @@ function isMatch(fp, pattern, opts) {
  */
 
 function contains(fp, pattern, opts) {
+  if (typeof fp !== 'string') {
+    throw new TypeError(msg('contains', 'pattern', 'a string'));
+  }
+
   opts = opts || {};
   opts.contains = (pattern !== '');
   if (opts.contains && !isGlob(pattern)) {
