@@ -344,7 +344,7 @@ Micromatch also supports the following.
 Extended globbing as described by the bash man page:
 
 | **pattern** | **regex equivalent** | **description** |
-| --- | --- |
+| --- | --- | --- |
 | `?(pattern-list)` | `(...|...)?` |  Matches zero or one occurrence of the given patterns |
 | `*(pattern-list)` | `(...|...)*` |  Matches zero or more occurrences of the given patterns |
 | `+(pattern-list)` | `(...|...)+` |  Matches one or more occurrences of the given patterns |
