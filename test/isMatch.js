@@ -71,6 +71,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/z.js', '**/*.js').should.be.true;
     mm.isMatch('a/z.js', '**/*.js').should.be.true;
     mm.isMatch('z.js', '**/*.js').should.be.true;
+    mm.isMatch('z.js', '**/z*').should.be.true;
 
     mm.isMatch('a/b/c/z.js', '*.js').should.be.false;
     mm.isMatch('a/b/z.js', '*.js').should.be.false;
@@ -86,6 +87,10 @@ describe('.isMatch()', function () {
 
     mm.isMatch('a/z.js', 'a/b/**/*.js').should.be.false;
     mm.isMatch('z.js', 'a/b/**/*.js').should.be.false;
+
+    mm.isMatch('z.js', '**/z*.js').should.be.true;
+    mm.isMatch('a/b-c/z.js', 'a/b-*/**/z.js').should.be.true;
+    mm.isMatch('a/b-c/d/e/z.js', 'a/b-*/**/z.js').should.be.true;
   });
 
   /**
