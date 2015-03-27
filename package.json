@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch (10-45x faster on avg). Just use `minimatch.isMatch()` instead of `multimatch()` or `minimatch()`.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": {
     "name": "Jon Schlinkert",
