@@ -230,18 +230,20 @@ function any(fp, patterns, opts) {
 }
 
 /**
- * Filter the keys in an object.
+ * Filter the keys of an object with the given `glob` pattern
+ * and `options`
  *
- * @param  {*} val
+ * @param  {Object} `object`
+ * @param  {Pattern} `object`
  * @return {Array}
  */
 
-function matchKeys(obj, pattern, options) {
+function matchKeys(obj, glob, options) {
   if (typeOf(obj) !== 'object') {
     throw new TypeError(msg('matchKeys', 'first argument', 'an object'));
   }
 
-  var fn = matcher(pattern, options);
+  var fn = matcher(glob, options);
   var res = {};
 
   for (var key in obj) {
@@ -293,11 +295,11 @@ function matcher(pattern, opts) {
  * Create and cache a regular expression for matching
  * file paths.
  *
- * If the leading character in the `glob` is `!` a negation
+ * If the leading character in the `glob` is `!`, a negation
  * regex is returned.
  *
- * @param  {String} glob
- * @param  {Object} options
+ * @param  {String} `glob`
+ * @param  {Object} `options`
  * @return {RegExp}
  */
 
@@ -319,28 +321,21 @@ function toRegex(glob, options) {
   opts.negated = opts.negated || parsed.negated;
   opts.negate = opts.negated;
   glob = wrapGlob(parsed.pattern, opts);
+  var re;
 
   try {
-    return new RegExp(glob, flags);
+    re = new RegExp(glob, flags);
+    return re;
   } catch (err) {
-    debug('toRegex', err);
+    var msg = 'micromatch invalid regex: (' + re + ')';
+    if (opts.strict) throw new SyntaxError(msg + err);
   }
   return /$^/;
 }
 
 /**
- * Wrap `toRegex` to memoize the generated regex
- * the string and options don't change
- */
-
-function makeRe(glob, opts) {
-  return cache(toRegex, glob, opts);
-}
-
-/**
- * Create the regex to do the matching. If
- * the leading character in the `glob` is `!`
- * a negation regex is returned.
+ * Create the regex to do the matching. If the leading
+ * character in the `glob` is `!` a negation regex is returned.
  *
  * @param {String} `glob`
  * @param {Boolean} `negate`
@@ -354,6 +349,15 @@ function wrapGlob(glob, opts) {
     return prefix + ('(?!^' + glob + ').*$');
   }
   return prefix + glob;
+}
+
+/**
+ * Wrap `toRegex` to memoize the generated regex
+ * the string and options don't change
+ */
+
+function makeRe(glob, opts) {
+  return cache(toRegex, glob, opts);
 }
 
 /**
