@@ -144,6 +144,7 @@ function filter(patterns, opts) {
     var len = patterns.length, i = 0;
     var res = true;
 
+    fp = utils.unixify(fp, opts);
     while (i < len) {
       var fn = matcher(patterns[i++], opts);
       if (!fn(fp)) {
@@ -178,6 +179,7 @@ function isMatch(fp, pattern, opts) {
     throw new TypeError(msg('isMatch', 'filepath', 'a string'));
   }
 
+  fp = utils.unixify(fp, opts);
   if (typeOf(pattern) === 'object') {
     return matcher(fp, pattern);
   }
@@ -196,6 +198,8 @@ function contains(fp, pattern, opts) {
 
   opts = opts || {};
   opts.contains = (pattern !== '');
+  fp = utils.unixify(fp, opts);
+
   if (opts.contains && !isGlob(pattern)) {
     return fp.indexOf(pattern) !== -1;
   }
@@ -217,6 +221,7 @@ function any(fp, patterns, opts) {
     throw new TypeError(msg('any', 'patterns', 'a string or array'));
   }
 
+  fp = utils.unixify(fp, opts);
   patterns = utils.arrayify(patterns);
   var len = patterns.length;
 
@@ -287,6 +292,7 @@ function matcher(pattern, opts) {
   }
   // `matchBase` is not defined
   return function(fp) {
+    fp = utils.unixify(fp, opts);
     return re.test(fp);
   };
 }

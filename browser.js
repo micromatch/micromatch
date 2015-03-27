@@ -145,6 +145,7 @@ function filter(patterns, opts) {
     var len = patterns.length, i = 0;
     var res = true;
 
+    fp = utils.unixify(fp, opts);
     while (i < len) {
       var fn = matcher(patterns[i++], opts);
       if (!fn(fp)) {
@@ -179,6 +180,7 @@ function isMatch(fp, pattern, opts) {
     throw new TypeError(msg('isMatch', 'filepath', 'a string'));
   }
 
+  fp = utils.unixify(fp, opts);
   if (typeOf(pattern) === 'object') {
     return matcher(fp, pattern);
   }
@@ -197,6 +199,8 @@ function contains(fp, pattern, opts) {
 
   opts = opts || {};
   opts.contains = (pattern !== '');
+  fp = utils.unixify(fp, opts);
+
   if (opts.contains && !isGlob(pattern)) {
     return fp.indexOf(pattern) !== -1;
   }
@@ -218,6 +222,7 @@ function any(fp, patterns, opts) {
     throw new TypeError(msg('any', 'patterns', 'a string or array'));
   }
 
+  fp = utils.unixify(fp, opts);
   patterns = utils.arrayify(patterns);
   var len = patterns.length;
 
@@ -231,18 +236,20 @@ function any(fp, patterns, opts) {
 }
 
 /**
- * Filter the keys in an object.
+ * Filter the keys of an object with the given `glob` pattern
+ * and `options`
  *
- * @param  {*} val
+ * @param  {Object} `object`
+ * @param  {Pattern} `object`
  * @return {Array}
  */
 
-function matchKeys(obj, pattern, options) {
+function matchKeys(obj, glob, options) {
   if (typeOf(obj) !== 'object') {
     throw new TypeError(msg('matchKeys', 'first argument', 'an object'));
   }
 
-  var fn = matcher(pattern, options);
+  var fn = matcher(glob, options);
   var res = {};
 
   for (var key in obj) {
@@ -286,6 +293,7 @@ function matcher(pattern, opts) {
   }
   // `matchBase` is not defined
   return function(fp) {
+    fp = utils.unixify(fp, opts);
     return re.test(fp);
   };
 }
@@ -294,11 +302,11 @@ function matcher(pattern, opts) {
  * Create and cache a regular expression for matching
  * file paths.
  *
- * If the leading character in the `glob` is `!` a negation
+ * If the leading character in the `glob` is `!`, a negation
  * regex is returned.
  *
- * @param  {String} glob
- * @param  {Object} options
+ * @param  {String} `glob`
+ * @param  {Object} `options`
  * @return {RegExp}
  */
 
@@ -320,28 +328,21 @@ function toRegex(glob, options) {
   opts.negated = opts.negated || parsed.negated;
   opts.negate = opts.negated;
   glob = wrapGlob(parsed.pattern, opts);
+  var re;
 
   try {
-    return new RegExp(glob, flags);
+    re = new RegExp(glob, flags);
+    return re;
   } catch (err) {
-    debug('toRegex', err);
+    var msg = 'micromatch invalid regex: (' + re + ')';
+    if (opts.strict) throw new SyntaxError(msg + err);
   }
   return /$^/;
 }
 
 /**
- * Wrap `toRegex` to memoize the generated regex
- * the string and options don't change
- */
-
-function makeRe(glob, opts) {
-  return cache(toRegex, glob, opts);
-}
-
-/**
- * Create the regex to do the matching. If
- * the leading character in the `glob` is `!`
- * a negation regex is returned.
+ * Create the regex to do the matching. If the leading
+ * character in the `glob` is `!` a negation regex is returned.
  *
  * @param {String} `glob`
  * @param {Boolean} `negate`
@@ -355,6 +356,15 @@ function wrapGlob(glob, opts) {
     return prefix + ('(?!^' + glob + ').*$');
   }
   return prefix + glob;
+}
+
+/**
+ * Wrap `toRegex` to memoize the generated regex
+ * the string and options don't change
+ */
+
+function makeRe(glob, opts) {
+  return cache(toRegex, glob, opts);
 }
 
 /**
@@ -397,14 +407,16 @@ micromatch.matchKeys = matchKeys;
 
 module.exports = micromatch;
 
-},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"braces":8,"debug":29,"is-glob":34,"kind-of":35,"object.omit":36,"regex-cache":46}],2:[function(require,module,exports){
+},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"braces":8,"debug":23,"is-glob":28,"kind-of":29,"object.omit":30,"regex-cache":39}],2:[function(require,module,exports){
 'use strict';
+
+var chars = {};
 
 /**
  * Regex for common characters
  */
 
-exports.escapeRegex = {
+chars.escapeRegex = {
   '?': /\?/g,
   '@': /\@/g,
   '!': /\!/g,
@@ -420,7 +432,7 @@ exports.escapeRegex = {
  * Escape characters
  */
 
-exports.ESC = {
+chars.ESC = {
   '?': '__UNESC_QMRK__',
   '@': '__UNESC_AMPE__',
   '!': '__UNESC_EXCL__',
@@ -437,7 +449,7 @@ exports.ESC = {
  * Unescape characters
  */
 
-exports.UNESC = {
+chars.UNESC = {
   '__UNESC_QMRK__'   : '\\?',
   '__UNESC_AMPE__'   : '\\@',
   '__UNESC_EXCL__'   : '\\!',
@@ -450,7 +462,7 @@ exports.UNESC = {
   '__UNESC_RTBRACK__': '\\]',
 };
 
-exports.ESC_TEMP = {
+chars.ESC_TEMP = {
   '?': '__TEMP_QMRK__',
   '@': '__TEMP_AMPE__',
   '!': '__TEMP_EXCL__',
@@ -463,7 +475,7 @@ exports.ESC_TEMP = {
   ']': '__TEMP_RTBRACK__',
 };
 
-exports.TEMP = {
+chars.TEMP = {
   '__TEMP_QMRK__'   : '?',
   '__TEMP_AMPE__'   : '@',
   '__TEMP_EXCL__'   : '!',
@@ -475,6 +487,8 @@ exports.TEMP = {
   '__TEMP_LTBRACK__': '[',
   '__TEMP_RTBRACK__': ']',
 };
+
+module.exports = chars;
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -513,11 +527,6 @@ function expand(pattern, options) {
   var glob = new Glob(pattern, options || {});
   var opts = glob.options;
 
-  function replace(re, str) {
-    glob.repl(re, esc(str));
-    pattern = glob.pattern;
-  }
-
   // return early if glob pattern matches special patterns
   if (specialCase(pattern) && opts.safemode) {
     return new RegExp(utils.escapeRe(pattern), 'g');
@@ -527,7 +536,7 @@ function expand(pattern, options) {
     opts.negated = glob.negated;
   }
 
-  glob.repl('/.', '/\\.');
+  glob._replace('/.', '/\\.');
 
   // parse the glob pattern into tokens
   glob.parse();
@@ -566,11 +575,11 @@ function expand(pattern, options) {
 
   glob.track('after braces');
 
-  glob.repl('[]', '\\[\\]');
-  glob.repl('(?', '__QMARK_GROUP__');
+  glob._replace('[]', '\\[\\]');
+  glob._replace('(?', '__QMARK_GROUP__');
 
   // windows drives
-  replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2');
+  glob._replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2', true);
 
   // negate slashes in exclusion ranges
   if (glob.pattern.indexOf('[^') !== -1) {
@@ -582,13 +591,13 @@ function expand(pattern, options) {
 
   } else {
     if (/^\*\.\w*$/.test(glob.pattern)) {
-      glob.repl('*', star(opts.dot) + '\\');
-      glob.repl('__QMARK_GROUP__', '(?');
+      glob._replace('*', star(opts.dot) + '\\');
+      glob._replace('__QMARK_GROUP__', '(?');
       return glob;
     }
 
     // '/*/*/*' => '(?:/*){3}'
-    glob.repl(/(\/\*)+/g, function (match) {
+    glob._replace(/(\/\*)+/g, function (match) {
       var len = match.length / 2;
       if (len === 1) { return match; }
       return '(?:\\/*){' + len + '}';
@@ -606,31 +615,28 @@ function expand(pattern, options) {
 
     // if the pattern has `**`
     if (tok.is.globstar) {
-      glob.pattern = collapse(glob.pattern, '**/');
+      glob._replace(/\*{2,}/g, '**');
       glob.pattern = collapse(glob.pattern, '/**');
       glob.pattern = optionalGlobstar(glob.pattern);
 
       // reduce extraneous globstars
-      glob.repl(/(^|[^\\])\*{2,}([^\\]|$)/g, '$1**$2');
+      glob._replace(/(^|[^\\])\*{2,}([^\\]|$)/g, '$1**$2');
 
-      // 'foo/**'
-      replace(/(\w+)\*\*(?!\/)/g, '(?=.)$1[^/]*?');
-      replace('**/', '.*\\/');
-      replace('**', globstar(opts));
-      replace('/*', '\\/?' + nodot + '[^\\/]*?');
+      // 'foo/*'
+      glob._replace(/(\w+)\*(?!\/)/g, '(?=.)$1[^/]*?', true);
+      glob._replace('**', globstar(opts), true);
     }
 
     // ends with /*
-    replace(/\/\*$/, '\\/' + stardot(opts));
+    glob._replace(/\/\*$/, '\\/' + stardot(opts), true);
     // ends with *, no slashes
-    replace(/(?!\/)\*$/, boxQ);
+    glob._replace(/(?!\/)\*$/, boxQ, true);
     // has '*'
-    replace('*', stardot(opts));
+    glob._replace('*', stardot(opts), true);
+    glob._replace('?.', '?\\.', true);
+    glob._replace('?:', '?:', true);
 
-    replace('?.', '?\\.');
-    replace('?:', '?:');
-
-    glob.repl(/\?+/g, function (match) {
+    glob._replace(/\?+/g, function (match) {
       var len = match.length;
       if (len === 1) {
         return box;
@@ -639,22 +645,22 @@ function expand(pattern, options) {
     });
 
     // escape '.abc' => '\\.abc'
-    glob.repl(/\.([*\w]+)/g, '\\.$1');
+    glob._replace(/\.([*\w]+)/g, '\\.$1');
     // fix '[^\\\\/]'
-    glob.repl(/\[\^[\\\/]+\]/g, box);
+    glob._replace(/\[\^[\\\/]+\]/g, box);
     // '///' => '\/'
-    glob.repl(/\/+/g, '\\/');
+    glob._replace(/\/+/g, '\\/');
     // '\\\\\\' => '\\'
-    glob.repl(/\\{2,}/g, '\\');
+    glob._replace(/\\{2,}/g, '\\');
   }
 
-  glob.repl('__QMARK_GROUP__', '(?');
+  glob._replace('__QMARK_GROUP__', '(?');
   glob.unescape(glob.pattern);
-  glob.repl('__UNESC_STAR__', '*');
-  glob.repl('%~', '?');
-  glob.repl('%%', '*');
-  glob.repl('?.', '?\\.');
-  glob.repl('[^\\/]', '[^/]');
+  glob._replace('__UNESC_STAR__', '*');
+  glob._replace('%~', '?');
+  glob._replace('%%', '*');
+  glob._replace('?.', '?\\.');
+  glob._replace('[^\\/]', '[^/]');
   return glob;
 }
 
@@ -687,11 +693,11 @@ function expandFilename(glob, opts) {
     if (tok.path.filename === '*' && !tok.path.dirname) {
       glob.pattern = star(opts.dot) + '\\' + glob.pattern.slice(1);
     } else {
-      glob.repl(/(?!\()\?/g, '[^/]');
+      glob._replace(/(?!\()\?/g, '[^/]');
       if (tok.path.basename.charAt(0) !== '.') {
         opts.dot = true;
       }
-      glob.repl('*', star(opts.dot));
+      glob._replace('*', star(opts.dot));
     }
   }
 
@@ -699,9 +705,9 @@ function expandFilename(glob, opts) {
     glob.pattern = '\\' + glob.pattern;
   }
 
-  glob.repl('__QMARK_GROUP__', '(?');
+  glob._replace('__QMARK_GROUP__', '(?');
   glob.unescape(glob.pattern);
-  glob.repl('__UNESC_STAR__', '*');
+  glob._replace('__UNESC_STAR__', '*');
   return glob;
 }
 
@@ -762,11 +768,11 @@ function collapse(str, ch, repeat) {
 
 function optionalGlobstar(glob) {
   // globstars preceded and followed by a word character
-  if (/\w\/\*\*\/\w/.test(glob)) {
+  if (/[^\/]\/\*\*\/[^\/]/.test(glob)) {
     var tmp = glob.split('/**/').join('/');
     glob = '(?:' + tmp + '|' + glob + ')';
   // leading globstars
-  } else if (/^\*\*\/\w/.test(glob)) {
+  } else if (/^\*\*\/[^\/]/.test(glob)) {
     glob = glob.split(/^\*\*\//).join('(^|.+\\/)');
   }
   return glob;
@@ -998,34 +1004,28 @@ Glob.prototype.parse = function(pattern) {
 };
 
 /**
- * Replace `a` with `b`. Also tracks the change
- * before and after each replacement. This is
- * disabled by default, but can be enabled by
- * setting `options.track` to true.
+ * Replace `a` with `b`. Also tracks the change before and
+ * after each replacement. This is disabled by default, but
+ * can be enabled by setting `options.track` to true.
+ *
+ * Also, when the pattern is a string, `.split()` is used,
+ * because it's much faster than replace.
  *
  * @param  {RegExp|String} `a`
  * @param  {String} `b`
+ * @param  {Boolean} `escape` When `true`, escapes `*` and `?` in the replacement.
  * @return {String}
  */
 
-Glob.prototype.repl = function(a, b, c) {
-  if (c) {
-    this.track('before ' + c);
-  } else {
-    this.track('before');
-  }
+Glob.prototype._replace = function(a, b, escape) {
+  this.track('before (find): "' + a + '" (replace with): "' + b + '"');
+  if (escape) b = esc(b);
   if (a && b && typeof a === 'string') {
     this.pattern = this.pattern.split(a).join(b);
   } else if (a instanceof RegExp) {
-    try {
-      this.pattern = this.pattern.replace(a, b);
-    } catch(err) {}
+    this.pattern = this.pattern.replace(a, b);
   }
-  if (c) {
-    this.track('after ' + c);
-  } else {
-    this.track('after');
-  }
+  this.track('after');
 };
 
 /**
@@ -1037,8 +1037,8 @@ Glob.prototype.repl = function(a, b, c) {
 
 Glob.prototype.escape = function(str) {
   this.track('before escape: ');
-
   var re = /["\\](['"]?[^"'\\]['"]?)/g;
+
   this.pattern = str.replace(re, function($0, $1) {
     var o = chars.ESC;
     var ch = o && o[$1];
@@ -1068,7 +1068,17 @@ Glob.prototype.unescape = function(str) {
   });
 };
 
-},{"./chars":2,"braces":8,"expand-brackets":32,"parse-glob":40}],5:[function(require,module,exports){
+/**
+ * Escape utils
+ */
+
+function esc(str) {
+  str = str.split('?').join('%~');
+  str = str.split('*').join('%%');
+  return str;
+}
+
+},{"./chars":2,"braces":8,"expand-brackets":26,"parse-glob":34}],5:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1077,7 +1087,7 @@ var fileRe = require('filename-regex');
 var win32 = process.platform === 'win32';
 var win;
 
-var utils = module.exports;
+var utils = {};
 
 utils.filename = function filename(fp) {
   var seg = fp.match(fileRe());
@@ -1128,14 +1138,13 @@ utils.arrayify = function arrayify(val) {
  */
 
 utils.unixify = function unixify(fp, opts) {
+  if (opts && opts.unixify === false) return fp;
   if (opts && opts.unixify === true) {
     win = true;
   } else if (opts && opts.cache && typeof win === 'undefined') {
     win = win32 || path.sep === '\\';
   }
-  if (win) {
-    return fp.replace(/[\\\/]+/g, '/');
-  }
+  if (win) return fp.replace(/[\\\/]+/g, '/');
   return fp;
 };
 
@@ -1155,8 +1164,14 @@ utils.escapeRe = function escapeRe(str) {
   return str.replace(/[-[\\$*+?.#^\s{}(|)\]]/g, '\\$&');
 };
 
+/**
+ * Expose `utils`
+ */
+
+module.exports = utils;
+
 }).call(this,require('_process'))
-},{"_process":28,"filename-regex":33,"path":27}],6:[function(require,module,exports){
+},{"_process":22,"filename-regex":27,"path":21}],6:[function(require,module,exports){
 /*!
  * arr-diff <https://github.com/jonschlinkert/arr-diff>
  *
@@ -1268,11 +1283,10 @@ function idx(arr, pos, end) {
  * Module dependencies
  */
 
-var filter = require('arr-filter');
 var expand = require('expand-range');
+var repeat = require('repeat-element');
 var tokens = require('preserve');
-var map = require('arr-map');
-var exp = require('./lib/exp');
+var cache = {};
 
 /**
  * Expose `braces`
@@ -1337,7 +1351,7 @@ function braces(str, arr, options) {
     case ' ':
       return splitWhitespace(str);
     case '{,}':
-      return exp(str, opts, braces);
+      return exponential(str, opts, braces);
     case '{}':
       return emptyBraces(str, arr, opts);
     case '\\{':
@@ -1412,6 +1426,55 @@ function braces(str, arr, options) {
   }
 
   if (opts.strict) { return filter(arr, filterEmpty); }
+  return arr;
+}
+
+/**
+ * Expand exponential ranges
+ *
+ *   `a{,}{,}` => ['a', 'a', 'a', 'a']
+ */
+
+function exponential(str, options, fn) {
+  if (typeof options === 'function') {
+    fn = options;
+    options = null;
+  }
+
+  var opts = options || {};
+  var esc = '__ESC_EXP__';
+  var exp = 0;
+  var res;
+
+  var parts = str.split('{,}');
+  if (opts.nodupes) {
+    return fn(parts.join(''), opts);
+  }
+
+  exp = parts.length - 1;
+  res = fn(parts.join(esc), opts);
+  var len = res.length;
+  var arr = [];
+  var i = 0;
+
+  while (len--) {
+    var ele = res[i++];
+    var idx = ele.indexOf(esc);
+
+    if (idx === -1) {
+      arr.push(ele);
+
+    } else {
+      ele = ele.split('__ESC_EXP__').join('');
+      if (!!ele && opts.nodupes !== false) {
+        arr.push(ele);
+
+      } else {
+        var num = Math.pow(2, exp);
+        arr.push.apply(arr, repeat(ele, num));
+      }
+    }
+  }
   return arr;
 }
 
@@ -1567,260 +1630,11 @@ function splice(str, token, replacement) {
     + str.substr(i + token.length);
 }
 
-},{"./lib/exp":9,"arr-filter":10,"arr-map":14,"expand-range":15,"preserve":21}],9:[function(require,module,exports){
-'use strict';
-
 /**
- * Module dependencies
+ * Fast array map
  */
 
-var repeat = require('repeat-element');
-
-/**
- * Expose `exponential`
- */
-
-module.exports = exponential;
-
-/**
- * Create and expand range patterns:
- *
- *   `a{,}{,}` => ['a', 'a', 'a', 'a']
- */
-
-function exponential(str, options, fn) {
-  if (typeof options === 'function') {
-    fn = options;
-    options = null;
-  }
-
-  var opts = options || {};
-  var esc = '__ESC_EXP__';
-  var exp = 0;
-  var res;
-
-  var parts = str.split('{,}');
-  if (opts.nodupes) {
-    return fn(parts.join(''), opts);
-  }
-
-  exp = parts.length - 1;
-  res = fn(parts.join(esc), opts);
-  var len = res.length;
-  var arr = [];
-  var i = 0;
-
-  while (len--) {
-    var ele = res[i++];
-    var idx = ele.indexOf(esc);
-
-    if (idx === -1) {
-      arr.push(ele);
-
-    } else {
-      ele = ele.split('__ESC_EXP__').join('');
-      if (!!ele && opts.nodupes !== false) {
-        arr.push(ele);
-
-      } else {
-        var num = Math.pow(2, exp);
-        arr.push.apply(arr, repeat(ele, num));
-      }
-    }
-  }
-  return arr;
-}
-
-},{"repeat-element":22}],10:[function(require,module,exports){
-/*!
- * arr-filter <https://github.com/jonschlinkert/arr-filter>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License
- */
-
-'use strict';
-
-var iterator = require('make-iterator');
-
-module.exports = function filter(arr, cb, thisArg) {
-  if (arr == null) {
-    return [];
-  }
-
-  if (typeof cb !== 'function') {
-    throw new TypeError('arr-filter expects a callback function.');
-  }
-
-  cb = iterator(cb, thisArg);
-  var len = arr.length;
-  var res = arr.slice();
-  var i = 0;
-
-  while (len--) {
-    if (!cb(arr[len], i++)) {
-      res.splice(len, 1);
-    }
-  }
-
-  return res;
-};
-
-
-},{"make-iterator":11}],11:[function(require,module,exports){
-/*!
- * make-iterator <https://github.com/jonschlinkert/make-iterator>
- *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Copyright (c) 2012, 2013 moutjs team and contributors (http://moutjs.com)
- * Licensed under the MIT License
- */
-
-'use strict';
-
-var forOwn = require('for-own');
-
-/**
- * Convert an argument into a valid iterator.
- * Used internally on most array/object/collection methods that receives a
- * callback/iterator providing a shortcut syntax.
- */
-
-module.exports = function makeIterator(src, thisArg) {
-  if (src == null) {
-    return noop;
-  }
-
-  switch (typeof src) {
-    // function is the first to improve perf (most common case)
-    // also avoid using `Function#call` if not needed, which boosts
-    // perf a lot in some cases
-    case 'function':
-      return (typeof thisArg !== 'undefined') ? function (val, i, arr) {
-        return src.call(thisArg, val, i, arr);
-      } : src;
-    case 'object':
-      return function (val) {
-        return deepMatches(val, src);
-      };
-    case 'string':
-    case 'number':
-      return prop(src);
-    }
-};
-
-function containsMatch(array, value) {
-  var len = array.length;
-  var i = -1;
-
-  while (++i < len) {
-    if (deepMatches(array[i], value)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function matchArray(o, value) {
-  var len = value.length;
-  var i = -1;
-
-  while (++i < len) {
-    if (!containsMatch(o, value[i])) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function matchObject(o, value) {
-  var res = true;
-  forOwn(value, function (val, key) {
-    if (!deepMatches(o[key], val)) {
-      // Return false to break out of forOwn early
-      return (res = false);
-    }
-  });
-  return res;
-}
-
-/**
- * Recursively compare objects
- */
-
-function deepMatches(o, value) {
-  if (o && typeof o === 'object') {
-    if (Array.isArray(o) && Array.isArray(value)) {
-      return matchArray(o, value);
-    } else {
-      return matchObject(o, value);
-    }
-  } else {
-    return o === value;
-  }
-}
-
-function prop(name) {
-  return function(obj) {
-    return obj[name];
-  };
-}
-
-function noop(val) {
-  return val;
-}
-},{"for-own":12}],12:[function(require,module,exports){
-/*!
- * for-own <https://github.com/jonschlinkert/for-own>
- *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
- */
-
-'use strict';
-
-var forIn = require('for-in');
-
-module.exports = function forOwn(o, fn, thisArg) {
-  forIn(o, function (val, key) {
-    if (hasOwn(o, key)) {
-      return fn.call(thisArg, o[key], key, o);
-    }
-  });
-};
-
-function hasOwn(o, prop) {
-  return {}.hasOwnProperty.call(o, prop);
-}
-
-},{"for-in":13}],13:[function(require,module,exports){
-/*!
- * for-in <https://github.com/jonschlinkert/for-in>
- *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
- */
-
-'use strict';
-
-module.exports = function forIn(o, fn, thisArg) {
-  for (var key in o) {
-    if (fn.call(thisArg, o[key], key, o) === false) {
-      break;
-    }
-  }
-};
-},{}],14:[function(require,module,exports){
-/*!
- * arr-map <https://github.com/jonschlinkert/arr-map>
- *
- * Copyright (c) 2015 Jon Schlinkert, contributors.
- * Licensed under the MIT license.
- */
-
-'use strict';
-
-module.exports = function map(arr, fn) {
+function map(arr, fn) {
   if (arr == null) {
     return [];
   }
@@ -1834,9 +1648,31 @@ module.exports = function map(arr, fn) {
   }
 
   return res;
-};
+}
 
-},{}],15:[function(require,module,exports){
+/**
+ * Fast array filter
+ */
+
+function filter(arr, cb) {
+  if (arr == null) return [];
+  if (typeof cb !== 'function') {
+    throw new TypeError('braces: filter expects a callback function.');
+  }
+
+  var len = arr.length;
+  var res = arr.slice();
+  var i = 0;
+
+  while (len--) {
+    if (!cb(arr[len], i++)) {
+      res.splice(len, 1);
+    }
+  }
+  return res;
+}
+
+},{"expand-range":9,"preserve":15,"repeat-element":16}],9:[function(require,module,exports){
 /*!
  * expand-range <https://github.com/jonschlinkert/expand-range>
  *
@@ -1881,7 +1717,7 @@ module.exports = function expandRange(str, options, fn) {
   return fill.apply(fill, args.concat(fn));
 };
 
-},{"fill-range":16}],16:[function(require,module,exports){
+},{"fill-range":10}],10:[function(require,module,exports){
 /*!
  * fill-range <https://github.com/jonschlinkert/fill-range>
  *
@@ -1917,6 +1753,7 @@ function fillRange(a, b, step, options, fn) {
   if (a == null || b == null) {
     throw new Error('fill-range expects the first and second args to be strings.');
   }
+
   if (typeof step === 'function') {
     fn = step; options = {}; step = null;
   }
@@ -2290,12 +2127,12 @@ function length(val) {
   return val.toString().length;
 }
 
-},{"is-number":17,"isobject":18,"randomatic":19,"repeat-element":22,"repeat-string":20}],17:[function(require,module,exports){
+},{"is-number":11,"isobject":12,"randomatic":13,"repeat-element":16,"repeat-string":14}],11:[function(require,module,exports){
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
  * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -2306,7 +2143,7 @@ module.exports = function isNumber(n) {
     || n === 0;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
@@ -2327,7 +2164,7 @@ module.exports = function isObject(o) {
   return o != null && typeof o === 'object'
     && !Array.isArray(o);
 };
-},{}],19:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*!
  * randomatic <https://github.com/jonschlinkert/randomatic>
  *
@@ -2415,7 +2252,7 @@ function randomatic(pattern, length, options) {
   return res;
 };
 
-},{"is-number":17,"kind-of":35}],20:[function(require,module,exports){
+},{"is-number":11,"kind-of":29}],14:[function(require,module,exports){
 /*!
  * repeat-string <https://github.com/jonschlinkert/repeat-string>
  *
@@ -2483,7 +2320,7 @@ function repeat(str, num) {
 var res = '';
 var cache;
 
-},{}],21:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*!
  * preserve <https://github.com/jonschlinkert/preserve>
  *
@@ -2538,7 +2375,7 @@ function randomize() {
 }
 
 var cache = {};
-},{}],22:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*!
  * repeat-element <https://github.com/jonschlinkert/repeat-element>
  *
@@ -2560,7 +2397,7 @@ function repeat(ele, num) {
   return arr;
 }
 
-},{}],23:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -2627,41 +2464,36 @@ Buffer.TYPED_ARRAY_SUPPORT = (function () {
  * By augmenting the instances, we can avoid modifying the `Uint8Array`
  * prototype.
  */
-function Buffer (subject, encoding, noZero) {
-  if (!(this instanceof Buffer))
-    return new Buffer(subject, encoding, noZero)
+function Buffer (subject, encoding) {
+  var self = this
+  if (!(self instanceof Buffer)) return new Buffer(subject, encoding)
 
   var type = typeof subject
-
-  // Find the length
   var length
+
   if (type === 'number') {
     length = +subject
   } else if (type === 'string') {
     length = Buffer.byteLength(subject, encoding)
-  } else if (type === 'object' && subject !== null) { // assume object is array-like
-    if (subject.type === 'Buffer' && isArray(subject.data))
-      subject = subject.data
+  } else if (type === 'object' && subject !== null) {
+    // assume object is array-like
+    if (subject.type === 'Buffer' && isArray(subject.data)) subject = subject.data
     length = +subject.length
   } else {
     throw new TypeError('must start with number, buffer, array or string')
   }
 
-  if (length > kMaxLength)
-    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-      'size: 0x' + kMaxLength.toString(16) + ' bytes')
+  if (length > kMaxLength) {
+    throw new RangeError('Attempt to allocate Buffer larger than maximum size: 0x' +
+      kMaxLength.toString(16) + ' bytes')
+  }
 
-  if (length < 0)
-    length = 0
-  else
-    length >>>= 0 // Coerce to uint32.
+  if (length < 0) length = 0
+  else length >>>= 0 // coerce to uint32
 
-  var self = this
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     // Preferred: Return an augmented `Uint8Array` instance for best performance
-    /*eslint-disable consistent-this */
-    self = Buffer._augment(new Uint8Array(length))
-    /*eslint-enable consistent-this */
+    self = Buffer._augment(new Uint8Array(length)) // eslint-disable-line consistent-this
   } else {
     // Fallback: Return THIS instance of Buffer (created by `new`)
     self.length = length
@@ -2675,42 +2507,43 @@ function Buffer (subject, encoding, noZero) {
   } else if (isArrayish(subject)) {
     // Treat array-ish objects as a byte array
     if (Buffer.isBuffer(subject)) {
-      for (i = 0; i < length; i++)
+      for (i = 0; i < length; i++) {
         self[i] = subject.readUInt8(i)
+      }
     } else {
-      for (i = 0; i < length; i++)
+      for (i = 0; i < length; i++) {
         self[i] = ((subject[i] % 256) + 256) % 256
+      }
     }
   } else if (type === 'string') {
     self.write(subject, 0, encoding)
-  } else if (type === 'number' && !Buffer.TYPED_ARRAY_SUPPORT && !noZero) {
+  } else if (type === 'number' && !Buffer.TYPED_ARRAY_SUPPORT) {
     for (i = 0; i < length; i++) {
       self[i] = 0
     }
   }
 
-  if (length > 0 && length <= Buffer.poolSize)
-    self.parent = rootParent
+  if (length > 0 && length <= Buffer.poolSize) self.parent = rootParent
 
   return self
 }
 
-function SlowBuffer (subject, encoding, noZero) {
-  if (!(this instanceof SlowBuffer))
-    return new SlowBuffer(subject, encoding, noZero)
+function SlowBuffer (subject, encoding) {
+  if (!(this instanceof SlowBuffer)) return new SlowBuffer(subject, encoding)
 
-  var buf = new Buffer(subject, encoding, noZero)
+  var buf = new Buffer(subject, encoding)
   delete buf.parent
   return buf
 }
 
-Buffer.isBuffer = function (b) {
+Buffer.isBuffer = function isBuffer (b) {
   return !!(b != null && b._isBuffer)
 }
 
-Buffer.compare = function (a, b) {
-  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b))
+Buffer.compare = function compare (a, b) {
+  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
     throw new TypeError('Arguments must be Buffers')
+  }
 
   if (a === b) return 0
 
@@ -2726,7 +2559,7 @@ Buffer.compare = function (a, b) {
   return 0
 }
 
-Buffer.isEncoding = function (encoding) {
+Buffer.isEncoding = function isEncoding (encoding) {
   switch (String(encoding).toLowerCase()) {
     case 'hex':
     case 'utf8':
@@ -2745,8 +2578,8 @@ Buffer.isEncoding = function (encoding) {
   }
 }
 
-Buffer.concat = function (list, totalLength) {
-  if (!isArray(list)) throw new TypeError('Usage: Buffer.concat(list[, length])')
+Buffer.concat = function concat (list, totalLength) {
+  if (!isArray(list)) throw new TypeError('list argument must be an Array of Buffers.')
 
   if (list.length === 0) {
     return new Buffer(0)
@@ -2772,7 +2605,7 @@ Buffer.concat = function (list, totalLength) {
   return buf
 }
 
-Buffer.byteLength = function (str, encoding) {
+Buffer.byteLength = function byteLength (str, encoding) {
   var ret
   str = str + ''
   switch (encoding || 'utf8') {
@@ -2808,7 +2641,7 @@ Buffer.prototype.length = undefined
 Buffer.prototype.parent = undefined
 
 // toString(encoding, start=0, end=buffer.length)
-Buffer.prototype.toString = function (encoding, start, end) {
+Buffer.prototype.toString = function toString (encoding, start, end) {
   var loweredCase = false
 
   start = start >>> 0
@@ -2844,45 +2677,84 @@ Buffer.prototype.toString = function (encoding, start, end) {
         return utf16leSlice(this, start, end)
 
       default:
-        if (loweredCase)
-          throw new TypeError('Unknown encoding: ' + encoding)
+        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
         encoding = (encoding + '').toLowerCase()
         loweredCase = true
     }
   }
 }
 
-Buffer.prototype.equals = function (b) {
+Buffer.prototype.equals = function equals (b) {
   if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
   if (this === b) return true
   return Buffer.compare(this, b) === 0
 }
 
-Buffer.prototype.inspect = function () {
+Buffer.prototype.inspect = function inspect () {
   var str = ''
   var max = exports.INSPECT_MAX_BYTES
   if (this.length > 0) {
     str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
-    if (this.length > max)
-      str += ' ... '
+    if (this.length > max) str += ' ... '
   }
   return '<Buffer ' + str + '>'
 }
 
-Buffer.prototype.compare = function (b) {
+Buffer.prototype.compare = function compare (b) {
   if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
   if (this === b) return 0
   return Buffer.compare(this, b)
 }
 
+Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
+  if (byteOffset > 0x7fffffff) byteOffset = 0x7fffffff
+  else if (byteOffset < -0x80000000) byteOffset = -0x80000000
+  byteOffset >>= 0
+
+  if (this.length === 0) return -1
+  if (byteOffset >= this.length) return -1
+
+  // Negative offsets start from the end of the buffer
+  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
+
+  if (typeof val === 'string') {
+    if (val.length === 0) return -1 // special case: looking for empty string always fails
+    return String.prototype.indexOf.call(this, val, byteOffset)
+  }
+  if (Buffer.isBuffer(val)) {
+    return arrayIndexOf(this, val, byteOffset)
+  }
+  if (typeof val === 'number') {
+    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
+      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
+    }
+    return arrayIndexOf(this, [ val ], byteOffset)
+  }
+
+  function arrayIndexOf (arr, val, byteOffset) {
+    var foundIndex = -1
+    for (var i = 0; byteOffset + i < arr.length; i++) {
+      if (arr[byteOffset + i] === val[foundIndex === -1 ? 0 : i - foundIndex]) {
+        if (foundIndex === -1) foundIndex = i
+        if (i - foundIndex + 1 === val.length) return byteOffset + foundIndex
+      } else {
+        foundIndex = -1
+      }
+    }
+    return -1
+  }
+
+  throw new TypeError('val must be string, number or Buffer')
+}
+
 // `get` will be removed in Node 0.13+
-Buffer.prototype.get = function (offset) {
+Buffer.prototype.get = function get (offset) {
   console.log('.get() is deprecated. Access using array indexes instead.')
   return this.readUInt8(offset)
 }
 
 // `set` will be removed in Node 0.13+
-Buffer.prototype.set = function (v, offset) {
+Buffer.prototype.set = function set (v, offset) {
   console.log('.set() is deprecated. Access using array indexes instead.')
   return this.writeUInt8(v, offset)
 }
@@ -2907,9 +2779,9 @@ function hexWrite (buf, string, offset, length) {
     length = strLen / 2
   }
   for (var i = 0; i < length; i++) {
-    var byte = parseInt(string.substr(i * 2, 2), 16)
-    if (isNaN(byte)) throw new Error('Invalid hex string')
-    buf[offset + i] = byte
+    var parsed = parseInt(string.substr(i * 2, 2), 16)
+    if (isNaN(parsed)) throw new Error('Invalid hex string')
+    buf[offset + i] = parsed
   }
   return i
 }
@@ -2938,7 +2810,7 @@ function utf16leWrite (buf, string, offset, length) {
   return charsWritten
 }
 
-Buffer.prototype.write = function (string, offset, length, encoding) {
+Buffer.prototype.write = function write (string, offset, length, encoding) {
   // Support both (string, offset, length, encoding)
   // and the legacy (string, encoding, offset, length)
   if (isFinite(offset)) {
@@ -2955,8 +2827,9 @@ Buffer.prototype.write = function (string, offset, length, encoding) {
 
   offset = Number(offset) || 0
 
-  if (length < 0 || offset < 0 || offset > this.length)
+  if (length < 0 || offset < 0 || offset > this.length) {
     throw new RangeError('attempt to write outside buffer bounds')
+  }
 
   var remaining = this.length - offset
   if (!length) {
@@ -2999,7 +2872,7 @@ Buffer.prototype.write = function (string, offset, length, encoding) {
   return ret
 }
 
-Buffer.prototype.toJSON = function () {
+Buffer.prototype.toJSON = function toJSON () {
   return {
     type: 'Buffer',
     data: Array.prototype.slice.call(this._arr || this, 0)
@@ -3073,43 +2946,39 @@ function utf16leSlice (buf, start, end) {
   return res
 }
 
-Buffer.prototype.slice = function (start, end) {
+Buffer.prototype.slice = function slice (start, end) {
   var len = this.length
   start = ~~start
   end = end === undefined ? len : ~~end
 
   if (start < 0) {
     start += len
-    if (start < 0)
-      start = 0
+    if (start < 0) start = 0
   } else if (start > len) {
     start = len
   }
 
   if (end < 0) {
     end += len
-    if (end < 0)
-      end = 0
+    if (end < 0) end = 0
   } else if (end > len) {
     end = len
   }
 
-  if (end < start)
-    end = start
+  if (end < start) end = start
 
   var newBuf
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     newBuf = Buffer._augment(this.subarray(start, end))
   } else {
     var sliceLen = end - start
-    newBuf = new Buffer(sliceLen, undefined, true)
+    newBuf = new Buffer(sliceLen, undefined)
     for (var i = 0; i < sliceLen; i++) {
       newBuf[i] = this[i + start]
     }
   }
 
-  if (newBuf.length)
-    newBuf.parent = this.parent || this
+  if (newBuf.length) newBuf.parent = this.parent || this
 
   return newBuf
 }
@@ -3118,62 +2987,58 @@ Buffer.prototype.slice = function (start, end) {
  * Need to make sure that buffer isn't trying to write out of bounds.
  */
 function checkOffset (offset, ext, length) {
-  if ((offset % 1) !== 0 || offset < 0)
-    throw new RangeError('offset is not uint')
-  if (offset + ext > length)
-    throw new RangeError('Trying to access beyond buffer length')
+  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
 }
 
-Buffer.prototype.readUIntLE = function (offset, byteLength, noAssert) {
+Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
-    checkOffset(offset, byteLength, this.length)
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var val = this[offset]
   var mul = 1
   var i = 0
-  while (++i < byteLength && (mul *= 0x100))
+  while (++i < byteLength && (mul *= 0x100)) {
     val += this[offset + i] * mul
+  }
 
   return val
 }
 
-Buffer.prototype.readUIntBE = function (offset, byteLength, noAssert) {
+Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
+  if (!noAssert) {
     checkOffset(offset, byteLength, this.length)
+  }
 
   var val = this[offset + --byteLength]
   var mul = 1
-  while (byteLength > 0 && (mul *= 0x100))
+  while (byteLength > 0 && (mul *= 0x100)) {
     val += this[offset + --byteLength] * mul
+  }
 
   return val
 }
 
-Buffer.prototype.readUInt8 = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 1, this.length)
+Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length)
   return this[offset]
 }
 
-Buffer.prototype.readUInt16LE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 2, this.length)
+Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
   return this[offset] | (this[offset + 1] << 8)
 }
 
-Buffer.prototype.readUInt16BE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 2, this.length)
+Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
   return (this[offset] << 8) | this[offset + 1]
 }
 
-Buffer.prototype.readUInt32LE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
 
   return ((this[offset]) |
       (this[offset + 1] << 8) |
@@ -3181,117 +3046,104 @@ Buffer.prototype.readUInt32LE = function (offset, noAssert) {
       (this[offset + 3] * 0x1000000)
 }
 
-Buffer.prototype.readUInt32BE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset] * 0x1000000) +
-      ((this[offset + 1] << 16) |
-      (this[offset + 2] << 8) |
-      this[offset + 3])
+    ((this[offset + 1] << 16) |
+    (this[offset + 2] << 8) |
+    this[offset + 3])
 }
 
-Buffer.prototype.readIntLE = function (offset, byteLength, noAssert) {
+Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
-    checkOffset(offset, byteLength, this.length)
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var val = this[offset]
   var mul = 1
   var i = 0
-  while (++i < byteLength && (mul *= 0x100))
+  while (++i < byteLength && (mul *= 0x100)) {
     val += this[offset + i] * mul
+  }
   mul *= 0x80
 
-  if (val >= mul)
-    val -= Math.pow(2, 8 * byteLength)
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
 
   return val
 }
 
-Buffer.prototype.readIntBE = function (offset, byteLength, noAssert) {
+Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
-    checkOffset(offset, byteLength, this.length)
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var i = byteLength
   var mul = 1
   var val = this[offset + --i]
-  while (i > 0 && (mul *= 0x100))
+  while (i > 0 && (mul *= 0x100)) {
     val += this[offset + --i] * mul
+  }
   mul *= 0x80
 
-  if (val >= mul)
-    val -= Math.pow(2, 8 * byteLength)
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
 
   return val
 }
 
-Buffer.prototype.readInt8 = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 1, this.length)
-  if (!(this[offset] & 0x80))
-    return (this[offset])
+Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length)
+  if (!(this[offset] & 0x80)) return (this[offset])
   return ((0xff - this[offset] + 1) * -1)
 }
 
-Buffer.prototype.readInt16LE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 2, this.length)
+Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
   var val = this[offset] | (this[offset + 1] << 8)
   return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
-Buffer.prototype.readInt16BE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 2, this.length)
+Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
   var val = this[offset + 1] | (this[offset] << 8)
   return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
-Buffer.prototype.readInt32LE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset]) |
-      (this[offset + 1] << 8) |
-      (this[offset + 2] << 16) |
-      (this[offset + 3] << 24)
+    (this[offset + 1] << 8) |
+    (this[offset + 2] << 16) |
+    (this[offset + 3] << 24)
 }
 
-Buffer.prototype.readInt32BE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset] << 24) |
-      (this[offset + 1] << 16) |
-      (this[offset + 2] << 8) |
-      (this[offset + 3])
+    (this[offset + 1] << 16) |
+    (this[offset + 2] << 8) |
+    (this[offset + 3])
 }
 
-Buffer.prototype.readFloatLE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
   return ieee754.read(this, offset, true, 23, 4)
 }
 
-Buffer.prototype.readFloatBE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 4, this.length)
+Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
   return ieee754.read(this, offset, false, 23, 4)
 }
 
-Buffer.prototype.readDoubleLE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 8, this.length)
+Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length)
   return ieee754.read(this, offset, true, 52, 8)
 }
 
-Buffer.prototype.readDoubleBE = function (offset, noAssert) {
-  if (!noAssert)
-    checkOffset(offset, 8, this.length)
+Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length)
   return ieee754.read(this, offset, false, 52, 8)
 }
 
@@ -3301,43 +3153,42 @@ function checkInt (buf, value, offset, ext, max, min) {
   if (offset + ext > buf.length) throw new RangeError('index out of range')
 }
 
-Buffer.prototype.writeUIntLE = function (value, offset, byteLength, noAssert) {
+Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
   value = +value
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
 
   var mul = 1
   var i = 0
   this[offset] = value & 0xFF
-  while (++i < byteLength && (mul *= 0x100))
+  while (++i < byteLength && (mul *= 0x100)) {
     this[offset + i] = (value / mul) >>> 0 & 0xFF
+  }
 
   return offset + byteLength
 }
 
-Buffer.prototype.writeUIntBE = function (value, offset, byteLength, noAssert) {
+Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
   value = +value
   offset = offset >>> 0
   byteLength = byteLength >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
 
   var i = byteLength - 1
   var mul = 1
   this[offset + i] = value & 0xFF
-  while (--i >= 0 && (mul *= 0x100))
+  while (--i >= 0 && (mul *= 0x100)) {
     this[offset + i] = (value / mul) >>> 0 & 0xFF
+  }
 
   return offset + byteLength
 }
 
-Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
+Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 1, 0xff, 0)
+  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   this[offset] = value
   return offset + 1
@@ -3351,27 +3202,29 @@ function objectWriteUInt16 (buf, value, offset, littleEndian) {
   }
 }
 
-Buffer.prototype.writeUInt16LE = function (value, offset, noAssert) {
+Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 2, 0xffff, 0)
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = value
     this[offset + 1] = (value >>> 8)
-  } else objectWriteUInt16(this, value, offset, true)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
   return offset + 2
 }
 
-Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
+Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 2, 0xffff, 0)
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
     this[offset + 1] = value
-  } else objectWriteUInt16(this, value, offset, false)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
   return offset + 2
 }
 
@@ -3382,139 +3235,144 @@ function objectWriteUInt32 (buf, value, offset, littleEndian) {
   }
 }
 
-Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
+Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset + 3] = (value >>> 24)
     this[offset + 2] = (value >>> 16)
     this[offset + 1] = (value >>> 8)
     this[offset] = value
-  } else objectWriteUInt32(this, value, offset, true)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
   return offset + 4
 }
 
-Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
+Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
     this[offset + 3] = value
-  } else objectWriteUInt32(this, value, offset, false)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
   return offset + 4
 }
 
-Buffer.prototype.writeIntLE = function (value, offset, byteLength, noAssert) {
+Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
   value = +value
   offset = offset >>> 0
   if (!noAssert) {
-    checkInt(this,
-             value,
-             offset,
-             byteLength,
-             Math.pow(2, 8 * byteLength - 1) - 1,
-             -Math.pow(2, 8 * byteLength - 1))
+    checkInt(
+      this, value, offset, byteLength,
+      Math.pow(2, 8 * byteLength - 1) - 1,
+      -Math.pow(2, 8 * byteLength - 1)
+    )
   }
 
   var i = 0
   var mul = 1
   var sub = value < 0 ? 1 : 0
   this[offset] = value & 0xFF
-  while (++i < byteLength && (mul *= 0x100))
+  while (++i < byteLength && (mul *= 0x100)) {
     this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+  }
 
   return offset + byteLength
 }
 
-Buffer.prototype.writeIntBE = function (value, offset, byteLength, noAssert) {
+Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
   value = +value
   offset = offset >>> 0
   if (!noAssert) {
-    checkInt(this,
-             value,
-             offset,
-             byteLength,
-             Math.pow(2, 8 * byteLength - 1) - 1,
-             -Math.pow(2, 8 * byteLength - 1))
+    checkInt(
+      this, value, offset, byteLength,
+      Math.pow(2, 8 * byteLength - 1) - 1,
+      -Math.pow(2, 8 * byteLength - 1)
+    )
   }
 
   var i = byteLength - 1
   var mul = 1
   var sub = value < 0 ? 1 : 0
   this[offset + i] = value & 0xFF
-  while (--i >= 0 && (mul *= 0x100))
+  while (--i >= 0 && (mul *= 0x100)) {
     this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+  }
 
   return offset + byteLength
 }
 
-Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
+Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 1, 0x7f, -0x80)
+  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   if (value < 0) value = 0xff + value + 1
   this[offset] = value
   return offset + 1
 }
 
-Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
+Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = value
     this[offset + 1] = (value >>> 8)
-  } else objectWriteUInt16(this, value, offset, true)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
   return offset + 2
 }
 
-Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
+Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
     this[offset + 1] = value
-  } else objectWriteUInt16(this, value, offset, false)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
   return offset + 2
 }
 
-Buffer.prototype.writeInt32LE = function (value, offset, noAssert) {
+Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = value
     this[offset + 1] = (value >>> 8)
     this[offset + 2] = (value >>> 16)
     this[offset + 3] = (value >>> 24)
-  } else objectWriteUInt32(this, value, offset, true)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
   return offset + 4
 }
 
-Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
+Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
-  if (!noAssert)
-    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
   if (value < 0) value = 0xffffffff + value + 1
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
     this[offset + 3] = value
-  } else objectWriteUInt32(this, value, offset, false)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
   return offset + 4
 }
 
@@ -3525,39 +3383,39 @@ function checkIEEE754 (buf, value, offset, ext, max, min) {
 }
 
 function writeFloat (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert)
+  if (!noAssert) {
     checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
+  }
   ieee754.write(buf, value, offset, littleEndian, 23, 4)
   return offset + 4
 }
 
-Buffer.prototype.writeFloatLE = function (value, offset, noAssert) {
+Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
   return writeFloat(this, value, offset, true, noAssert)
 }
 
-Buffer.prototype.writeFloatBE = function (value, offset, noAssert) {
+Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
   return writeFloat(this, value, offset, false, noAssert)
 }
 
 function writeDouble (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert)
+  if (!noAssert) {
     checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
+  }
   ieee754.write(buf, value, offset, littleEndian, 52, 8)
   return offset + 8
 }
 
-Buffer.prototype.writeDoubleLE = function (value, offset, noAssert) {
+Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
   return writeDouble(this, value, offset, true, noAssert)
 }
 
-Buffer.prototype.writeDoubleBE = function (value, offset, noAssert) {
+Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
   return writeDouble(this, value, offset, false, noAssert)
 }
 
 // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-Buffer.prototype.copy = function (target, target_start, start, end) {
-  var self = this // source
-
+Buffer.prototype.copy = function copy (target, target_start, start, end) {
   if (!start) start = 0
   if (!end && end !== 0) end = this.length
   if (target_start >= target.length) target_start = target.length
@@ -3566,19 +3424,20 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   // Copy 0 bytes; we're done
   if (end === start) return 0
-  if (target.length === 0 || self.length === 0) return 0
+  if (target.length === 0 || this.length === 0) return 0
 
   // Fatal error conditions
-  if (target_start < 0)
+  if (target_start < 0) {
     throw new RangeError('targetStart out of bounds')
-  if (start < 0 || start >= self.length) throw new RangeError('sourceStart out of bounds')
+  }
+  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')
   if (end < 0) throw new RangeError('sourceEnd out of bounds')
 
   // Are we oob?
-  if (end > this.length)
-    end = this.length
-  if (target.length - target_start < end - start)
+  if (end > this.length) end = this.length
+  if (target.length - target_start < end - start) {
     end = target.length - target_start + start
+  }
 
   var len = end - start
 
@@ -3594,7 +3453,7 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 }
 
 // fill(value, start=0, end=buffer.length)
-Buffer.prototype.fill = function (value, start, end) {
+Buffer.prototype.fill = function fill (value, start, end) {
   if (!value) value = 0
   if (!start) start = 0
   if (!end) end = this.length
@@ -3628,7 +3487,7 @@ Buffer.prototype.fill = function (value, start, end) {
  * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
  * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
  */
-Buffer.prototype.toArrayBuffer = function () {
+Buffer.prototype.toArrayBuffer = function toArrayBuffer () {
   if (typeof Uint8Array !== 'undefined') {
     if (Buffer.TYPED_ARRAY_SUPPORT) {
       return (new Buffer(this)).buffer
@@ -3652,12 +3511,11 @@ var BP = Buffer.prototype
 /**
  * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
  */
-Buffer._augment = function (arr) {
+Buffer._augment = function _augment (arr) {
   arr.constructor = Buffer
   arr._isBuffer = true
 
-  // save reference to original Uint8Array get/set methods before overwriting
-  arr._get = arr.get
+  // save reference to original Uint8Array set method before overwriting
   arr._set = arr.set
 
   // deprecated, will be removed in node 0.13+
@@ -3670,6 +3528,7 @@ Buffer._augment = function (arr) {
   arr.toJSON = BP.toJSON
   arr.equals = BP.equals
   arr.compare = BP.compare
+  arr.indexOf = BP.indexOf
   arr.copy = BP.copy
   arr.slice = BP.slice
   arr.readUIntLE = BP.readUIntLE
@@ -3857,8 +3716,7 @@ function base64ToBytes (str) {
 
 function blitBuffer (src, dst, offset, length) {
   for (var i = 0; i < length; i++) {
-    if ((i + offset >= dst.length) || (i >= src.length))
-      break
+    if ((i + offset >= dst.length) || (i >= src.length)) break
     dst[i + offset] = src[i]
   }
   return i
@@ -3872,7 +3730,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":24,"ieee754":25,"is-array":26}],24:[function(require,module,exports){
+},{"base64-js":18,"ieee754":19,"is-array":20}],18:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -3998,7 +3856,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],25:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -4084,7 +3942,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 
 /**
  * isArray
@@ -4119,7 +3977,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4347,7 +4205,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":28}],28:[function(require,module,exports){
+},{"_process":22}],22:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4407,7 +4265,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],29:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -4584,7 +4442,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":30}],30:[function(require,module,exports){
+},{"./debug":24}],24:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -4783,7 +4641,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":31}],31:[function(require,module,exports){
+},{"ms":25}],25:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4908,7 +4766,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],32:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*!
  * expand-brackets <https://github.com/jonschlinkert/expand-brackets>
  *
@@ -5067,7 +4925,7 @@ brackets.match = function (arr, pattern) {
   return res;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*!
  * filename-regex <https://github.com/regexps/filename-regex>
  *
@@ -5079,7 +4937,7 @@ module.exports = function filenameRegex() {
   return /([^\\\/]+)$/;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /*!
  * is-glob <https://github.com/jonschlinkert/is-glob>
  *
@@ -5092,7 +4950,7 @@ module.exports = function isGlob(str) {
     && /[!*{}?(|)[\]]/.test(str);
 };
 
-},{}],35:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (Buffer){
 var toString = Object.prototype.toString;
 
@@ -5141,7 +4999,7 @@ module.exports = function kindOf(val) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23}],36:[function(require,module,exports){
+},{"buffer":17}],30:[function(require,module,exports){
 /*!
  * object.omit <https://github.com/jonschlinkert/object.omit>
  *
@@ -5182,13 +5040,47 @@ module.exports = function omit(obj, props) {
 
   return o;
 };
-},{"for-own":37,"isobject":39}],37:[function(require,module,exports){
+},{"for-own":31,"isobject":33}],31:[function(require,module,exports){
+/*!
+ * for-own <https://github.com/jonschlinkert/for-own>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+var forIn = require('for-in');
+var hasOwn = Object.prototype.hasOwnProperty;
+
+module.exports = function forOwn(o, fn, thisArg) {
+  forIn(o, function (val, key) {
+    if (hasOwn.call(o, key)) {
+      return fn.call(thisArg, o[key], key, o);
+    }
+  });
+};
+
+},{"for-in":32}],32:[function(require,module,exports){
+/*!
+ * for-in <https://github.com/jonschlinkert/for-in>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function forIn(o, fn, thisArg) {
+  for (var key in o) {
+    if (fn.call(thisArg, o[key], key, o) === false) {
+      break;
+    }
+  }
+};
+},{}],33:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12,"for-in":38}],38:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],39:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],40:[function(require,module,exports){
+},{"dup":12}],34:[function(require,module,exports){
 /*!
  * parse-glob <https://github.com/jonschlinkert/parse-glob>
  *
@@ -5345,7 +5237,7 @@ function unescape(str) {
   return str;
 }
 
-},{"glob-base":41,"is-dotfile":43,"is-extglob":44,"is-glob":45}],41:[function(require,module,exports){
+},{"glob-base":35,"is-dotfile":37,"is-extglob":38,"is-glob":28}],35:[function(require,module,exports){
 /*!
  * glob-base <https://github.com/jonschlinkert/glob-base>
  *
@@ -5397,7 +5289,7 @@ function dirname(glob) {
   return path.dirname(glob);
 }
 
-},{"glob-parent":42,"path":27}],42:[function(require,module,exports){
+},{"glob-parent":36,"path":21}],36:[function(require,module,exports){
 'use strict';
 
 var path = require('path');
@@ -5408,7 +5300,7 @@ module.exports = function globParent(str) {
 	return str;
 };
 
-},{"is-glob":45,"path":27}],43:[function(require,module,exports){
+},{"is-glob":28,"path":21}],37:[function(require,module,exports){
 /*!
  * is-dotfile <https://github.com/regexps/is-dotfile>
  *
@@ -5425,7 +5317,7 @@ module.exports = function(str) {
   return last !== -1 ? str.charCodeAt(last + 1) === 46  /* . */ : false;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /*!
  * is-extglob <https://github.com/jonschlinkert/is-extglob>
  *
@@ -5438,9 +5330,7 @@ module.exports = function isExtglob(str) {
     && /[@?!+*]\(/.test(str);
 };
 
-},{}],45:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],46:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /*!
  * regex-cache <https://github.com/jonschlinkert/regex-cache>
  *
@@ -5494,7 +5384,7 @@ function regexCache(fn, str, options) {
 
 var cache = module.exports.cache = {};
 
-},{"to-key":47}],47:[function(require,module,exports){
+},{"to-key":40}],40:[function(require,module,exports){
 (function (Buffer){
 /*!
  * to-key <https://github.com/jonschlinkert/to-key>
@@ -5567,8 +5457,32 @@ function toString(obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"arr-map":48,"buffer":23,"for-in":49}],48:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],49:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}]},{},[1]);
+},{"arr-map":41,"buffer":17,"for-in":42}],41:[function(require,module,exports){
+/*!
+ * arr-map <https://github.com/jonschlinkert/arr-map>
+ *
+ * Copyright (c) 2015 Jon Schlinkert, contributors.
+ * Licensed under the MIT license.
+ */
+
+'use strict';
+
+module.exports = function map(arr, fn) {
+  if (arr == null) {
+    return [];
+  }
+
+  var len = arr.length;
+  var res = new Array(len);
+  var i = -1;
+
+  while (++i < len) {
+    res[i] = fn(arr[i], i, arr);
+  }
+
+  return res;
+};
+
+},{}],42:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}]},{},[1]);
