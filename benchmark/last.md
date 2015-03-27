@@ -1,51 +1,51 @@
 #1: basename-braces
-  micromatch x 27,734 ops/sec ±0.75% (93 runs sampled)
-  minimatch x 3,409 ops/sec ±0.77% (97 runs sampled)
+  micromatch x 28,257 ops/sec ±0.72% (97 runs sampled)
+  minimatch x 3,016 ops/sec ±0.70% (96 runs sampled)
 
 #2: basename
-  micromatch x 26,727 ops/sec ±0.81% (97 runs sampled)
-  minimatch x 4,122 ops/sec ±0.77% (97 runs sampled)
+  micromatch x 26,498 ops/sec ±1.01% (94 runs sampled)
+  minimatch x 4,072 ops/sec ±0.69% (97 runs sampled)
 
 #3: braces-no-glob
-  micromatch x 324,367 ops/sec ±0.62% (95 runs sampled)
-  minimatch x 29,682 ops/sec ±0.71% (94 runs sampled)
+  micromatch x 333,735 ops/sec ±0.81% (95 runs sampled)
+  minimatch x 27,698 ops/sec ±0.88% (95 runs sampled)
 
 #4: braces
-  micromatch x 63,430 ops/sec ±1.14% (95 runs sampled)
-  minimatch x 2,749 ops/sec ±0.77% (97 runs sampled)
+  micromatch x 58,366 ops/sec ±0.84% (98 runs sampled)
+  minimatch x 2,781 ops/sec ±0.75% (97 runs sampled)
 
 #5: immediate
-  micromatch x 21,842 ops/sec ±0.66% (98 runs sampled)
-  minimatch x 3,638 ops/sec ±0.66% (97 runs sampled)
+  micromatch x 23,495 ops/sec ±0.68% (98 runs sampled)
+  minimatch x 3,841 ops/sec ±0.89% (97 runs sampled)
 
 #6: large
-  micromatch x 802 ops/sec ±0.58% (96 runs sampled)
-  minimatch x 15.72 ops/sec ±1.25% (42 runs sampled)
+  micromatch x 761 ops/sec ±0.78% (96 runs sampled)
+  minimatch x 15.94 ops/sec ±1.01% (42 runs sampled)
 
 #7: long
-  micromatch x 8,061 ops/sec ±0.69% (96 runs sampled)
-  minimatch x 560 ops/sec ±0.71% (90 runs sampled)
+  micromatch x 7,653 ops/sec ±0.74% (99 runs sampled)
+  minimatch x 574 ops/sec ±0.64% (94 runs sampled)
 
 #8: mid
-  micromatch x 67,972 ops/sec ±0.78% (93 runs sampled)
-  minimatch x 1,745 ops/sec ±0.87% (96 runs sampled)
+  micromatch x 64,422 ops/sec ±0.76% (95 runs sampled)
+  minimatch x 1,722 ops/sec ±0.95% (95 runs sampled)
 
 #9: multi-patterns
-  micromatch x 25,136 ops/sec ±0.87% (95 runs sampled)
-  minimatch x 1,986 ops/sec ±1.03% (95 runs sampled)
+  micromatch x 22,265 ops/sec ±0.74% (97 runs sampled)
+  minimatch x 2,089 ops/sec ±0.72% (96 runs sampled)
 
 #10: no-glob
-  micromatch x 1,062,274 ops/sec ±0.90% (94 runs sampled)
-  minimatch x 53,150 ops/sec ±0.85% (96 runs sampled)
+  micromatch x 1,045,797 ops/sec ±0.78% (94 runs sampled)
+  minimatch x 51,875 ops/sec ±0.79% (94 runs sampled)
 
 #11: range
-  micromatch x 270,918 ops/sec ±0.75% (97 runs sampled)
-  minimatch x 13,548 ops/sec ±0.85% (96 runs sampled)
+  micromatch x 261,721 ops/sec ±0.69% (95 runs sampled)
+  minimatch x 13,824 ops/sec ±0.66% (98 runs sampled)
 
 #12: shallow
-  micromatch x 198,022 ops/sec ±0.80% (97 runs sampled)
-  minimatch x 20,093 ops/sec ±0.62% (95 runs sampled)
+  micromatch x 190,469 ops/sec ±0.70% (95 runs sampled)
+  minimatch x 20,565 ops/sec ±0.70% (94 runs sampled)
 
 #13: short
-  micromatch x 440,230 ops/sec ±0.84% (97 runs sampled)
-  minimatch x 58,116 ops/sec ±0.74% (92 runs sampled)
+  micromatch x 451,798 ops/sec ±0.69% (93 runs sampled)
+  minimatch x 50,688 ops/sec ±0.78% (94 runs sampled)
