@@ -7,8 +7,8 @@
 
 'use strict';
 
-var path = require('path');
 require('should');
+var path = require('path');
 var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
 
@@ -19,11 +19,32 @@ if ('multimatch' in argv || 'minimatch' in argv) {
 var files = ['a', 'b', 'c', 'd', 'a/a', 'a/b', 'a/b.js', 'a/c.js', 'a/b/c/d.js', '.a/.js', 'a/b/.js', 'a/b.md', 'a/b.txt']
 
 describe('micromatch string patterns', function () {
-  it('should unixify file paths', function () {
-    mm(['a\\b\\c.md'], '**/*.md', {unixify: true}).should.eql(['a/b/c.md']);
+  it('should handle windows paths', function () {
     mm(['a/b/c.md'], '**/*.md').should.eql(['a/b/c.md']);
     mm(['E:/a/b/c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
-    mm(['E:\\a\\b\\c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
+  });
+
+  it('should unixify file paths', function () {
+    if (path.sep === '\\') {
+      mm(['a\\b\\c.md'], '**/*.md').should.eql(['a/b/c.md']);
+    }
+    mm(['a\\b\\c.md'], '**/*.md', {unixify: true}).should.eql(['a/b/c.md']);
+  });
+
+  it('should unixify absolute paths', function () {
+    if (path.sep === '\\') {
+      mm(['E:\\a\\b\\c.md'], 'E:/**/*.md').should.eql(['E:/a/b/c.md']);
+    }
+    mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', {unixify: true}).should.eql(['E:/a/b/c.md']);
+  });
+
+  it('should unixify patterns', function () {
+    if (path.sep === '\\') {
+      mm(['a\\b\\c.md'], '**\\*.md').should.eql(['a/b/c.md']);
+      mm(['E:\\a\\b\\c.md'], 'E:\\**\\*.md').should.eql(['E:/a/b/c.md']);
+    }
+    mm(['a\\b\\c.md'], '**\\*.md', {unixify: true}).should.eql(['a/b/c.md']);
+    mm(['E:\\a\\b\\c.md'], 'E:\\**\\*.md', {unixify: true}).should.eql(['E:/a/b/c.md']);
   });
 
   describe('file extensions:', function () {

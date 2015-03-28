@@ -221,10 +221,10 @@ function any(fp, patterns, opts) {
     throw new TypeError(msg('any', 'patterns', 'a string or array'));
   }
 
-  fp = utils.unixify(fp, opts);
   patterns = utils.arrayify(patterns);
   var len = patterns.length;
 
+  fp = utils.unixify(fp, opts);
   while (len--) {
     var isMatch = matcher(patterns[len], opts);
     if (isMatch(fp)) {
@@ -279,6 +279,10 @@ function matcher(pattern, opts) {
       return pattern.test(fp);
     };
   }
+
+  // strings, all the way down...
+  pattern = utils.unixify(pattern, opts);
+
   // pattern is a non-glob string
   if (!isGlob(pattern)) {
     return utils.matchPath(pattern, opts);
