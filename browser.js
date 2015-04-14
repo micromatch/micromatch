@@ -222,10 +222,10 @@ function any(fp, patterns, opts) {
     throw new TypeError(msg('any', 'patterns', 'a string or array'));
   }
 
-  fp = utils.unixify(fp, opts);
   patterns = utils.arrayify(patterns);
   var len = patterns.length;
 
+  fp = utils.unixify(fp, opts);
   while (len--) {
     var isMatch = matcher(patterns[len], opts);
     if (isMatch(fp)) {
@@ -280,6 +280,10 @@ function matcher(pattern, opts) {
       return pattern.test(fp);
     };
   }
+
+  // strings, all the way down...
+  pattern = utils.unixify(pattern, opts);
+
   // pattern is a non-glob string
   if (!isGlob(pattern)) {
     return utils.matchPath(pattern, opts);
@@ -708,6 +712,8 @@ function expandFilename(glob, opts) {
   glob._replace('__QMARK_GROUP__', '(?');
   glob.unescape(glob.pattern);
   glob._replace('__UNESC_STAR__', '*');
+  glob._replace('%~', '?');
+  glob._replace('%%', '*');
   return glob;
 }
 
@@ -1084,7 +1090,7 @@ function esc(str) {
 
 var path = require('path');
 var fileRe = require('filename-regex');
-var win32 = process.platform === 'win32';
+var win32 = process && process.platform === 'win32';
 var win;
 
 var utils = {};
@@ -1094,22 +1100,22 @@ utils.filename = function filename(fp) {
   return seg && seg[0];
 };
 
-utils.isPath = function isPath(pattern) {
+utils.isPath = function isPath(pattern, opts) {
   return function (fp) {
-    return fp === pattern;
+    return utils.unixify(fp, opts) === pattern;
   };
 };
 
-utils.hasPath = function hasPath(pattern) {
+utils.hasPath = function hasPath(pattern, opts) {
   return function (fp) {
-    return fp.indexOf(pattern) !== -1;
+    return utils.unixify(fp, opts).indexOf(pattern) !== -1;
   };
 };
 
 utils.matchPath = function matchPath(pattern, opts) {
   var fn = (opts && opts.contains)
-    ? utils.hasPath(pattern)
-    : utils.isPath(pattern);
+    ? utils.hasPath(pattern, opts)
+    : utils.isPath(pattern, opts);
   return fn;
 };
 
@@ -1139,12 +1145,9 @@ utils.arrayify = function arrayify(val) {
 
 utils.unixify = function unixify(fp, opts) {
   if (opts && opts.unixify === false) return fp;
-  if (opts && opts.unixify === true) {
-    win = true;
-  } else if (opts && opts.cache && typeof win === 'undefined') {
-    win = win32 || path.sep === '\\';
+  if (opts && opts.unixify === true || win32 || path.sep === '\\') {
+    return fp.split('\\').join('/');
   }
-  if (win) return fp.replace(/[\\\/]+/g, '/');
   return fp;
 };
 
@@ -1236,8 +1239,8 @@ function diff(a, b, c) {
 /*!
  * array-slice <https://github.com/jonschlinkert/array-slice>
  *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -1780,7 +1783,7 @@ function fillRange(a, b, step, options, fn) {
 
   b = (b.toString() === '-0') ? 0 : b;
 
-  if (opts.makeRe) {
+  if (opts.optimize || opts.makeRe) {
     step = step ? (step += '~') : step;
     expand = true;
     regex = true;
@@ -2147,18 +2150,11 @@ module.exports = function isNumber(n) {
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
-
-/**
- * is the value an object, and not an array?
- *
- * @param  {*} `value`
- * @return {Boolean}
- */
 
 module.exports = function isObject(o) {
   return o != null && typeof o === 'object'
@@ -2257,7 +2253,7 @@ function randomatic(pattern, length, options) {
  * repeat-string <https://github.com/jonschlinkert/repeat-string>
  *
  * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -5079,8 +5075,27 @@ module.exports = function forIn(o, fn, thisArg) {
   }
 };
 },{}],33:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],34:[function(require,module,exports){
+/*!
+ * isobject <https://github.com/jonschlinkert/isobject>
+ *
+ * Copyright (c) 2014 Jon Schlinkert, contributors.
+ * Licensed under the MIT License
+ */
+
+'use strict';
+
+/**
+ * is the value an object, and not an array?
+ *
+ * @param  {*} `value`
+ * @return {Boolean}
+ */
+
+module.exports = function isObject(o) {
+  return o != null && typeof o === 'object'
+    && !Array.isArray(o);
+};
+},{}],34:[function(require,module,exports){
 /*!
  * parse-glob <https://github.com/jonschlinkert/parse-glob>
  *
@@ -5340,7 +5355,8 @@ module.exports = function isExtglob(str) {
 
 'use strict';
 
-var toKey = require('to-key');
+var isPrimitive = require('is-primitive');
+var equal = require('is-equal-shallow');
 
 /**
  * Expose `regexCache`
@@ -5358,24 +5374,37 @@ module.exports = regexCache;
  * @return {RegExp}
  */
 
-function regexCache(fn, str, options) {
-  var key = '_default_';
+function regexCache(fn, str, opts) {
+  var key = '_default_', regex, cached;
 
-  if (!str) {
-    return cache[key] || (cache[key] = fn());
-  }
-
-  if (!options) {
-    if (typeof str === 'string') {
-      return cache[str] || (cache[str] = fn(str));
-    } else {
-      key = toKey(str);
-      return cache[key] || (cache[key] = fn(str));
+  if (!str && !opts) {
+    if (typeof fn !== 'function') {
+      return fn;
     }
+    return basic[key] || (basic[key] = fn());
   }
 
-  key = str + toKey(options);
-  return cache[key] || (cache[key] = fn(str, options));
+  var isString = typeof str === 'string';
+  if (isString) {
+    if (!opts) {
+      return basic[str] || (basic[str] = fn(str));
+    }
+    key = str;
+  } else {
+    opts = str;
+  }
+
+  cached = cache[key];
+  if (cached && equal(cached.opts, opts)) {
+    return cached.regex;
+  }
+
+  memo(key, opts, (regex = fn(str, opts)));
+  return regex;
+}
+
+function memo(key, opts, regex) {
+  cache[key] = {regex: regex, opts: opts};
 }
 
 /**
@@ -5383,106 +5412,73 @@ function regexCache(fn, str, options) {
  */
 
 var cache = module.exports.cache = {};
+var basic = module.exports.basic = {};
 
-},{"to-key":40}],40:[function(require,module,exports){
-(function (Buffer){
+},{"is-equal-shallow":40,"is-primitive":42}],40:[function(require,module,exports){
 /*!
- * to-key <https://github.com/jonschlinkert/to-key>
+ * is-equal-shallow <https://github.com/jonschlinkert/is-equal-shallow>
  *
- * Copyright (c) 2015 Jon Schlinkert.
- * Licensed under the MIT license.
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
 
-var forIn = require('for-in');
-var map = require('arr-map');
+var isPrimitive = require('is-primitive');
 
-module.exports = toKey;
+module.exports = function isEqual(a, b) {
+  if (!a && !b) { return true; }
+  if (!a && b || a && !b) { return false; }
 
-function toKey(val) {
-  if (val === undefined || val === null) {
-    return '';
+  var numKeysA = 0, numKeysB = 0, key;
+  for (key in b) {
+    numKeysB++;
+    if (!isPrimitive(b[key]) || !a.hasOwnProperty(key) || (a[key] !== b[key])) {
+      return false;
+    }
   }
-
-  if (typeof val !== 'object') {
-    return '' + val;
+  for (key in a) {
+    numKeysA++;
   }
+  return numKeysA === numKeysB;
+};
 
-  if (Array.isArray(val)) {
-    return map(val, toKey).join('');
-  }
-
-  var type = toString.call(val);
-
-  if (type === '[object Function]') {
-    return '';
-  }
-
-  if (val instanceof RegExp || type === '[object RegExp]') {
-    return val.source;
-  }
-
-  if (val instanceof Date || type === '[object Date]') {
-    return Date.parse(val);
-  }
-
-  if (Buffer.isBuffer(val)) {
-    return val.toString();
-  }
-
-  return toString(val);
-}
-
-function toString(obj) {
-  if (typeof obj !== 'object') {
-    return obj + '';
-  }
-
-  var str = '';
-
-  if (Array.isArray(obj)) {
-    str += map(obj, toString);
-  } else {
-    forIn(obj, function (val, key) {
-      if (typeof val === 'object') {
-        str += key + toString(val);
-      } else {
-        str += key + val;
-      }
-    });
-    str = str.split(/[\W\s]/).join('');
-  }
-  return str;
-}
-
-}).call(this,require("buffer").Buffer)
-},{"arr-map":41,"buffer":17,"for-in":42}],41:[function(require,module,exports){
+},{"is-primitive":41}],41:[function(require,module,exports){
 /*!
- * arr-map <https://github.com/jonschlinkert/arr-map>
+ * is-primitive <https://github.com/jonschlinkert/is-primitive>
  *
- * Copyright (c) 2015 Jon Schlinkert, contributors.
- * Licensed under the MIT license.
+ * Copyright (c) 2014 Jon Schlinkert, contributors.
+ * Licensed under the MIT License
  */
 
 'use strict';
 
-module.exports = function map(arr, fn) {
-  if (arr == null) {
-    return [];
-  }
+// see http://jsperf.com/testing-value-is-primitive/5
+module.exports = function isPrimitive(value) {
+  switch (typeof value) {
+    case "string":
+    case "number":
+    case "boolean":
+    case "symbol":
+      return true;
+    }
 
-  var len = arr.length;
-  var res = new Array(len);
-  var i = -1;
-
-  while (++i < len) {
-    res[i] = fn(arr[i], i, arr);
-  }
-
-  return res;
+  return value == null;
 };
 
 },{}],42:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}]},{},[1]);
+/*!
+ * is-primitive <https://github.com/jonschlinkert/is-primitive>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+// see http://jsperf.com/testing-value-is-primitive/7
+module.exports = function isPrimitive(value) {
+  return value == null || (typeof value !== 'function' && typeof value !== 'object');
+};
+
+},{}]},{},[1]);
