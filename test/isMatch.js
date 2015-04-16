@@ -71,6 +71,10 @@ describe('.isMatch()', function () {
       mm.isMatch('a/b/z.js', '*.js').should.be.false;
       mm.isMatch('a/z.js', '*.js').should.be.false;
       mm.isMatch('z.js', '*.js').should.be.true;
+
+      mm.isMatch('z.js', 'z*.js').should.be.true;
+      mm.isMatch('a/z.js', 'a/z*.js').should.be.true;
+      mm.isMatch('a/z.js', '*/z*.js').should.be.true;
   });
 
   it('should match globstars:', function () {
