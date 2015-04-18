@@ -67,14 +67,14 @@ describe('.isMatch()', function () {
   });
 
   it('should match wildcards:', function() {
-      mm.isMatch('a/b/c/z.js', '*.js').should.be.false;
-      mm.isMatch('a/b/z.js', '*.js').should.be.false;
-      mm.isMatch('a/z.js', '*.js').should.be.false;
-      mm.isMatch('z.js', '*.js').should.be.true;
+    mm.isMatch('a/b/c/z.js', '*.js').should.be.false;
+    mm.isMatch('a/b/z.js', '*.js').should.be.false;
+    mm.isMatch('a/z.js', '*.js').should.be.false;
+    mm.isMatch('z.js', '*.js').should.be.true;
 
-      mm.isMatch('z.js', 'z*.js').should.be.true;
-      mm.isMatch('a/z.js', 'a/z*.js').should.be.true;
-      mm.isMatch('a/z.js', '*/z*.js').should.be.true;
+    mm.isMatch('z.js', 'z*.js').should.be.true;
+    mm.isMatch('a/z.js', 'a/z*.js').should.be.true;
+    mm.isMatch('a/z.js', '*/z*.js').should.be.true;
   });
 
   it('should match globstars:', function () {
@@ -94,7 +94,27 @@ describe('.isMatch()', function () {
     mm.isMatch('a/z.js', 'a/b/**/*.js').should.be.false;
     mm.isMatch('z.js', 'a/b/**/*.js').should.be.false;
 
-    // see issue #15
+    // issue #24
+    mm.isMatch('a', '**').should.be.true;
+    mm.isMatch('a', 'a/**').should.be.false;
+    mm.isMatch('a/', '**').should.be.true;
+    mm.isMatch('a/b/c/d', '**').should.be.true;
+    mm.isMatch('a/b/c/d/', '**').should.be.true;
+    mm.isMatch('a/b/c/d/', '**/**').should.be.true;
+    mm.isMatch('a/b/c/d/', '**/b/**').should.be.true;
+    mm.isMatch('a/b/c/d/', 'a/b/**').should.be.true;
+    mm.isMatch('a/b/c/d/', 'a/b/**/').should.be.true;
+    mm.isMatch('a/b/c/d/', 'a/b/**/c/**/').should.be.true;
+    mm.isMatch('a/b/c/d/', 'a/b/**/c/**/d/').should.be.true;
+    mm.isMatch('a/b/c/d/', 'a/b/**/f').should.be.false;
+    mm.isMatch('a/b/c/d/e.f', 'a/b/**/**/*.*').should.be.true;
+    mm.isMatch('a/b/c/d/e.f', 'a/b/**/*.*').should.be.true;
+    mm.isMatch('a/b/c/d/e.f', 'a/b/**/c/**/d/*.*').should.be.true;
+    mm.isMatch('a/b/c/d/e.f', 'a/b/**/d/**/*.*').should.be.true;
+    mm.isMatch('a/b/c/d/g/e.f', 'a/b/**/d/**/*.*').should.be.true;
+    mm.isMatch('a/b/c/d/g/g/e.f', 'a/b/**/d/**/*.*').should.be.true;
+
+    // issue #15
     mm.isMatch('z.js', '**/z*.js').should.be.true;
     mm.isMatch('a/b-c/z.js', 'a/b-*/**/z.js').should.be.true;
     mm.isMatch('a/b-c/d/e/z.js', 'a/b-*/**/z.js').should.be.true;
