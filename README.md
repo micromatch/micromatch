@@ -105,6 +105,11 @@ mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.md', '*.txt']);
 
 **Negation patterns:**
 
+Behavior;
+
+ - when the pattern is a string, [minimatch] behavior is used, so patterns are **inclusive by default**. 
+ - when an array of patterns is passed, [multimatch] behavior is used, so patterns are **exclusive by default**
+
 ```js
 mm(['a.js', 'b.md', 'c.txt'], '!*.{js,txt}');
 //=> ['b.md']
