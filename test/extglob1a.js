@@ -18,28 +18,30 @@ if ('minimatch' in argv) {
 }
 
 describe('extglob1a', function () {
-  // it('should match character classes:', function () {
-  //   mm.match(['a', 'ab', 'x'], 'a!(x)').should.eql(['a', 'ab']);
-  //   mm.match(['a'], 'a?(x)').should.eql(['a']);
-  //   mm.match(['ba'], 'a!(x)').should.eql([]);
-  //   mm.match(['ba'], 'a*?(x)').should.eql([]);
-  //   mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c').should.eql([]);
-  //   mm.match(['ab', 'ba'], 'a?(x)').should.eql([]);
-  //   mm.match(['ba'], 'a*!(x)').should.eql([]);
-  //   mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)').should.eql(['a.md', 'a.', 'd.js.d']);
-  // });
+  it('should match extglobs:', function () {
+    mm.match(['ba'], 'a!(x)', {extglob: true}).should.eql([]);
+    mm.match(['ba', 'ab'], 'a!(x)', {extglob: true}).should.eql(['ab']);
+    mm.match(['ba'], 'a*(?(x))', {extglob: true}).should.eql([]);
+    mm.match(['ba', 'ax', 'a'], 'a*(?(x))', {extglob: true}).should.eql(['ax', 'a']);
+    mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c', {extglob: true}).should.eql([]);
+    mm.match(['ab', 'ba'], 'a?(x)', {extglob: true}).should.eql([]);
+    mm.match(['ba'], 'a*!(x)', {extglob: true}).should.eql([]);
+  });
 
-  it.skip('failing:', function () {
-    mm.match(['a', 'ab'], 'a*?(x)').should.eql(['a', 'ab']);
-    mm.match(['a', 'ab'], 'a*!(x)').should.eql(['a', 'ab']);
-    mm.match(['a', 'x'], 'a*!(x)').should.eql(['a']);
-    mm.match(['a', 'x', 'ab', 'ax'], 'a*!(x)').should.eql(['a']);
-    mm.makeRe('a*!(x)').should.eql(/^(?:(?=.)a[^/]*?(?:(?!x)[^/]*?))$/);
+  it('pending:', function () {
+    mm.match(['a', 'ab', 'x'], 'a!(x)', {extglob: true}).should.eql(['a', 'ab']);
+    mm.match(['a'], 'a?(x)', {extglob: true}).should.eql(['a']);
+    mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)', {extglob: true}).should.eql(['a.md', 'a.', 'd.js.d']);
+    // mm.match(['a', 'ab'], 'a*(?(x))', {extglob: true}).should.eql(['a', 'ab']);
+    mm.match(['a', 'ab'], 'a*(!(x))', {extglob: true}).should.eql(['a', 'ab']);
+    mm.match(['a', 'x'], 'a*(!(x))', {extglob: true}).should.eql(['a']);
+    mm.match(['a', 'x', 'ab', 'ax'], 'a*(!(x))', {extglob: true}).should.eql(['a', 'ab']);
+    mm.makeRe('a*!(x)', {extglob: true}).should.eql(/^(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?(?!x)[^/]*?)$/);
   });
 
   it('should match negation patterns on extglobs:', function () {
-    mm.makeRe('a*!(x)').should.eql(/^(?:a[^/]*?!(x))$/);
-    mm.makeRe('?(a*|b)').should.eql(/^(?:[^/](a[^/]*?|b))$/);
+    mm.makeRe('a*!(x)').should.eql(/^(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?!(x))$/);
+    mm.makeRe('?(a*|b)').should.eql(/^(?:(?!\.)(?=.)[^/](a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b))$/);
     mm.makeRe('*.!(js)').should.eql(/^(?:(?!\.)(?=.)[^/]*?\.!(js))$/);
   });
 })
