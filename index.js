@@ -10,6 +10,7 @@
 var diff = require('arr-diff');
 var typeOf = require('kind-of');
 var omit = require('object.omit');
+var unique = require('array-unique');
 var cache = require('regex-cache');
 var isGlob = require('is-glob');
 var expand = require('./lib/expand');
@@ -111,7 +112,11 @@ function match(files, pattern, opts) {
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
     opts = omit(opts, ['ignore']);
-    return diff(res, micromatch(res, pattern, opts));
+    res = diff(res, micromatch(res, pattern, opts));
+  }
+
+  if (opts.nodupes) {
+    return unique(res);
   }
   return res;
 }
