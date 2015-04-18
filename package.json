@@ -32,9 +32,10 @@
   },
   "dependencies": {
     "arr-diff": "^1.0.1",
+    "array-unique": "^0.2.1",
     "braces": "^1.8.0",
-    "debug": "^2.1.3",
     "expand-brackets": "^0.1.1",
+    "extglob": "^0.3.0",
     "filename-regex": "^2.0.0",
     "is-glob": "^1.1.3",
     "kind-of": "^1.1.0",
