@@ -94,6 +94,10 @@ describe('.isMatch()', function () {
     mm.isMatch('a/z.js', 'a/b/**/*.js').should.be.false;
     mm.isMatch('z.js', 'a/b/**/*.js').should.be.false;
 
+    // issue #23
+    mm.isMatch('zzjs', 'z*.js').should.be.false;
+    mm.isMatch('zzjs', '*z.js').should.be.false;
+
     // issue #24
     mm.isMatch('a', '**').should.be.true;
     mm.isMatch('a', 'a/**').should.be.false;
