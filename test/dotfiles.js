@@ -17,14 +17,49 @@ if ('minimatch' in argv) {
 }
 
 describe('dotfiles', function () {
-  it('should not match a dot when the dot is not explicitly defined', function () {
-    mm.isMatch('.bashrc', '[.]bashrc').should.be.false;
-    mm.isMatch('.bashrc', '?bashrc').should.be.false;
+  describe('file name', function () {
+    it('should not match a dot when the dot is not explicitly defined', function () {
+      mm.isMatch('.bashrc', '*bashrc').should.be.false;
+      mm.isMatch('.bashrc', '[.]bashrc').should.be.false;
+      mm.isMatch('.bashrc', '?bashrc').should.be.false;
+    });
+
+    it('should match a dot when the dot is explicitly defined', function () {
+      mm.isMatch('.bashrc', '.[b]ashrc').should.be.true;
+      mm.isMatch('.bashrc', '.ba?hrc').should.be.true;
+      mm.isMatch('.bashrc', '.bashr*').should.be.true;
+    });
   });
 
-  it('should match a dot when the dot is explicitly defined', function () {
-    mm.isMatch('.bashrc', '.[b]ashrc').should.be.true;
-    mm.isMatch('.bashrc', '.ba?hrc').should.be.true;
-    mm.isMatch('.bashrc', '.bashr*').should.be.true;
+  describe('multiple directories', function () {
+    it('should not match a dot when the dot is not explicitly defined', function () {
+      mm.isMatch('/.bashrc', '/*bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '/?bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '/[.]bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '*/*bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '*/?bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '*/[.]bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '**/*bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '**/?bashrc').should.be.false;
+      mm.isMatch('/.bashrc', '**/[.]bashrc').should.be.false;
+      mm.isMatch('a/.bashrc', '*/*bashrc').should.be.false;
+      mm.isMatch('a/.bashrc', '*/?bashrc').should.be.false;
+      mm.isMatch('a/.bashrc', '*/[.]bashrc').should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/*bashrc').should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/?bashrc').should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc').should.be.false;
+    });
+
+    it('should match a dot when the dot is explicitly defined', function () {
+      mm.isMatch('/.bashrc', '**/.[b]ashrc').should.be.true;
+      mm.isMatch('/.bashrc', '**/.ba?hrc').should.be.true;
+      mm.isMatch('/.bashrc', '**/.bashr*').should.be.true;
+      mm.isMatch('a/.bashrc', '*/.[b]ashrc').should.be.true;
+      mm.isMatch('a/.bashrc', '*/.ba?hrc').should.be.true;
+      mm.isMatch('a/.bashrc', '*/.bashr*').should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/.[b]ashrc').should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/.ba?hrc').should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/.bashr*').should.be.true;
+    });
   });
 });
