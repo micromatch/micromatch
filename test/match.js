@@ -126,12 +126,14 @@ describe('.match()', function () {
 
     it('should match multiple directory levels:', function () {
       var dirs = ['a/b/c/e', 'a/b/c/d/e'];
-      mm.match(dirs, 'a/***').should.eql(['a/b/c/e', 'a/b/c/d/e']);
+      mm.match(dirs, 'a/***').should.eql(dirs);
       mm.match(dirs, 'a/**c*').should.eql([]);
       mm.match(dirs, 'a/**c/*').should.eql(['a/b/c/e']);
       mm.match(dirs, 'a/**/c/*').should.eql(['a/b/c/e']);
       mm.match(dirs, 'a/**/e').should.eql(dirs);
       mm.match(dirs, 'a/b/**/e').should.eql(dirs);
+      mm.match(['a/x.js', 'a/z.js', 'z.js'], '*/z*.js').should.eql(['a/z.js']);
+      mm.match([ 'z.js', 'a/z.js', 'a/b/c/z.js' ], '**z*.js').should.eql(['z.js']);
     });
   });
 
