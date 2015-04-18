@@ -8,7 +8,6 @@
 'use strict';
 
 var diff = require('arr-diff');
-var debug = require('debug')('micromatch');
 var typeOf = require('kind-of');
 var omit = require('object.omit');
 var cache = require('regex-cache');
