@@ -64,6 +64,21 @@ describe('options.matchBase', function () {
   });
 });
 
+describe('options.nodupes', function () {
+  it('should remove duplicate elements from the result array:', function () {
+    mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true}).should.eql(['abc', 'abc']);
+    mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true, nodupes: true}).should.eql(['abc']);
+  });
+});
+
+describe('options.unescape', function () {
+  it('should remove backslashes in glob patterns:', function () {
+    mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c').should.eql(['\\a\\b\\c']);
+    mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true}).should.eql(['abc', 'abc']);
+    mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true, nodupes: true}).should.eql(['abc']);
+  });
+});
+
 describe('options.dotfiles:', function () {
   describe('when `dot` or `dotfile` is NOT true:', function () {
     it('should not match dotfiles by default:', function () {
