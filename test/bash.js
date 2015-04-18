@@ -14,7 +14,7 @@ var ref = require('./support/reference');
 var mm = require('..');
 
 if ('minimatch' in argv) {
-  mm = ref.minimatch;
+  mm = ref;
 }
 
 // from the Bash 4.3 specification/unit tests
