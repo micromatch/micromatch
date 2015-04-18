@@ -9,9 +9,9 @@
 'use strict';
 
 var diff = require('arr-diff');
-var debug = require('debug')('micromatch');
 var typeOf = require('kind-of');
 var omit = require('object.omit');
+var unique = require('array-unique');
 var cache = require('regex-cache');
 var isGlob = require('is-glob');
 var expand = require('./lib/expand');
@@ -113,7 +113,11 @@ function match(files, pattern, opts) {
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
     opts = omit(opts, ['ignore']);
-    return diff(res, micromatch(res, pattern, opts));
+    res = diff(res, micromatch(res, pattern, opts));
+  }
+
+  if (opts.nodupes) {
+    return unique(res);
   }
   return res;
 }
@@ -411,7 +415,7 @@ micromatch.matchKeys = matchKeys;
 
 module.exports = micromatch;
 
-},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"braces":8,"debug":23,"is-glob":28,"kind-of":29,"object.omit":30,"regex-cache":39}],2:[function(require,module,exports){
+},{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"array-unique":8,"braces":9,"is-glob":28,"kind-of":29,"object.omit":30,"regex-cache":39}],2:[function(require,module,exports){
 'use strict';
 
 var chars = {};
@@ -531,16 +535,42 @@ function expand(pattern, options) {
   var glob = new Glob(pattern, options || {});
   var opts = glob.options;
 
+  if (typeof opts.braces === 'undefined' && typeof opts.nobraces === 'undefined') {
+    opts.braces = true;
+  }
+
   // return early if glob pattern matches special patterns
   if (specialCase(pattern) && opts.safemode) {
     return new RegExp(utils.escapeRe(pattern), 'g');
   }
 
+  if (glob.pattern === '.*') {
+    return {
+      pattern: '\\.' + star,
+      tokens: tok,
+      options: opts
+    };
+  }
+
+  if (glob.pattern === '.') {
+    return {
+      pattern: '\\.',
+      tokens: tok,
+      options: opts
+    };
+  }
+
+  if (glob.pattern === '*') {
+    return {
+      pattern: oneStar(opts.dot),
+      tokens: tok,
+      options: opts
+    };
+  }
+
   if (opts.nonegate !== true) {
     opts.negated = glob.negated;
   }
-
-  glob._replace('/.', '/\\.');
 
   // parse the glob pattern into tokens
   glob.parse();
@@ -553,25 +583,29 @@ function expand(pattern, options) {
     opts.dot = true;
   }
 
-  if (!tok.is.glob) {
-    return {
-      pattern: utils.escapePath(glob.pattern),
-      tokens: tok,
-      options: opts
-    };
+  if (glob.pattern.charAt(0) === '.' && glob.pattern.charAt(1) !== '/') {
+    glob.pattern = '\\' + glob.pattern;
   }
 
-  // see if it might be a dotfile pattern
+  opts.dot = !!opts.dot;
+
+  // check for braces with a dotfile pattern
   if (/[{,]\./.test(glob.pattern)) {
     opts.makeRe = false;
     opts.dot = true;
   }
 
   // expand braces, e.g `{1..5}`
+  glob.track('before extglob');
+  if (tok.is.extglob) {
+    glob.extglob();
+  }
+
   glob.track('before brackets');
   if (tok.is.brackets) {
     glob.brackets();
   }
+
   glob.track('before braces');
   if (tok.is.braces) {
     glob.braces();
@@ -579,27 +613,25 @@ function expand(pattern, options) {
 
   glob.track('after braces');
 
+  glob._replace('[!', '[^');
+  glob._replace('(?', '(%~');
+  glob._replace('/[', '/(?!\\.)(?=.)[', true);
+  glob._replace('/?', '/(?!\\.)(?=.)[^/]', true);
+  glob._replace('/.', '/(?=.)\\.', true);
   glob._replace('[]', '\\[\\]');
-  glob._replace('(?', '__QMARK_GROUP__');
 
   // windows drives
-  glob._replace(/^(\w):([\\\/]+?)/gi, lookahead + '$1:$2', true);
+  glob._replace(/^(\w):([\\\/]+?)/gi, '(?=.)$1:$2', true);
 
   // negate slashes in exclusion ranges
   if (glob.pattern.indexOf('[^') !== -1) {
     glob.pattern = negateSlash(glob.pattern);
   }
 
-  if (glob.pattern === '**' && opts.globstar !== false) {
-     glob.pattern = globstar(opts);
+  if (opts.globstar !== false && glob.pattern === '**') {
+     glob.pattern = globstar(opts.dot);
 
   } else {
-    if (/^\*\.\w*$/.test(glob.pattern)) {
-      glob._replace('*', star(opts.dot) + '\\');
-      glob._replace('__QMARK_GROUP__', '(?');
-      return glob;
-    }
-
     // '/*/*/*' => '(?:/*){3}'
     glob._replace(/(\/\*)+/g, function (match) {
       var len = match.length / 2;
@@ -610,115 +642,75 @@ function expand(pattern, options) {
     glob.pattern = balance(glob.pattern, '[', ']');
     glob.escape(glob.pattern);
 
-    // if the glob is for one directory deep, we can
-    // simplify the parsing and generated regex
-    if (tok.path.dirname === '' && !tok.is.globstar) {
-      glob.track('before expand filename');
-      return expandFilename(glob, opts);
-    }
-
     // if the pattern has `**`
     if (tok.is.globstar) {
-      glob._replace(/\*{2,}/g, '**');
       glob.pattern = collapse(glob.pattern, '/**');
-      glob.pattern = optionalGlobstar(glob.pattern);
-
-      // reduce extraneous globstars
-      glob._replace(/(^|[^\\])\*{2,}([^\\]|$)/g, '$1**$2');
+      glob.pattern = collapse(glob.pattern, '**/');
+      glob._replace(/\*{2,}/g, '**');
 
       // 'foo/*'
-      glob._replace(/(\w+)\*(?!\/)/g, '(?=.)$1[^/]*?', true);
-      glob._replace('**', globstar(opts), true);
+      glob._replace(/(\w+)\*(?!\/)/g, '$1[^/]*?', true);
+      glob._replace(/\*\*\/\*(\w)/g, globstar(opts.dot) + '\\/(?!\\.)(?=.)[^/]*?$1', true);
+      glob._replace(/\*\*\/(.)/g, '(?:**\\/|)$1');
+
+      // 'foo/**' or '{**,*}', but not 'foo**'
+      if (tok.path.dirname !== '' || /,\*\*|\*\*,/.test(glob.orig)) {
+        glob._replace('**', globstar(opts.dot), true);
+      }
     }
 
     // ends with /*
-    glob._replace(/\/\*$/, '\\/' + stardot(opts), true);
+    glob._replace(/\/\*$/, '\\/' + oneStar(opts.dot), true);
     // ends with *, no slashes
-    glob._replace(/(?!\/)\*$/, boxQ, true);
+    glob._replace(/(?!\/)\*$/, star, true);
+    // has 'n*.' (partial wildcard w/ file extension)
+    glob._replace(/([^\/]+)\*/, '$1' + oneStar(true), true);
     // has '*'
-    glob._replace('*', stardot(opts), true);
+    glob._replace('*', oneStar(opts.dot), true);
     glob._replace('?.', '?\\.', true);
     glob._replace('?:', '?:', true);
 
     glob._replace(/\?+/g, function (match) {
       var len = match.length;
       if (len === 1) {
-        return box;
+        return qmark;
       }
-      return box + '{' + len + '}';
+      return qmark + '{' + len + '}';
     });
 
     // escape '.abc' => '\\.abc'
     glob._replace(/\.([*\w]+)/g, '\\.$1');
     // fix '[^\\\\/]'
-    glob._replace(/\[\^[\\\/]+\]/g, box);
+    glob._replace(/\[\^[\\\/]+\]/g, qmark);
     // '///' => '\/'
     glob._replace(/\/+/g, '\\/');
     // '\\\\\\' => '\\'
     glob._replace(/\\{2,}/g, '\\');
   }
 
-  glob._replace('__QMARK_GROUP__', '(?');
+  // unescape previously escaped patterns
   glob.unescape(glob.pattern);
   glob._replace('__UNESC_STAR__', '*');
-  glob._replace('%~', '?');
-  glob._replace('%%', '*');
+
+  // escape dots that follow qmarks
   glob._replace('?.', '?\\.');
-  glob._replace('[^\\/]', '[^/]');
-  return glob;
-}
 
-/**
- * Expand the filename part of the glob into a regex
- * compatible string
- *
- * @param  {String} glob
- * @param  {Object} tok Tokens
- * @param  {Options} opts
- * @return {Object}
- */
+  // remove unnecessary slashes in character classes
+  glob._replace('[^\\/]', qmark);
 
-function expandFilename(glob, opts) {
-  var tok = glob.tokens;
-  switch (glob.pattern) {
-    case '.':
-      glob.pattern = '\\.';
-      break;
-    case '.*':
-      glob.pattern = '\\..*';
-      break;
-    case '*.*':
-      glob.pattern = star(opts.dot) + '\\.[^/]*?';
-      break;
-    case '*':
-      glob.pattern = star(opts.dot);
-      break;
-    default:
-    if (tok.path.filename === '*' && !tok.path.dirname) {
-      glob.pattern = star(opts.dot) + '\\' + glob.pattern.slice(1);
-    } else {
-      glob._replace(/(?!\()\?/g, '[^/]');
-      if (tok.path.basename.charAt(0) !== '.') {
-        opts.dot = true;
-      }
-      glob._replace('*', star(opts.dot));
+  if (glob.pattern.length > 1) {
+    if (glob.pattern.indexOf('\\/') === 0 && glob.pattern.indexOf('\\/(?!\\.)(?=.)') !== 0) {
+      glob.pattern = '\\/(?!\\.)(?=.)' + glob.pattern.slice(2);
+    } else if (/^[\[?*]/.test(glob.pattern)) {
+      glob.pattern = '(?!\\.)(?=.)' + glob.pattern;
     }
   }
-
-  if (glob.pattern.charAt(0) === '.') {
-    glob.pattern = '\\' + glob.pattern;
-  }
-
-  glob._replace('__QMARK_GROUP__', '(?');
-  glob.unescape(glob.pattern);
-  glob._replace('__UNESC_STAR__', '*');
-  glob._replace('%~', '?');
-  glob._replace('%%', '*');
   return glob;
 }
 
 /**
- * Special cases
+ * Special cases. This is somewhat of a placeholder
+ * for more advanced logic.
  */
 
 function specialCase(glob) {
@@ -737,51 +729,18 @@ function specialCase(glob) {
  * ```
  *
  * @param  {String} `str`
- * @param  {String} `ch`
+ * @param  {String} `ch` Character sequence to collapse
  * @return {String}
  */
 
-function collapse(str, ch, repeat) {
+function collapse(str, ch) {
   var res = str.split(ch);
-  var len = res.length;
   var isFirst = res[0] === '';
   var isLast = res[res.length - 1] === '';
   res = res.filter(Boolean);
-  if (isFirst) {
-    res.unshift('');
-  }
-  if (isLast) {
-    res.push('');
-  }
-  var diff = len - res.length;
-  if (repeat && diff >= 1) {
-    ch = '(?:' + ch + '){' + (diff + 1) + '}';
-  }
+  if (isFirst) res.unshift('');
+  if (isLast) res.push('');
   return res.join(ch);
-}
-
-/**
- * Make globstars optional, as in glob spec:
- *
- * ```js
- * optionalGlobstar('a\/**\/b');
- * //=> '(?:a\/b|a\/**\/b)'
- * ```
- *
- * @param  {String} `str`
- * @return {String}
- */
-
-function optionalGlobstar(glob) {
-  // globstars preceded and followed by a word character
-  if (/[^\/]\/\*\*\/[^\/]/.test(glob)) {
-    var tmp = glob.split('/**/').join('/');
-    glob = '(?:' + tmp + '|' + glob + ')';
-  // leading globstars
-  } else if (/^\*\*\/[^\/]/.test(glob)) {
-    glob = glob.split(/^\*\*\//).join('(^|.+\\/)');
-  }
-  return glob;
 }
 
 /**
@@ -792,13 +751,12 @@ function optionalGlobstar(glob) {
  * //=> '[^\\/foo]'
  * ```
  *
- * @param  {[type]} str [description]
- * @return {[type]}
+ * @param  {String} `str` glob pattern
+ * @return {String}
  */
 
 function negateSlash(str) {
-  var re = /\[\^([^\]]*?)\]/g;
-  return str.replace(re, function (match, inner) {
+  return str.replace(/\[\^([^\]]*?)\]/g, function (match, inner) {
     if (inner.indexOf('/') === -1) {
       inner = '\\/' + inner;
     }
@@ -807,7 +765,9 @@ function negateSlash(str) {
 }
 
 /**
- * Escape imbalanced braces/bracket
+ * Escape imbalanced braces/bracket. This is a very
+ * basic, naive implementation that only does enough
+ * to serve the purpose.
  */
 
 function balance(str, a, b) {
@@ -823,60 +783,39 @@ function balance(str, a, b) {
 }
 
 /**
- * Escape utils
- */
-
-function esc(str) {
-  str = str.split('?').join('%~');
-  str = str.split('*').join('%%');
-  return str;
-}
-
-/**
  * Special patterns to be converted to regex.
  * Heuristics are used to simplify patterns
  * and speed up processing.
  */
 
-var box         = '[^/]';
-var boxQ        = '[^/]*?';
-var lookahead   = '(?=.)';
+var qmark       = '[^/]';
+var star        = qmark + '*?';
 var nodot       = '(?!\\.)(?=.)';
-
-var ex = {};
-ex.dotfileGlob = '(?:^|\\/)(?:\\.{1,2})(?:$|\\/)';
-ex.stardot     = '(?!' + ex.dotfileGlob + ')(?=.)[^/]*?';
-ex.twoStarDot  = '(?:(?!' + ex.dotfileGlob + ').)*?';
+var dotfileGlob = '(?:\\/|^)\\.{1,2}(?:$|\\/)';
+var twoStarDot  = '(?:(?!' + dotfileGlob + ').)*?';
 
 /**
- * Create a regex for `*`. If `dot` is true,
- * or the pattern does not begin with a leading
- * star, then return the simple regex.
+ * Create a regex for `*`.
+ *
+ * If `dot` is true, or the pattern does not begin with
+ * a leading star, then return the simpler regex.
  */
 
-function star(dotfile) {
-  return dotfile ? boxQ : nodot + boxQ;
+function oneStar(dotfile) {
+  return dotfile ? '(?!(?:\\/|^)\\.{1,2}(?:$|\\/))(?=.)' + star : (nodot + star);
 }
 
-function dotstarbase(dotfile) {
-  var re = dotfile ? ex.dotfileGlob : '\\.';
-  return '(?!' + re + ')' + lookahead;
-}
-
-function globstar(opts) {
-  if (opts.dot) { return ex.twoStarDot; }
-  return '(?:(?!(?:^|\\/)\\.).)*?';
-}
-
-function stardot(opts) {
-  return dotstarbase(opts && opts.dot) + '[^/]*?';
+function globstar(dotfile) {
+  if (dotfile) { return twoStarDot; }
+  return '(?:(?!(?:\\/|^)\\.).)*?';
 }
 
 },{"./glob":4,"./utils":5}],4:[function(require,module,exports){
 'use strict';
 
-var brackets = require('expand-brackets');
 var braces = require('braces');
+var brackets = require('expand-brackets');
+var extglob = require('extglob');
 var parse = require('parse-glob');
 var chars = require('./chars');
 
@@ -941,22 +880,12 @@ Glob.prototype.has = function(pattern, ch) {
  */
 
 Glob.prototype.isNegated = function() {
+  if (this.tokens.isNegated) return true;
   if (this.pattern.charCodeAt(0) === 33 /* '!' */) {
     this.pattern = this.pattern.slice(1);
     return true;
   }
   return false;
-};
-
-/**
- * Return true if the glob pattern has braces
- *
- * @param  {String} `pattern`
- * @return {Boolean}
- */
-
-Glob.prototype.hasBraces = function(pattern) {
-  return this.has((pattern || this.pattern), '{');
 };
 
 /**
@@ -967,27 +896,20 @@ Glob.prototype.hasBraces = function(pattern) {
  */
 
 Glob.prototype.braces = function() {
-  if (this.hasBraces() && this.options.nobraces !== true) {
+  if (this.options.braces === true && this.options.nobraces !== true) {
+    // quick check for balanced characters
     var a = this.pattern.match(/[\{\(\[]/g);
     var b = this.pattern.match(/[\}\)\]]/g);
+
+    // if imbalanced, don't optimize the pattern
     if (a && b && (a.length !== b.length)) {
       this.options.makeRe = false;
     }
+
+    // expand brace patterns and join the resulting array
     var expanded = braces(this.pattern, this.options);
     this.pattern = expanded.join('|');
   }
-};
-
-/**
- * Return true if the glob pattern has a POSIX
- * bracket expression (character class)
- *
- * @param  {String} `pattern`
- * @return {Boolean}
- */
-
-Glob.prototype.hasBrackets = function(pattern) {
-  return this.has((pattern || this.pattern), '[:');
 };
 
 /**
@@ -995,8 +917,18 @@ Glob.prototype.hasBrackets = function(pattern) {
  */
 
 Glob.prototype.brackets = function() {
-  if (this.hasBrackets() && this.options.nobrackets !== true) {
+  if (this.options.brackets === true && this.options.nobrackets !== true) {
     this.pattern = brackets(this.pattern);
+  }
+};
+
+/**
+ * Expand bracket expressions in `glob.pattern`
+ */
+
+Glob.prototype.extglob = function() {
+  if (this.options.extglob === true && this.options.noextglob !== true) {
+    this.pattern = extglob(this.pattern, {escape: true});
   }
 };
 
@@ -1072,10 +1004,11 @@ Glob.prototype.unescape = function(str) {
   this.pattern = str.replace(re, function($0, $1) {
     return chars[$1][$0];
   });
+  this.pattern = unesc(this.pattern);
 };
 
 /**
- * Escape utils
+ * Escape/unescape utils
  */
 
 function esc(str) {
@@ -1084,16 +1017,26 @@ function esc(str) {
   return str;
 }
 
-},{"./chars":2,"braces":8,"expand-brackets":26,"parse-glob":34}],5:[function(require,module,exports){
+function unesc(str) {
+  str = str.split('%~').join('?');
+  str = str.split('%%').join('*');
+  return str;
+}
+
+},{"./chars":2,"braces":9,"expand-brackets":24,"extglob":25,"parse-glob":34}],5:[function(require,module,exports){
 (function (process){
 'use strict';
 
 var path = require('path');
 var fileRe = require('filename-regex');
 var win32 = process && process.platform === 'win32';
-var win;
 
-var utils = {};
+/**
+ * Expose `utils`
+ */
+
+var utils = module.exports;
+
 
 utils.filename = function filename(fp) {
   var seg = fp.match(fileRe());
@@ -1148,6 +1091,9 @@ utils.unixify = function unixify(fp, opts) {
   if (opts && opts.unixify === true || win32 || path.sep === '\\') {
     return fp.split('\\').join('/');
   }
+  if (opts && opts.unescape === true) {
+    return fp ? fp.toString().replace(/\\(\w)/g, '$1') : '';
+  }
   return fp;
 };
 
@@ -1167,14 +1113,8 @@ utils.escapeRe = function escapeRe(str) {
   return str.replace(/[-[\\$*+?.#^\s{}(|)\]]/g, '\\$&');
 };
 
-/**
- * Expose `utils`
- */
-
-module.exports = utils;
-
 }).call(this,require('_process'))
-},{"_process":22,"filename-regex":27,"path":21}],6:[function(require,module,exports){
+},{"_process":23,"filename-regex":27,"path":22}],6:[function(require,module,exports){
 /*!
  * arr-diff <https://github.com/jonschlinkert/arr-diff>
  *
@@ -1273,6 +1213,36 @@ function idx(arr, pos, end) {
   return pos;
 }
 },{}],8:[function(require,module,exports){
+/*!
+ * array-unique <https://github.com/jonschlinkert/array-unique>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function unique(arr) {
+  if (!Array.isArray(arr)) {
+    throw new TypeError('array-unique expects an array.');
+  }
+
+  var len = arr.length;
+  var i = -1;
+
+  while (i++ < len) {
+    var j = i + 1;
+
+    for (; j < arr.length; ++j) {
+      if (arr[i] === arr[j]) {
+        arr.splice(j--, 1);
+      }
+    }
+  }
+  return arr;
+};
+
+},{}],9:[function(require,module,exports){
 /*!
  * braces <https://github.com/jonschlinkert/braces>
  *
@@ -1675,7 +1645,7 @@ function filter(arr, cb) {
   return res;
 }
 
-},{"expand-range":9,"preserve":15,"repeat-element":16}],9:[function(require,module,exports){
+},{"expand-range":10,"preserve":16,"repeat-element":17}],10:[function(require,module,exports){
 /*!
  * expand-range <https://github.com/jonschlinkert/expand-range>
  *
@@ -1720,7 +1690,7 @@ module.exports = function expandRange(str, options, fn) {
   return fill.apply(fill, args.concat(fn));
 };
 
-},{"fill-range":10}],10:[function(require,module,exports){
+},{"fill-range":11}],11:[function(require,module,exports){
 /*!
  * fill-range <https://github.com/jonschlinkert/fill-range>
  *
@@ -2130,7 +2100,7 @@ function length(val) {
   return val.toString().length;
 }
 
-},{"is-number":11,"isobject":12,"randomatic":13,"repeat-element":16,"repeat-string":14}],11:[function(require,module,exports){
+},{"is-number":12,"isobject":13,"randomatic":14,"repeat-element":17,"repeat-string":15}],12:[function(require,module,exports){
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -2146,7 +2116,7 @@ module.exports = function isNumber(n) {
     || n === 0;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
@@ -2160,7 +2130,7 @@ module.exports = function isObject(o) {
   return o != null && typeof o === 'object'
     && !Array.isArray(o);
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*!
  * randomatic <https://github.com/jonschlinkert/randomatic>
  *
@@ -2248,7 +2218,7 @@ function randomatic(pattern, length, options) {
   return res;
 };
 
-},{"is-number":11,"kind-of":29}],14:[function(require,module,exports){
+},{"is-number":12,"kind-of":29}],15:[function(require,module,exports){
 /*!
  * repeat-string <https://github.com/jonschlinkert/repeat-string>
  *
@@ -2316,7 +2286,7 @@ function repeat(str, num) {
 var res = '';
 var cache;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*!
  * preserve <https://github.com/jonschlinkert/preserve>
  *
@@ -2371,7 +2341,7 @@ function randomize() {
 }
 
 var cache = {};
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*!
  * repeat-element <https://github.com/jonschlinkert/repeat-element>
  *
@@ -2393,7 +2363,7 @@ function repeat(ele, num) {
   return arr;
 }
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -3726,7 +3696,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":18,"ieee754":19,"is-array":20}],18:[function(require,module,exports){
+},{"base64-js":19,"ieee754":20,"is-array":21}],19:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -3852,7 +3822,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -3938,7 +3908,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 
 /**
  * isArray
@@ -3973,7 +3943,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4201,7 +4171,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":22}],22:[function(require,module,exports){
+},{"_process":23}],23:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4261,508 +4231,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],23:[function(require,module,exports){
-
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = require('./debug');
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-
-/**
- * Use chrome.storage.local if we are in an app
- */
-
-var storage;
-
-if (typeof chrome !== 'undefined' && typeof chrome.storage !== 'undefined')
-  storage = chrome.storage.local;
-else
-  storage = localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  return ('WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  return JSON.stringify(v);
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      storage.removeItem('debug');
-    } else {
-      storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    r = storage.debug;
-  } catch(e) {}
-  return r;
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-},{"./debug":24}],24:[function(require,module,exports){
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = require('ms');
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lowercased letter, i.e. "n".
- */
-
-exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var prevColor = 0;
-
-/**
- * Previous log timestamp.
- */
-
-var prevTime;
-
-/**
- * Select a color.
- *
- * @return {Number}
- * @api private
- */
-
-function selectColor() {
-  return exports.colors[prevColor++ % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function debug(namespace) {
-
-  // define the `disabled` version
-  function disabled() {
-  }
-  disabled.enabled = false;
-
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
-
-    var args = Array.prototype.slice.call(arguments);
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
-    });
-
-    if ('function' === typeof exports.formatArgs) {
-      args = exports.formatArgs.apply(self, args);
-    }
-    var logFn = enabled.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-  enabled.enabled = true;
-
-  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-  fn.namespace = namespace;
-
-  return fn;
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-},{"ms":25}],25:[function(require,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
-  return options.long
-    ? long(val)
-    : short(val);
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
-    || ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-},{}],26:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /*!
  * expand-brackets <https://github.com/jonschlinkert/expand-brackets>
  *
@@ -4921,6 +4390,169 @@ brackets.match = function (arr, pattern) {
   return res;
 };
 
+},{}],25:[function(require,module,exports){
+/*!
+ * extglob <https://github.com/jonschlinkert/extglob>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+/**
+ * Module dependencies
+ */
+
+var isExtglob = require('is-extglob');
+var re, cache = {};
+
+/**
+ * Expose `extglob`
+ */
+
+module.exports = extglob;
+
+/**
+ * Convert the given extglob `string` to a regex-compatible
+ * string.
+ *
+ * ```js
+ * var extglob = require('extglob');
+ * extglob('!(a?(b))');
+ * //=> '(?!a(?:b)?)[^/]*?'
+ * ```
+ *
+ * @param {String} `str` The string to convert.
+ * @param {Object} `options`
+ *   @option {Boolean} [options] `esc` If `false` special characters will not be escaped. Defaults to `true`.
+ *   @option {Boolean} [options] `regex` If `true` a regular expression is returned instead of a string.
+ * @return {String}
+ * @api public
+ */
+
+function extglob(str, opts) {
+  opts = opts || {};
+  var o = {}, i = 0;
+
+  // create a unique key for caching by
+  // combining the string and options
+  var key = str
+    + !!opts.regex
+    + !!opts.contains
+    + !!opts.escape;
+
+  if (cache.hasOwnProperty(key)) {
+    return cache[key];
+  }
+
+  if (!(re instanceof RegExp)) {
+    re = regex();
+  }
+
+  var negate = false;
+
+  while (isExtglob(str)) {
+    var match = re.exec(str);
+    if (!match) break;
+    var prefix = match[1];
+
+    var id = '__EXTGLOB_' + (i++) + '__';
+    o[id] = wrap(match[3], prefix, opts.escape);
+    str = str.split(match[0]).join(id);
+
+    // use the prefix of the _last_ (outtermost) pattern
+    if (prefix === '!') {
+      negate = true;
+    }
+  }
+
+  var keys = Object.keys(o);
+  var len = keys.length;
+
+  // we have to loop again to allow us to convert
+  // patterns in reverse order (starting with the
+  // innermost pattern first)
+  while (len--) {
+    var prop = keys[len];
+    str = str.split(prop).join(o[prop]);
+  }
+
+  var result = opts.regex
+    ? toRegex(str, opts.contains, negate)
+    : str;
+
+  // cache the result and return it
+  return (cache[key] = result);
+}
+
+/**
+ * Convert `string` to a regex string.
+ *
+ * @param  {String} `str`
+ * @param  {String} `prefix` Character that determines how to wrap the string.
+ * @param  {Boolean} `esc` If `false` special characters will not be escaped. Defaults to `true`.
+ * @return {String}
+ */
+
+function wrap(str, prefix, esc) {
+  switch (prefix) {
+    case '!':
+      return '(?!' + str + ')[^/]' + (esc ? '%%%~' : '*?');
+    case '@':
+      return '(?:' + str + ')';
+    case '+':
+      return '(?:' + str + ')+';
+    case '*':
+      return '(?:' + str + ')' + (esc ? '%%' : '*')
+    case '?':
+      return '(?:' + str + ')' + (esc ? '%~' : '?')
+    default:
+      return str;
+  }
+}
+
+/**
+ * extglob regex.
+ */
+
+function regex() {
+  return /(\\?[@?!+*$]\\?)(\(([^()]*?)\))/;
+}
+
+/**
+ * Create the regex to do the matching. If
+ * the leading character in the `pattern` is `!`
+ * a negation regex is returned.
+ *
+ * @param {String} `pattern`
+ * @param {Boolean} `contains` Allow loose matching.
+ * @param {Boolean} `negate` True if the pattern is a negation pattern.
+ */
+
+function toRegex(pattern, contains, negate) {
+  var prefix = contains ? '^' : '';
+  var after = contains ? '$' : '';
+  pattern = ('(?:' + pattern + ')' + after);
+  if (negate) {
+    pattern = prefix + ('(?!^' + pattern + ').*$');
+  }
+  return new RegExp(prefix + pattern);
+}
+
+},{"is-extglob":26}],26:[function(require,module,exports){
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+module.exports = function isExtglob(str) {
+  return typeof str === 'string'
+    && /[@?!+*]\(/.test(str);
+};
+
 },{}],27:[function(require,module,exports){
 /*!
  * filename-regex <https://github.com/regexps/filename-regex>
@@ -4995,12 +4627,12 @@ module.exports = function kindOf(val) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":17}],30:[function(require,module,exports){
+},{"buffer":18}],30:[function(require,module,exports){
 /*!
  * object.omit <https://github.com/jonschlinkert/object.omit>
  *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -5008,34 +4640,21 @@ module.exports = function kindOf(val) {
 var isObject = require('isobject');
 var forOwn = require('for-own');
 
-module.exports = function omit(obj, props) {
-  if (obj == null || !isObject(obj)) {
-    return {};
-  }
+module.exports = function omit(obj, keys) {
+  if (!isObject(obj)) return {};
+  if (!keys) return obj;
 
-  // Exit as early as possible
-  if (props == null || (Array.isArray(props) && props.length === 0)) {
-    return obj;
-  }
-
-  if (typeof props === 'string') {
-    props = [].slice.call(arguments, 1);
-  }
-
-  var o = {};
-
-  if (!Object.keys(obj).length) {
-    return o;
-  }
+  keys = Array.isArray(keys) ? keys : [keys];
+  var res = {};
 
   forOwn(obj, function (value, key) {
-    if (props.indexOf(key) === -1) {
-      o[key] = value;
+    if (keys.indexOf(key) === -1) {
+      res[key] = value;
     }
   });
-
-  return o;
+  return res;
 };
+
 },{"for-own":31,"isobject":33}],31:[function(require,module,exports){
 /*!
  * for-own <https://github.com/jonschlinkert/for-own>
@@ -5075,27 +4694,8 @@ module.exports = function forIn(o, fn, thisArg) {
   }
 };
 },{}],33:[function(require,module,exports){
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
- * Licensed under the MIT License
- */
-
-'use strict';
-
-/**
- * is the value an object, and not an array?
- *
- * @param  {*} `value`
- * @return {Boolean}
- */
-
-module.exports = function isObject(o) {
-  return o != null && typeof o === 'object'
-    && !Array.isArray(o);
-};
-},{}],34:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13}],34:[function(require,module,exports){
 /*!
  * parse-glob <https://github.com/jonschlinkert/parse-glob>
  *
@@ -5234,7 +4834,8 @@ function has(is, glob, ch) {
 
 function escape(str) {
   var re = /\{([^{}]*?)}|\(([^()]*?)\)|\[([^\[\]]*?)\]/g;
-  return str.replace(re, function (outter, inner) {
+  return str.replace(re, function (outter, braces, parens, brackets) {
+    var inner = braces || parens || brackets;
     if (!inner) { return outter; }
     return outter.split(inner).join(esc(inner));
   });
@@ -5304,7 +4905,7 @@ function dirname(glob) {
   return path.dirname(glob);
 }
 
-},{"glob-parent":36,"path":21}],36:[function(require,module,exports){
+},{"glob-parent":36,"path":22}],36:[function(require,module,exports){
 'use strict';
 
 var path = require('path');
@@ -5315,7 +4916,7 @@ module.exports = function globParent(str) {
 	return str;
 };
 
-},{"is-glob":28,"path":21}],37:[function(require,module,exports){
+},{"is-glob":28,"path":22}],37:[function(require,module,exports){
 /*!
  * is-dotfile <https://github.com/regexps/is-dotfile>
  *
@@ -5333,19 +4934,8 @@ module.exports = function(str) {
 };
 
 },{}],38:[function(require,module,exports){
-/*!
- * is-extglob <https://github.com/jonschlinkert/is-extglob>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-module.exports = function isExtglob(str) {
-  return typeof str === 'string'
-    && /[@?!+*]\(/.test(str);
-};
-
-},{}],39:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],39:[function(require,module,exports){
 /*!
  * regex-cache <https://github.com/jonschlinkert/regex-cache>
  *
