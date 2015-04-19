@@ -55,9 +55,12 @@ describe('original wildmatch', function() {
     mm.isMatch('foo', '@foo').should.be.false;
     mm.isMatch('[ab]', '\\[ab]', {unixify: false}).should.be.true;
     mm.isMatch('[ab]', '[[]ab]').should.be.false;
-    mm.isMatch('[ab]', '[[:]ab]', {brackets: false}).should.be.true;
-    mm.isMatch('[ab]', '[[::]ab]').should.be.true;
-    mm.isMatch('[ab]', '[\\[:]ab]', {unixify: false}).should.be.true;
+    mm.isMatch('[ab]', '[[:]ab]').should.be.false;
+    mm.isMatch('[ab]', '[[::]ab]').should.be.false;
+    mm.isMatch('[ab]', '[\\[:]ab]', {unixify: false}).should.be.false;
+    mm.isMatch('[ab]', '[[:]ab]', {nobrackets: true}).should.be.true;
+    mm.isMatch('[ab]', '[[::]ab]', {nobrackets: true}).should.be.true;
+    mm.isMatch('[ab]', '[\\[:]ab]', {unixify: false, nobrackets: true}).should.be.true;
     mm.isMatch('[ab]', '[[::]ab]', {brackets: true}).should.be.false;
     mm.isMatch('[ab]', '[\\[:]ab]', {unixify: false, brackets: true}).should.be.false;
     mm.isMatch('?a?b', '\\??\\?b', {unixify: false}).should.be.true;
