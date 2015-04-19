@@ -48,10 +48,5 @@ describe('basic extglobs', function () {
     mm.isMatch('xbx', 'a?(b*)').should.be.false;
     mm.isMatch('yax', '?(a*|b)').should.be.false;
   });
-
-  it('should create regex for extglobs:', function () {
-    mm.makeRe('a?(b*)').should.eql(/^(?:a(?:b(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?)?)$/);
-    mm.makeRe('?(a.*|b)').should.eql(/^(?:(?:a.(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b)?)$/);
-  });
 });
 

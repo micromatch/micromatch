@@ -49,12 +49,11 @@ describe('expand()', function () {
 
   it('should expand patterns for file names:', function () {
     mm.expand('*.md').pattern.should.equal('(?!\\.)(?=.)[^/]*?\\.md');
-    mm.expand('*.md', {dot: true}).pattern.should.equal('(?!(?:\\/|^)\\.{1,2}(?:$|\\/))(?=.)[^/]*?\\.md');
-    mm.expand('.*.md').pattern.should.equal('\\.(?!(?:\\/|^)\\.{1,2}(?:$|\\/))(?=.)[^/]*?\\.md');
+    mm.expand('*.md', {dot: true}).pattern.should.equal('(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?\\.md');
+    mm.expand('.*.md').pattern.should.equal('\\.(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?\\.md');
   });
 
   it('should expand extglobs', function () {
-    mm.makeRe('?(a*|b)').should.eql(/^(?:(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b)?)$/);
-    mm.expand('?(a*|b)').pattern.should.equal('(?:a(?!(?:\\/|^)\\.{1,2}(?:$|\\/))(?=.)[^/]*?|b)?');
+    mm.expand('?(a*|b)').pattern.should.equal('(?:a(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)?');
   });
 });

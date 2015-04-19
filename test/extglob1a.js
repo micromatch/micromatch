@@ -36,12 +36,5 @@ describe('extglob1a', function () {
     mm.match(['a', 'ab'], 'a*(!(x))', {extglob: true}).should.eql(['a', 'ab']);
     mm.match(['a', 'x'], 'a*(!(x))', {extglob: true}).should.eql(['a']);
     mm.match(['a', 'x', 'ab', 'ax'], 'a*(!(x))', {extglob: true}).should.eql(['a', 'ab']);
-    mm.makeRe('a*!(x)', {extglob: true}).should.eql(/^(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?(?!x)[^/]*?)$/);
-  });
-
-  it('should match negation patterns on extglobs:', function () {
-    mm.makeRe('a*!(x)').should.eql(/^(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?(?!x)[^/]*?)$/);
-    mm.makeRe('?(a*|b)').should.eql(/^(?:(?:a(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b)?)$/);
-    mm.makeRe('*.!(js)').should.eql(/^(?:(?!\.)(?=.)[^/]*?\.(?!js)[^/]*?)$/);
   });
 })
