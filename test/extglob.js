@@ -24,30 +24,34 @@ describe('basic extglobs', function () {
     mm.match(['ax'], '?(a.*|b)').should.eql([]);
     mm.match(['ax'], 'a?(b*)').should.eql([]);
     mm.match(['ax'], 'a?(b*)').should.eql([]);
-    mm.match(['yax'], '?(a*|b)').should.eql(['yax']);
-    mm.match(['ax'], '?(a*|b)').should.eql([]);
+    mm.match(['yax', 'b'], '?(a*|b)').should.eql(['b']);
+    mm.match(['ax'], '?(a*|b)').should.eql(['ax']);
   });
 
-  it('should match character classes:', function () {
-    mm.isMatch('ax', 'a?(b*)').should.be.false;
-    mm.isMatch('abx', 'a?(b*)').should.be.false;
-    mm.isMatch('axbx', 'a?(b*)').should.be.true;
-    mm.isMatch('xbx', 'a?(b*)').should.be.false;
-    mm.isMatch('axb', 'a?(b*)').should.be.false;
-    mm.isMatch('ax', '?(a*|b)').should.be.false;
-    mm.isMatch('yax', '?(a*|b)').should.be.true;
-    mm.isMatch('ax', 'a?(b+)').should.be.false;
-    mm.isMatch('ax', 'a?(b*)').should.be.false;
-    mm.isMatch('axb', 'a?(b*)').should.be.false;
+  it('should support matching with extglobs:', function () {
+    mm.isMatch('foo/abbbb', 'foo/a?(b*)').should.be.true;
+    mm.isMatch('abbbb', 'a!(b*)').should.be.false;
+    mm.isMatch('foo/abbbb', 'foo/a!(b*)').should.be.false;
     mm.isMatch('abbbb', 'a?(b*)').should.be.true;
-    mm.isMatch('axbbbb', 'a?(b*)').should.be.true;
-    mm.isMatch('xbbbb', 'a?(b*)').should.be.false;
+    mm.isMatch('abbbb', 'a?(b*)').should.be.true;
+    mm.isMatch('abx', 'a?(b*)').should.be.true;
+    mm.isMatch('ax', '?(a*|b)').should.be.true;
+    mm.isMatch('ax', 'a?(b*)').should.be.false;
+    mm.isMatch('ax', 'a?(b*)').should.be.false;
+    mm.isMatch('ax', 'a?(b+)').should.be.false;
+    mm.isMatch('axb', 'a?(b*)').should.be.false;
+    mm.isMatch('axb', 'a?(b*)').should.be.false;
+    mm.isMatch('axbbbb', 'a?(b*)').should.be.false;
+    mm.isMatch('axbx', 'a?(b*)').should.be.false;
     mm.isMatch('xabbbb', 'a?(b*)').should.be.false;
+    mm.isMatch('xbbbb', 'a?(b*)').should.be.false;
+    mm.isMatch('xbx', 'a?(b*)').should.be.false;
+    mm.isMatch('yax', '?(a*|b)').should.be.false;
   });
 
-  it('should create a regex for character classes:', function () {
-    mm.makeRe('a?(b*)').should.eql(/^(?:a[^/](b(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?))$/);
-    mm.makeRe('?(a.*|b)').should.eql(/^(?:(?!\.)(?=.)[^/](a.(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b))$/);
+  it('should create regex for extglobs:', function () {
+    mm.makeRe('a?(b*)').should.eql(/^(?:a(?:b(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?)?)$/);
+    mm.makeRe('?(a.*|b)').should.eql(/^(?:(?:a.(?!(?:\/|^)\.{1,2}(?:$|\/))(?=.)[^/]*?|b)?)$/);
   });
 });
 
