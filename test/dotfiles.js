@@ -62,4 +62,88 @@ describe('dotfiles', function () {
       mm.isMatch('a/b/.bashrc', '**/.bashr*').should.be.true;
     });
   });
+
+  describe('options.dot', function () {
+    it('should match dotfiles when `options.dot` is true', function () {
+      mm.isMatch('.bashrc', '*bashrc', {dot: true}).should.be.true;
+      mm.isMatch('.bashrc', '[.]bashrc', {dot: true}).should.be.true;
+      mm.isMatch('.bashrc', '?bashrc', {dot: true}).should.be.true;
+
+      mm.isMatch('a/b/.bashrc', '*bashrc', {dot: true, matchBase: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '[.]bashrc', {dot: true, matchBase: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '?bashrc', {dot: true, matchBase: true}).should.be.true;
+
+      mm.isMatch('a/b/.bashrc', '**/*bashrc', {dot: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/.[b]ashrc', {dot: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dot: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/?bashrc', {dot: true}).should.be.true;
+    });
+
+    it('should not match dotfiles when `options.dot` is false', function () {
+      mm.isMatch('a/b/.bashrc', '*bashrc', {dot: false, matchBase: true}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '[.]bashrc', {dot: false, matchBase: true}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '?bashrc', {dot: false, matchBase: true}).should.be.false;
+
+      mm.isMatch('a/b/.bashrc', '**/*bashrc', {dot: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dot: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/?bashrc', {dot: false}).should.be.false;
+    });
+  });
+
+  describe('options.dotfiles', function () {
+    it('should match a dotfile when `options.dotfiles` is true', function () {
+      mm.isMatch('.bashrc', '*bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('.bashrc', '[.]bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('.bashrc', '?bashrc', {dotfiles: true}).should.be.true;
+
+      mm.isMatch('a/b/.bashrc', '*bashrc', {dotfiles: true, matchBase: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '[.]bashrc', {dotfiles: true, matchBase: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '?bashrc', {dotfiles: true, matchBase: true}).should.be.true;
+
+      mm.isMatch('a/b/.bashrc', '**/*bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/.[b]ashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotfiles: true}).should.be.true;
+    });
+
+    it('should not match a dotfile when `options.dotfiles` is false', function () {
+      mm.isMatch('.bashrc', '*bashrc', {dotfiles: false}).should.be.false;
+      mm.isMatch('.bashrc', '[.]bashrc', {dotfiles: false}).should.be.false;
+      mm.isMatch('.bashrc', '?bashrc', {dotfiles: false}).should.be.false;
+
+      mm.isMatch('a/b/.bashrc', '*bashrc', {dotfiles: false, matchBase: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '[.]bashrc', {dotfiles: false, matchBase: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '?bashrc', {dotfiles: false, matchBase: false}).should.be.false;
+
+      mm.isMatch('a/b/.bashrc', '**/*bashrc', {dotfiles: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dotfiles: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotfiles: false}).should.be.false;
+    });
+
+    it('should not match a dotfile when `options.dotdirs` is true', function () {
+      // mm.isMatch('.bashrc', '*bashrc', {dotdirs: true}).should.be.false;
+      // mm.isMatch('.bashrc', '[.]bashrc', {dotdirs: true}).should.be.false;
+      // mm.isMatch('.bashrc', '?bashrc', {dotdirs: true}).should.be.false;
+
+      mm.isMatch('a/b/.bashrc', '*bashrc', {dotdirs: true, matchBase: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '[.]bashrc', {dotdirs: true, matchBase: false}).should.be.false;
+      mm.isMatch('a/b/.bashrc', '?bashrc', {dotdirs: true, matchBase: false}).should.be.false;
+
+      // mm.isMatch('a/b/.bashrc', '**/*bashrc', {dotdirs: true}).should.be.false;
+      // mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dotdirs: true}).should.be.false;
+      // mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotdirs: true}).should.be.false;
+    });
+  });
+
+  describe('options.dot / options.dotfiles', function () {
+    it('should match a dot `options.dot` is true', function () {
+      mm.isMatch('.bashrc', '*bashrc', {dot: true}).should.be.true;
+      mm.isMatch('.bashrc', '[.]bashrc', {dot: true}).should.be.true;
+      mm.isMatch('.bashrc', '?bashrc', {dot: true}).should.be.true;
+
+      mm.isMatch('.bashrc', '*bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('.bashrc', '[.]bashrc', {dotfiles: true}).should.be.true;
+      mm.isMatch('.bashrc', '?bashrc', {dotfiles: true}).should.be.true;
+    });
+  });
 });
