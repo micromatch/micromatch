@@ -568,26 +568,21 @@ function expand(pattern, options) {
     };
   }
 
-  if (opts.nonegate !== true) {
-    opts.negated = glob.negated;
-  }
-
   // parse the glob pattern into tokens
   glob.parse();
-
   var tok = glob.tokens;
   tok.is.negated = opts.negated;
 
-  if (tok.is.dotfile) {
-    glob.options.dot = true;
+  // dotfile handling
+  if ((opts.dotfiles === true || tok.is.dotfile) && opts.dot !== false) {
+    opts.dotfiles = true;
     opts.dot = true;
   }
 
-  if (glob.pattern.charAt(0) === '.' && glob.pattern.charAt(1) !== '/') {
-    glob.pattern = '\\' + glob.pattern;
+  if ((opts.dotdirs === true || tok.is.dotdir) && opts.dot !== false) {
+    opts.dotdirs = true;
+    opts.dot = true;
   }
-
-  opts.dot = !!opts.dot;
 
   // check for braces with a dotfile pattern
   if (/[{,]\./.test(glob.pattern)) {
@@ -595,30 +590,47 @@ function expand(pattern, options) {
     opts.dot = true;
   }
 
-  // expand braces, e.g `{1..5}`
-  glob.track('before extglob');
-  if (tok.is.extglob) {
-    glob.extglob();
+  if (opts.nonegate !== true) {
+    opts.negated = glob.negated;
   }
 
+  // if the leading character is a dot or a slash, escape it
+  if (glob.pattern.charAt(0) === '.' && glob.pattern.charAt(1) !== '/') {
+    glob.pattern = '\\' + glob.pattern;
+  }
+
+  /**
+   * Extended globs
+   */
+
+  // expand brackets, e.g `[[:alpha:]]`
   glob.track('before brackets');
   if (tok.is.brackets) {
     glob.brackets();
   }
+  glob.track('after brackets');
 
+  // expand braces, e.g `{1..5}`
   glob.track('before braces');
   if (tok.is.braces) {
     glob.braces();
   }
-
   glob.track('after braces');
 
+  // expand extglobs, e.g `foo/!(a|b)`
+  glob.track('before extglob');
+  if (tok.is.extglob) {
+    glob.extglob();
+  }
+  glob.track('after extglob');
+
+  // special patterns
   glob._replace('[!', '[^');
   glob._replace('(?', '(%~');
-  glob._replace('/[', '/(?!\\.)(?=.)[', true);
-  glob._replace('/?', '/(?!\\.)(?=.)[^/]', true);
-  glob._replace('/.', '/(?=.)\\.', true);
   glob._replace('[]', '\\[\\]');
+  glob._replace('/[', '/' + (opts.dot ? dotfiles : nodot) + '[', true);
+  glob._replace('/?', '/' + (opts.dot ? dotfiles : nodot) + '[^/]', true);
+  glob._replace('/.', '/(?=.)\\.', true);
 
   // windows drives
   glob._replace(/^(\w):([\\\/]+?)/gi, '(?=.)$1:$2', true);
@@ -650,8 +662,11 @@ function expand(pattern, options) {
 
       // 'foo/*'
       glob._replace(/(\w+)\*(?!\/)/g, '$1[^/]*?', true);
-      glob._replace(/\*\*\/\*(\w)/g, globstar(opts.dot) + '\\/(?!\\.)(?=.)[^/]*?$1', true);
-      glob._replace(/\*\*\/(.)/g, '(?:**\\/|)$1');
+      glob._replace(/\*\*\/\*(\w)/g, globstar(opts.dot) + '\\/' + (opts.dot ? dotfiles : nodot) + '[^/]*?$1', true);
+
+      if (opts.dot !== true) {
+        glob._replace(/\*\*\/(.)/g, '(?:**\\/|)$1');
+      }
 
       // 'foo/**' or '{**,*}', but not 'foo**'
       if (tok.path.dirname !== '' || /,\*\*|\*\*,/.test(glob.orig)) {
@@ -699,12 +714,14 @@ function expand(pattern, options) {
   glob._replace('[^\\/]', qmark);
 
   if (glob.pattern.length > 1) {
-    if (glob.pattern.indexOf('\\/') === 0 && glob.pattern.indexOf('\\/(?!\\.)(?=.)') !== 0) {
-      glob.pattern = '\\/(?!\\.)(?=.)' + glob.pattern.slice(2);
+    if (glob.pattern.indexOf('\\/') === 0 && glob.pattern.indexOf('\\/' + nodot) !== 0) {
+      glob.pattern = '\\/' + nodot + glob.pattern.slice(2);
     } else if (/^[\[?*]/.test(glob.pattern)) {
-      glob.pattern = '(?!\\.)(?=.)' + glob.pattern;
+      // only prepend the string if we don't want to match dotfiles
+      glob.pattern = (opts.dot ? dotfiles : nodot) + glob.pattern;
     }
   }
+
   return glob;
 }
 
@@ -791,7 +808,8 @@ function balance(str, a, b) {
 var qmark       = '[^/]';
 var star        = qmark + '*?';
 var nodot       = '(?!\\.)(?=.)';
-var dotfileGlob = '(?:\\/|^)\\.{1,2}(?:$|\\/)';
+var dotfileGlob = '(?:\\/|^)\\.{1,2}($|\\/)';
+var dotfiles    = '(?!' + dotfileGlob + ')(?=.)';
 var twoStarDot  = '(?:(?!' + dotfileGlob + ').)*?';
 
 /**
@@ -802,7 +820,7 @@ var twoStarDot  = '(?:(?!' + dotfileGlob + ').)*?';
  */
 
 function oneStar(dotfile) {
-  return dotfile ? '(?!(?:\\/|^)\\.{1,2}(?:$|\\/))(?=.)' + star : (nodot + star);
+  return dotfile ? '(?!' + dotfileGlob + ')(?=.)' + star : (nodot + star);
 }
 
 function globstar(dotfile) {
@@ -841,7 +859,6 @@ Glob.prototype.init = function(pattern) {
   this.orig = pattern;
   this.negated = this.isNegated();
   this.options.track = this.options.track || false;
-  this.options.dot = this.options.dot || this.options.dotfiles;
   this.options.makeRe = true;
 };
 
@@ -917,7 +934,7 @@ Glob.prototype.braces = function() {
  */
 
 Glob.prototype.brackets = function() {
-  if (this.options.brackets === true && this.options.nobrackets !== true) {
+  if (this.options.brackets === true || this.options.nobrackets !== true) {
     this.pattern = brackets(this.pattern);
   }
 };
@@ -927,7 +944,7 @@ Glob.prototype.brackets = function() {
  */
 
 Glob.prototype.extglob = function() {
-  if (this.options.extglob === true && this.options.noextglob !== true) {
+  if (this.options.extglob === true || this.options.noextglob !== true) {
     this.pattern = extglob(this.pattern, {escape: true});
   }
 };
