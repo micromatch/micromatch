@@ -24,11 +24,12 @@ npm i micromatch --save
   * [.expand](#-expand)
   * [.makeRe](#-makere)
 - [Options](#options)
+  * [options.unixify](#options-unixify)
   * [options.dot](#options-dot)
   * [options.unescape](#options-unescape)
   * [options.nodupes](#options-nodupes)
   * [options.matchBase](#options-matchbase)
-  * [options.brackes](#options-brackes)
+  * [options.braces](#options-braces)
   * [options.nobraces](#options-nobraces)
   * [options.brackets](#options-brackets)
   * [options.nobrackets](#options-nobrackets)
@@ -317,6 +318,15 @@ mm.makeRe('*.js');
 
 ## Options
 
+### options.unixify
+
+Normalize slashes in file paths and glob patterns to forward slashes.
+
+Type: `{Boolean}`
+
+Default: `undefined` on non-windows, `true` on windows.
+
+
 ### options.dot
 
 Match dotfiles. Same behavior as [minimatch].
@@ -379,9 +389,9 @@ mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
 //=> ['a/b.js']
 ```
 
-### options.brackes
+### options.braces
 
-Expand braces in glob patterns. Same behavior as [minimatch] `nobrace`. This option is overridden if `nobraces` is defined.
+Expand braces in glob patterns. This option is overridden if `nobraces` is defined.
 
 Type: `{Boolean}`
 
