@@ -528,7 +528,7 @@ Whenever possible parsing behavior for patterns is based on globbing specificati
 Run the [benchmarks](./benchmark):
 
 ```bash
-npm run benchmark
+node benchmark
 ```
 
 As of May 05, 2015:
