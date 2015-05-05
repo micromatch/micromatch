@@ -546,7 +546,7 @@ Whenever possible parsing behavior for patterns is based on globbing specificati
 Run the [benchmarks](./benchmark):
 
 ```bash
-npm run benchmark
+node benchmark
 ```
 
 As of April 18, 2015:
@@ -619,13 +619,14 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 Please be sure to run the benchmarks before/after any code changes to judge the impact before you do a PR. thanks!
 
 ## Related 
- * [braces](https://github.com/jonschlinkert/braces): Fastest brace expansion for node.js, with the most complete support for the Bash 4.3 braces specification.
- * [extglob](https://github.com/jonschlinkert/extglob): Convert extended globs to regex-compatible strings. Add (almost) the expressive power of regular expressions to glob patterns.
- * [expand-brackets](https://github.com/jonschlinkert/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns.
- * [fill-range](https://github.com/jonschlinkert/fill-range): Fill in a range of numbers or letters, optionally passing an increment or multiplier to use.
- * [expand-range](https://github.com/jonschlinkert/expand-range): Fast, bash-like range expansion. Expand a range of numbers or letters, uppercase or lowercase. See the benchmarks. Used by micromatch.
- * [parse-glob](https://github.com/jonschlinkert/parse-glob): Parse a glob pattern into an object of tokens.
- * [is-glob](https://github.com/jonschlinkert/is-glob): Returns `true` if the given string looks like a glob pattern.
+- [braces](https://github.com/jonschlinkert/braces): Fastest brace expansion for node.js, with the most complete support… [more](https://github.com/jonschlinkert/braces)
+- [extglob](https://github.com/jonschlinkert/extglob): Convert extended globs to regex-compatible strings. Add (almost) the expressive… [more](https://github.com/jonschlinkert/extglob)
+- [expand-brackets](https://github.com/jonschlinkert/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns.
+- [expand-range](https://github.com/jonschlinkert/expand-range): Fast, bash-like range expansion. Expand a range of numbers or… [more](https://github.com/jonschlinkert/expand-range)
+- [fill-range](https://github.com/jonschlinkert/fill-range): Fill in a range of numbers or letters, optionally passing… [more](https://github.com/jonschlinkert/fill-range)
+- [gulp-micromatch](https://github.com/tunnckoCore/gulp-micromatch): micromatch as gulp plugin. Filtering vinyl files with glob patterns,… [more](https://github.com/tunnckoCore/gulp-micromatch)
+- [is-glob](https://github.com/jonschlinkert/is-glob): Returns `true` if the given string looks like a glob… [more](https://github.com/jonschlinkert/is-glob)
+- [parse-glob](https://github.com/jonschlinkert/parse-glob): Parse a glob pattern into an object of tokens.
 
 ## Author
 
