@@ -14,10 +14,7 @@
   "bugs": {
     "url": "https://github.com/jonschlinkert/micromatch/issues"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/jonschlinkert/micromatch/blob/master/LICENSE"
-  },
+  "license": "MIT",
   "files": [
     "index.js",
     "lib/"
