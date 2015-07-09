@@ -418,6 +418,14 @@ module.exports = micromatch;
 },{"./lib/expand":3,"./lib/utils":5,"arr-diff":6,"array-unique":8,"braces":9,"is-glob":28,"kind-of":29,"object.omit":30,"regex-cache":39}],2:[function(require,module,exports){
 'use strict';
 
+var reverse = function(object, prepender) {
+  return Object.keys(object).reduce(function(reversed, key) {
+    var newKey = prepender ? prepender + key : key; // Optionally prepend a string to key.
+    reversed[object[key]] = newKey; // Swap key and value.
+    return reversed; // Return the result.
+  }, {});
+};
+
 var chars = {};
 
 /**
@@ -457,18 +465,7 @@ chars.ESC = {
  * Unescape characters
  */
 
-chars.UNESC = {
-  '__UNESC_QMRK__'   : '\\?',
-  '__UNESC_AMPE__'   : '\\@',
-  '__UNESC_EXCL__'   : '\\!',
-  '__UNESC_PLUS__'   : '\\+',
-  '__UNESC_STAR__'   : '\\*',
-  '__UNESC_COMMA__'  : '\\*',
-  '__UNESC_LTPAREN__': '\\(',
-  '__UNESC_RTPAREN__': '\\)',
-  '__UNESC_LTBRACK__': '\\[',
-  '__UNESC_RTBRACK__': '\\]',
-};
+chars.UNESC = reverse(chars.ESC, '\\');
 
 chars.ESC_TEMP = {
   '?': '__TEMP_QMRK__',
@@ -483,18 +480,7 @@ chars.ESC_TEMP = {
   ']': '__TEMP_RTBRACK__',
 };
 
-chars.TEMP = {
-  '__TEMP_QMRK__'   : '?',
-  '__TEMP_AMPE__'   : '@',
-  '__TEMP_EXCL__'   : '!',
-  '__TEMP_STAR__'   : '*',
-  '__TEMP_PLUS__'   : '+',
-  '__TEMP_COMMA__'  : ',',
-  '__TEMP_LTPAREN__': '(',
-  '__TEMP_RTPAREN__': ')',
-  '__TEMP_LTBRACK__': '[',
-  '__TEMP_RTBRACK__': ']',
-};
+chars.TEMP = reverse(chars.ESC_TEMP);
 
 module.exports = chars;
 
@@ -535,7 +521,7 @@ function expand(pattern, options) {
   var glob = new Glob(pattern, options || {});
   var opts = glob.options;
 
-  if (typeof opts.braces === 'undefined' && typeof opts.nobraces === 'undefined') {
+  if (typeof opts.braces !== 'boolean' && typeof opts.nobraces !== 'boolean') {
     opts.braces = true;
   }
 
@@ -913,8 +899,8 @@ Glob.prototype.isNegated = function() {
  */
 
 Glob.prototype.braces = function() {
-  if (this.options.braces === true && this.options.nobraces !== true) {
-    // quick check for balanced characters
+  if (this.options.nobraces !== true && this.options.nobrace !== true) {
+    // naive/fast check for imbalanced characters
     var a = this.pattern.match(/[\{\(\[]/g);
     var b = this.pattern.match(/[\}\)\]]/g);
 
@@ -934,7 +920,7 @@ Glob.prototype.braces = function() {
  */
 
 Glob.prototype.brackets = function() {
-  if (this.options.brackets === true || this.options.nobrackets !== true) {
+  if (this.options.nobrackets !== true) {
     this.pattern = brackets(this.pattern);
   }
 };
@@ -944,7 +930,7 @@ Glob.prototype.brackets = function() {
  */
 
 Glob.prototype.extglob = function() {
-  if (this.options.extglob === true || this.options.noextglob !== true) {
+  if (this.options.noextglob !== true) {
     this.pattern = extglob(this.pattern, {escape: true});
   }
 };
@@ -1100,7 +1086,8 @@ utils.arrayify = function arrayify(val) {
 };
 
 /**
- * Convert a file path to a unix path.
+ * Normalize all slashes in a file path or glob pattern to
+ * forward slashes.
  */
 
 utils.unixify = function unixify(fp, opts) {
@@ -4810,7 +4797,7 @@ module.exports = function parseGlob(glob) {
   tok.is.braces   = has(is, glob, '{');
   tok.is.brackets = has(is, glob, '[:');
   tok.is.globstar = has(is, glob, '**');
-  tok.is.dotfile  = dotfile(tok.path.basename);
+  tok.is.dotfile  = dotfile(tok.path.basename) || dotfile(tok.path.filename);
   tok.is.dotdir   = dotdir(tok.path.dirname);
   return (cache[glob] = tok);
 }
