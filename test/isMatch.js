@@ -43,6 +43,26 @@ describe('.isMatch()', function () {
     mm.isMatch('abcd', 'ab').should.be.false;
   });
 
+  it('should match file names:', function () {
+    mm.isMatch('a.b', 'a.b').should.be.true;
+    mm.isMatch('a.b', '*.b').should.be.true;
+    mm.isMatch('a.b', 'a.*').should.be.true;
+    mm.isMatch('a.b', '*.*').should.be.true;
+    mm.isMatch('a-b.c-d', 'a*.c*').should.be.true;
+    mm.isMatch('a-b.c-d', '*b.*d').should.be.true;
+    mm.isMatch('a-b.c-d', '*.*').should.be.true;
+    mm.isMatch('a-b.c-d', '*.*-*').should.be.true;
+    mm.isMatch('a-b.c-d', '*-*.*-*').should.be.true;
+    mm.isMatch('a-b.c-d', '*.c-*').should.be.true;
+    mm.isMatch('a-b.c-d', '*.*-d').should.be.true;
+    mm.isMatch('a-b.c-d', 'a-*.*-d').should.be.true;
+    mm.isMatch('a-b.c-d', '*-b.c-*').should.be.true;
+    mm.isMatch('a-b.c-d', '*-b*c-*').should.be.true;
+
+    // false
+    mm.isMatch('a-b.c-d', '*-bc-*').should.be.false;
+  });
+
   it('should match with common glob patterns', function () {
     mm.isMatch('/ab', '/*').should.be.true;
     mm.isMatch('/cd', '/*').should.be.true;

@@ -71,6 +71,16 @@ describe('options.nodupes', function () {
   });
 });
 
+describe('options.nobrace/nobraces', function () {
+  it('should not expect braces with `nobrace` is true:', function () {
+    mm.match(['1', '2', '3'], '{1..2}', {nobrace: true}).should.eql([]);
+  });
+
+  it('should not expect braces with `nobraces` is true:', function () {
+    mm.match(['1', '2', '3'], '{1..2}', {nobraces: true}).should.eql([]);
+  });
+});
+
 describe('options.unescape', function () {
   it('should remove backslashes in glob patterns:', function () {
     mm.match(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c').should.eql(['\\a\\b\\c']);
