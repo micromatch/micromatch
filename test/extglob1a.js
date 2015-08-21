@@ -26,9 +26,6 @@ describe('extglob1a', function () {
     mm.match(['a', 'ab'], 'a*!(x)/b/?(y)/c').should.eql([]);
     mm.match(['ab', 'ba'], 'a?(x)').should.eql([]);
     mm.match(['ba'], 'a*!(x)').should.eql([]);
-  });
-
-  it('pending:', function () {
     mm.match(['a', 'ab', 'x'], 'a!(x)').should.eql(['a', 'ab']);
     mm.match(['a'], 'a?(x)').should.eql(['a']);
     mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)').should.eql(['a.md', 'a.', 'd.js.d']);
@@ -79,7 +76,7 @@ describe('extglobs', function () {
     mm.match(arr, '@(b|a)\.@(a)').should.eql(['a.a', 'b.a']);
   });
 
-  it.skip('should support multiple exclusion patterns in one extglob:', function () {
+  it('should support multiple exclusion patterns in one extglob:', function () {
     var arr = ['a.a', 'a.b', 'a.c.d', 'c.c', 'a.', 'd.d', 'e.e', 'f.f'];
     mm.match(arr, '!(*.a|*.b|*.c)').should.eql(['a.c.d', 'a.', 'd.d', 'e.e', 'f.f']);
   });
@@ -137,7 +134,7 @@ describe('bash', function () {
     mm.match(['foobar', 'baz'], '!(foo)*').should.eql(['baz']);
     mm.match(['moo.cow', 'a.b'], '!(*\\.*).!(*\\.*)').should.eql(['moo.cow', 'a.b']);
     mm.match(['moo.cow', 'a.b'], '!(*.*).!(*.*)').should.eql(['moo.cow', 'a.b']);
-    // mm.match(['mad.moo.cow'], '^!(*.*).!(*.*)').should.eql([]);
+    mm.match(['mad.moo.cow'], '^!(*.*).!(*.*)').should.eql([]);
     mm.match(['mucca.pazza'], 'mu!(*(c))?.pa!(*(z))?').should.eql([]);
     mm.match(['ooo'], '!(f)').should.eql(['ooo']);
     mm.match(['ooo'], '*(!(f))').should.eql(['ooo']);
@@ -152,12 +149,12 @@ describe('bash', function () {
     mm.match(['foob'], '!(foo)b*').should.eql([]);
     mm.match(['fa', 'fb', 'f', 'fo'], '!(f(o))').should.eql(['fa', 'fb', 'f']);
     mm.match(['fa', 'fb', 'f', 'fo'], '!(f!(o))').should.eql(['fo']);
-    // mm.match(['fff'], '!(f)').should.eql(['fff']);
+    mm.match(['fff'], '!(f)').should.eql(['fff']);
     // mm.match(['foobb'], '!(foo)b*').should.eql(['foobb']);
     // mm.match(['foo'], '*(!(foo))').should.eql(['foo']);
     // mm.match(['foo'], '+(!(f))').should.eql(['foo']);
     // mm.match(['foo'], '*(!(f))').should.eql(['foo']);
-    // mm.match(['foo'], '!(f)').should.eql(['foo']);
+    mm.match(['foo'], '!(f)').should.eql(['foo']);
     // mm.match(['fff'], '+(!(f))').should.eql(['fff']);
     // mm.match(['fff'], '*(!(f))').should.eql(['fff']);
   });

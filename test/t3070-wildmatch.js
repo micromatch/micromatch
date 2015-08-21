@@ -69,12 +69,12 @@ describe('original wildmatch', function() {
   });
 
   it('malformed wildmats:', function() {
-    mm.isMatch(']', '[\\\\-^]', {unixify: false}).should.be.false;
-    mm.isMatch('[', '[\\\\-^]', {unixify: false}).should.be.false;
-    mm.isMatch('-', '[\\-_]', {unixify: false}).should.be.true;
-    // mm.isMatch(']', '[\\]]', {unixify: false}).should.be.true;
-    mm.isMatch('\\]', '[\\]]', {unixify: false}).should.be.false;
-    mm.isMatch('\\', '[\\]]', {unixify: false}).should.be.false;
+    mm.isMatch(']', '[\\\\-^]').should.be.false;
+    mm.isMatch('[', '[\\\\-^]').should.be.false;
+    mm.isMatch('-', '[\\-_]').should.be.true;
+    // mm.isMatch(']', '[\\]]').should.be.true;
+    mm.isMatch('\\]', '[\\]]').should.be.false;
+    mm.isMatch('\\', '[\\]]').should.be.false;
     mm.isMatch('ab', 'a[]b').should.be.false;
     mm.isMatch('a[]b', 'a[]b').should.be.true;
     mm.isMatch('ab[', 'ab[').should.be.true;
