@@ -19,30 +19,30 @@
   },
   "scripts": {
     "test": "mocha",
-    "prepublish": "browserify -o browser.js -e index.js"
+    "prepublish": "browserify -o browser.js -e index.js -s index --bare"
   },
   "dependencies": {
     "arr-diff": "^1.0.1",
     "array-unique": "^0.2.1",
     "braces": "^1.8.0",
-    "expand-brackets": "^0.1.2",
+    "expand-brackets": "^0.1.4",
     "extglob": "^0.3.1",
     "filename-regex": "^2.0.0",
     "is-extglob": "^1.0.0",
     "is-glob": "^2.0.0",
-    "kind-of": "^2.0.0",
-    "lazy-cache": "^0.1.0",
+    "kind-of": "^2.0.1",
+    "lazy-cache": "^0.2.3",
     "object.omit": "^2.0.0",
     "parse-glob": "^3.0.2",
     "regex-cache": "^0.4.2"
   },
   "devDependencies": {
     "benchmarked": "^0.1.4",
-    "browserify": "^9.0.8",
+    "browserify": "^11.0.1",
     "chalk": "^1.0.0",
     "minimatch": "^2.0.4",
     "minimist": "^1.1.1",
-    "mocha": "^2.2.4",
+    "mocha": "^2.2.5",
     "multimatch": "^2.0.0",
     "should": "^6.0.1",
     "write": "^0.2.0"
