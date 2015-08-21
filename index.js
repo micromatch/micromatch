@@ -7,14 +7,21 @@
 
 'use strict';
 
-var diff = require('arr-diff');
-var typeOf = require('kind-of');
-var omit = require('object.omit');
-var unique = require('array-unique');
-var cache = require('regex-cache');
-var isGlob = require('is-glob');
 var expand = require('./lib/expand');
 var utils = require('./lib/utils');
+var lazy = require('lazy-cache')(require);
+
+/**
+ * Lazily required module dependencies
+ */
+
+lazy('braces');
+lazy('arr-diff', 'diff');
+lazy('kind-of', 'typeOf');
+lazy('object.omit', 'omit');
+lazy('array-unique', 'unique');
+lazy('regex-cache', 'cache');
+lazy('is-glob', 'isGlob');
 
 /**
  * The main function. Pass an array of filepaths,
@@ -49,7 +56,7 @@ function micromatch(files, patterns, opts) {
       keep.push.apply(keep, match(files, glob, opts));
     }
   }
-  return diff(keep, omit);
+  return lazy.diff(keep, omit);
 }
 
 /**
@@ -66,7 +73,7 @@ function micromatch(files, patterns, opts) {
  */
 
 function match(files, pattern, opts) {
-  if (typeOf(files) !== 'string' && !Array.isArray(files)) {
+  if (lazy.typeOf(files) !== 'string' && !Array.isArray(files)) {
     throw new Error(msg('match', 'files', 'a string or array'));
   }
 
@@ -106,17 +113,17 @@ function match(files, pattern, opts) {
   }
 
   // if `negate` was defined, diff negated files
-  if (negate) { res = diff(files, res); }
+  if (negate) { res = lazy.diff(files, res); }
 
   // if `ignore` was defined, diff ignored filed
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
-    opts = omit(opts, ['ignore']);
-    res = diff(res, micromatch(res, pattern, opts));
+    opts = lazy.omit(opts, ['ignore']);
+    res = lazy.diff(res, micromatch(res, pattern, opts));
   }
 
   if (opts.nodupes) {
-    return unique(res);
+    return lazy.unique(res);
   }
   return res;
 }
@@ -184,7 +191,7 @@ function isMatch(fp, pattern, opts) {
   }
 
   fp = utils.unixify(fp, opts);
-  if (typeOf(pattern) === 'object') {
+  if (lazy.typeOf(pattern) === 'object') {
     return matcher(fp, pattern);
   }
   return matcher(pattern, opts)(fp);
@@ -204,7 +211,7 @@ function contains(fp, pattern, opts) {
   opts.contains = (pattern !== '');
   fp = utils.unixify(fp, opts);
 
-  if (opts.contains && !isGlob(pattern)) {
+  if (opts.contains && !lazy.isGlob(pattern)) {
     return fp.indexOf(pattern) !== -1;
   }
   return matcher(pattern, opts)(fp);
@@ -248,7 +255,7 @@ function any(fp, patterns, opts) {
  */
 
 function matchKeys(obj, glob, options) {
-  if (typeOf(obj) !== 'object') {
+  if (lazy.typeOf(obj) !== 'object') {
     throw new TypeError(msg('matchKeys', 'first argument', 'an object'));
   }
 
@@ -288,7 +295,7 @@ function matcher(pattern, opts) {
   pattern = utils.unixify(pattern, opts);
 
   // pattern is a non-glob string
-  if (!isGlob(pattern)) {
+  if (!lazy.isGlob(pattern)) {
     return utils.matchPath(pattern, opts);
   }
   // pattern is a glob string
@@ -318,7 +325,7 @@ function matcher(pattern, opts) {
  */
 
 function toRegex(glob, options) {
-  if (typeOf(glob) !== 'string') {
+  if (lazy.typeOf(glob) !== 'string') {
     throw new Error(msg('toRegex', 'glob', 'a string'));
   }
 
@@ -371,7 +378,7 @@ function wrapGlob(glob, opts) {
  */
 
 function makeRe(glob, opts) {
-  return cache(toRegex, glob, opts);
+  return lazy.cache(toRegex, glob, opts);
 }
 
 /**
@@ -398,7 +405,7 @@ function msg(method, what, type) {
  */
 
 micromatch.any       = any;
-micromatch.braces    = micromatch.braceExpand = require('braces');
+micromatch.braces    = micromatch.braceExpand = lazy.braces;
 micromatch.contains  = contains;
 micromatch.expand    = expand;
 micromatch.filter    = filter;
