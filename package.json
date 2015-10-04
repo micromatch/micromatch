@@ -18,8 +18,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "mocha",
-    "prepublish": "browserify -o browser.js -e index.js -s index --bare"
+    "test": "mocha"
   },
   "dependencies": {
     "arr-diff": "^1.1.0",
