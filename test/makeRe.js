@@ -16,6 +16,26 @@ if ('minimatch' in argv) {
 }
 
 describe('.makeRe()', function () {
+  describe('errors:', function () {
+    it('should throw when undefined:', function () {
+      (function () {
+        mm.makeRe();
+      }).should.throw('micromatch.makeRe(): glob should be a string.');
+    });
+
+    it('should throw when not a string:', function () {
+      (function () {
+        mm.makeRe({});
+      }).should.throw('micromatch.makeRe(): glob should be a string.');
+    });
+
+    it('should throw on bad regex in strict mode:', function () {
+      (function () {
+        mm.makeRe('(foo', {strict: true});
+      }).should.throw('SyntaxError: Invalid regular expression: /^(?:(foo)$/: Unterminated group');
+    });
+  });
+
   describe('file extensions:', function () {
     it('should create a regular expression for matching extensions:', function () {
       mm.makeRe('.md').should.eql(/^(?:\.md)$/);

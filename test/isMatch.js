@@ -1,9 +1,10 @@
 'use strict';
 
+require('should');
+var assert = require('assert');
 var argv = require('minimist')(process.argv.slice(2));
 var minimatch = require('./support/reference');
 var mm = require('..');
-require('should');
 
 if ('minimatch' in argv) {
   mm = minimatch;
@@ -22,6 +23,11 @@ describe('.isMatch()', function () {
         mm.isMatch({});
       }).should.throw('micromatch.isMatch(): filepath should be a string.');
     });
+  });
+
+  it('should work like `matcher` when a pattern and opts is passed', function () {
+    assert(typeof mm.isMatch('*', {}), 'function');
+    assert(mm.isMatch('*', {})('abc'), true);
   });
 
   it('should correctly deal with empty globs', function () {

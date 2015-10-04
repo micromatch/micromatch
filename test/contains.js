@@ -4,6 +4,20 @@ require('should');
 var mm = require('..');
 
 describe('.contains()', function () {
+  describe('errors:', function () {
+    it('should throw on undefined args:', function () {
+      (function () {
+        mm.contains();
+      }).should.throw('micromatch.contains(): pattern should be a string.');
+    });
+
+    it('should throw on bad args:', function () {
+      (function () {
+        mm.contains({});
+      }).should.throw('micromatch.contains(): pattern should be a string.');
+    });
+  });
+
   it('should correctly deal with empty patterns', function () {
     mm.contains('ab', '').should.be.false;
     mm.contains('a', '').should.be.false;
