@@ -31,6 +31,7 @@
     "is-glob": "^2.0.1",
     "kind-of": "^2.0.1",
     "lazy-cache": "^0.2.3",
+    "normalize-path": "^2.0.0",
     "object.omit": "^2.0.0",
     "parse-glob": "^3.0.4",
     "regex-cache": "^0.4.2"
