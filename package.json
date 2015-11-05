@@ -22,28 +22,28 @@
     "prepublish": "browserify -o browser.js -e index.js"
   },
   "dependencies": {
-    "arr-diff": "^1.0.1",
+    "arr-diff": "^1.1.0",
     "array-unique": "^0.2.1",
-    "braces": "^1.8.0",
-    "expand-brackets": "^0.1.1",
-    "extglob": "^0.3.0",
+    "braces": "^1.8.2",
+    "expand-brackets": "^0.1.4",
+    "extglob": "^0.3.1",
     "filename-regex": "^2.0.0",
-    "is-glob": "^1.1.3",
-    "kind-of": "^1.1.0",
-    "object.omit": "^1.1.0",
-    "parse-glob": "^3.0.1",
+    "is-glob": "^2.0.1",
+    "kind-of": "^2.0.1",
+    "object.omit": "^2.0.0",
+    "parse-glob": "^3.0.4",
     "regex-cache": "^0.4.2"
   },
   "devDependencies": {
     "benchmarked": "^0.1.4",
-    "browserify": "^9.0.8",
-    "chalk": "^1.0.0",
-    "minimatch": "^2.0.4",
-    "minimist": "^1.1.1",
-    "mocha": "^2.2.4",
+    "browserify": "^12.0.1",
+    "chalk": "^1.1.1",
+    "minimatch": "^3.0.0",
+    "minimist": "^1.2.0",
+    "mocha": "^2.3.3",
     "multimatch": "^2.0.0",
-    "should": "^6.0.1",
-    "write": "^0.2.0"
+    "should": "^7.1.1",
+    "write": "^0.2.1"
   },
   "keywords": [
     "bash",
