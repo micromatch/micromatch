@@ -30,6 +30,14 @@ describe('.isMatch()', function () {
     assert(mm.isMatch('*', {})('abc'), true);
   });
 
+  it('should escape plus signs to match string literals', function () {
+    assert(mm.isMatch('a+b/src/glimini.js', 'a+b/src/*.js'));
+    assert(mm.isMatch('+b/src/glimini.js', '+b/src/*.js'));
+    assert(mm.isMatch('coffee+/src/glimini.js', 'coffee+/src/*.js'));
+    assert(mm.isMatch('coffee+/src/glimini.js', 'coffee+/src/*.js'));
+    assert(mm.isMatch('coffee+/src/glimini.js', 'coffee+/src/*'));
+  });
+
   it('should correctly deal with empty globs', function () {
     mm.isMatch('ab', '').should.be.false;
     mm.isMatch('a', '').should.be.false;
