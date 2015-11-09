@@ -54,6 +54,6 @@ describe('expand()', function () {
   });
 
   it('should expand extglobs', function () {
-    mm.expand('?(a*|b)').pattern.should.equal('(?:a(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)?');
+    mm.expand('?(a*|b)').pattern.should.equal('(?:a[^/]*?|b|)');
   });
 });

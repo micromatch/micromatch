@@ -11,3 +11,4 @@ vendor
 staging
 wip
 test/bash
+coverage

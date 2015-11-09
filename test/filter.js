@@ -35,6 +35,10 @@ describe('.filter()', function () {
     mm.filter('*').should.be.a.function;
   });
 
+  it('should return an empty array when no pattern is passed:', function () {
+    mm.filter('*')().should.eql([]);
+  });
+
   it('should filter files', function () {
     ['a', 'b', 'c'].filter(mm.filter('*')).should.eql(['a', 'b', 'c']);
     ['a/a', 'b/a', 'a/c'].filter(mm.filter('a/*')).should.eql(['a/a', 'a/c']);

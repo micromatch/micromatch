@@ -1,23 +1,39 @@
-/*!
- * micromatch <https://github.com/jonschlinkert/micromatch>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
 'use strict';
 
 require('should');
-var path = require('path');
-var argv = require('minimist')(process.argv.slice(2));
-var ref = require('./support/reference');
+var assert = require('assert');
 var mm = require('..');
 
-if ('minimatch' in argv) {
-  mm = ref;
-}
-
 describe('basic extglobs', function () {
+  it('should NOT optimize extglobs if `options.noextglob` is `true`:', function () {
+    var opts = { noextglob: true };
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a[^/](b(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?)');
+    assert.equal(mm.expand('?(a.*|b)', opts).pattern, '(?!\\.)(?=.)[^/](a.(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)');
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a[^/](b(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?)');
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a[^/](b(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?)');
+    assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?!\\.)(?=.)[^/](a(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)');
+    assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?!\\.)(?=.)[^/](a(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)');
+  });
+
+  it('should optimize extglobs if `options.noextglob` is `false`:', function () {
+    var opts = { noextglob: false };
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('?(a.*|b)', opts).pattern, '(?:a\\.[^/]*?|b|)');
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('a?(b*)', opts).pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?:a[^/]*?|b|)');
+    assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?:a[^/]*?|b|)');
+  });
+
+  it('should optimize extglobs if `options.noextglob` is undefined:', function () {
+    assert.equal(mm.expand('a?(b*)').pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('?(a.*|b)').pattern, '(?:a\\.[^/]*?|b|)');
+    assert.equal(mm.expand('a?(b*)').pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('a?(b*)').pattern, 'a(?:b[^/]*?|)');
+    assert.equal(mm.expand('?(a*|b)').pattern, '(?:a[^/]*?|b|)');
+    assert.equal(mm.expand('?(a*|b)').pattern, '(?:a[^/]*?|b|)');
+  });
+
   it('should match extglobs:', function () {
     mm.match(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
     mm.match(['axb'], 'a?(b*)').should.eql([]);

@@ -7,12 +7,6 @@
 
 'use strict';
 
-var diff = require('arr-diff');
-var typeOf = require('kind-of');
-var omit = require('object.omit');
-var unique = require('array-unique');
-var cache = require('regex-cache');
-var isGlob = require('is-glob');
 var expand = require('./lib/expand');
 var utils = require('./lib/utils');
 
@@ -49,7 +43,7 @@ function micromatch(files, patterns, opts) {
       keep.push.apply(keep, match(files, glob, opts));
     }
   }
-  return diff(keep, omit);
+  return utils.diff(keep, omit);
 }
 
 /**
@@ -66,7 +60,7 @@ function micromatch(files, patterns, opts) {
  */
 
 function match(files, pattern, opts) {
-  if (typeOf(files) !== 'string' && !Array.isArray(files)) {
+  if (utils.typeOf(files) !== 'string' && !Array.isArray(files)) {
     throw new Error(msg('match', 'files', 'a string or array'));
   }
 
@@ -76,10 +70,16 @@ function match(files, pattern, opts) {
   var negate = opts.negate || false;
   var orig = pattern;
 
-  if (typeof pattern === 'string' && opts.nonegate !== true) {
+  if (typeof pattern === 'string') {
     negate = pattern.charAt(0) === '!';
     if (negate) {
       pattern = pattern.slice(1);
+    }
+
+    // we need to remove the character regardless,
+    // so the above logic is still needed
+    if (opts.nonegate === true) {
+      negate = false;
     }
   }
 
@@ -106,17 +106,17 @@ function match(files, pattern, opts) {
   }
 
   // if `negate` was defined, diff negated files
-  if (negate) { res = diff(files, res); }
+  if (negate) { res = utils.diff(files, res); }
 
   // if `ignore` was defined, diff ignored filed
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
-    opts = omit(opts, ['ignore']);
-    res = diff(res, micromatch(res, pattern, opts));
+    opts = utils.omit(opts, ['ignore']);
+    res = utils.diff(res, micromatch(res, pattern, opts));
   }
 
   if (opts.nodupes) {
-    return unique(res);
+    return utils.unique(res);
   }
   return res;
 }
@@ -184,7 +184,7 @@ function isMatch(fp, pattern, opts) {
   }
 
   fp = utils.unixify(fp, opts);
-  if (typeOf(pattern) === 'object') {
+  if (utils.typeOf(pattern) === 'object') {
     return matcher(fp, pattern);
   }
   return matcher(pattern, opts)(fp);
@@ -204,7 +204,7 @@ function contains(fp, pattern, opts) {
   opts.contains = (pattern !== '');
   fp = utils.unixify(fp, opts);
 
-  if (opts.contains && !isGlob(pattern)) {
+  if (opts.contains && !utils.isGlob(pattern)) {
     return fp.indexOf(pattern) !== -1;
   }
   return matcher(pattern, opts)(fp);
@@ -248,7 +248,7 @@ function any(fp, patterns, opts) {
  */
 
 function matchKeys(obj, glob, options) {
-  if (typeOf(obj) !== 'object') {
+  if (utils.typeOf(obj) !== 'object') {
     throw new TypeError(msg('matchKeys', 'first argument', 'an object'));
   }
 
@@ -284,11 +284,15 @@ function matcher(pattern, opts) {
     };
   }
 
+  if (typeof pattern !== 'string') {
+    throw new TypeError(msg('matcher', 'pattern', 'a string, regex, or function'));
+  }
+
   // strings, all the way down...
   pattern = utils.unixify(pattern, opts);
 
   // pattern is a non-glob string
-  if (!isGlob(pattern)) {
+  if (!utils.isGlob(pattern)) {
     return utils.matchPath(pattern, opts);
   }
   // pattern is a glob string
@@ -318,10 +322,6 @@ function matcher(pattern, opts) {
  */
 
 function toRegex(glob, options) {
-  if (typeOf(glob) !== 'string') {
-    throw new Error(msg('toRegex', 'glob', 'a string'));
-  }
-
   // clone options to prevent  mutating the original object
   var opts = Object.create(options || {});
   var flags = opts.flags || '';
@@ -341,9 +341,12 @@ function toRegex(glob, options) {
     re = new RegExp(glob, flags);
     return re;
   } catch (err) {
-    var msg = 'micromatch invalid regex: (' + re + ')';
-    if (opts.strict) throw new SyntaxError(msg + err);
+    err.reason = 'micromatch invalid regex: (' + re + ')';
+    if (opts.strict) throw new SyntaxError(err);
   }
+
+  // we're only here if a bad pattern was used and the user
+  // passed `options.silent`, match nothing
   return /$^/;
 }
 
@@ -371,7 +374,10 @@ function wrapGlob(glob, opts) {
  */
 
 function makeRe(glob, opts) {
-  return cache(toRegex, glob, opts);
+  if (utils.typeOf(glob) !== 'string') {
+    throw new Error(msg('makeRe', 'glob', 'a string'));
+  }
+  return utils.cache(toRegex, glob, opts);
 }
 
 /**
@@ -398,7 +404,7 @@ function msg(method, what, type) {
  */
 
 micromatch.any       = any;
-micromatch.braces    = micromatch.braceExpand = require('braces');
+micromatch.braces    = micromatch.braceExpand = utils.braces;
 micromatch.contains  = contains;
 micromatch.expand    = expand;
 micromatch.filter    = filter;
