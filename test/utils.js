@@ -38,6 +38,17 @@ describe('utils.unixify', function () {
     assert.equal(utils.unixify(''), '');
   });
 
+  it('should retain trailing slashes with unix paths:', function () {
+    assert.equal(utils.unixify('a/b/c/d/'), 'a/b/c/d/');
+  });
+
+  it('should retain trailing slashes with windows paths:', function () {
+    var sep = path.sep;
+    path.sep = '\\';
+    assert.equal(utils.unixify('a\\b\\c\\d\\'), 'a/b/c/d/');
+    path.sep = sep;
+  });
+
   it('should unescape word chars when `options.unescape` is true:', function () {
     var fp = utils.unixify('foo\\bar\\baz\\quux', {unescape: true});
     assert.equal(fp, 'foobarbazquux');
