@@ -144,18 +144,19 @@ function filter(patterns, opts) {
 
   patterns = utils.arrayify(patterns);
   var len = patterns.length, i = 0;
+  var patternMatchers = Array(len);
   while (i < len) {
-    patterns[i] = matcher(patterns[i++], opts);
+    patternMatchers[i] = matcher(patterns[i++], opts);
   }
 
   return function (fp) {
     if (fp == null) return [];
-    var len = patterns.length, i = 0;
+    var len = patternMatchers.length, i = 0;
     var res = true;
 
     fp = utils.unixify(fp, opts);
     while (i < len) {
-      var fn = patterns[i++];
+      var fn = patternMatchers[i++];
       if (!fn(fp)) {
         res = false;
         break;
