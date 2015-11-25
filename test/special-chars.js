@@ -7,8 +7,9 @@
 
 'use strict';
 
-var path = require('path');
 require('should');
+var path = require('path');
+var assert = require('assert');
 var argv = require('minimist')(process.argv.slice(2));
 var ref = require('./support/reference');
 var mm = require('..');
@@ -18,6 +19,16 @@ if ('minimatch' in argv) {
 }
 
 describe('special characters', function () {
+  describe('$ dollar signs', function () {
+    it('should treat dollar signs as literal:', function () {
+      assert(mm.isMatch('$', '$'));
+      assert(mm.isMatch('$/foo', '$/*'));
+      assert(mm.isMatch('$/foo', '$/*'));
+      assert(mm.isMatch('$foo/foo', '$foo/*'));
+      assert(mm.isMatch('foo$/foo', 'foo$/*'));
+    });
+  });
+
   describe('?:', function () {
     it('should match one character per question mark:', function () {
       mm.match(['a/b/c.md'], 'a/?/c.md').should.eql(['a/b/c.md']);
