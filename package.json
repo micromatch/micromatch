@@ -21,7 +21,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "arr-diff": "^1.1.0",
+    "arr-diff": "^2.0.0",
     "array-unique": "^0.2.1",
     "braces": "^1.8.1",
     "expand-brackets": "^0.1.4",
