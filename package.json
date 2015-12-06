@@ -29,7 +29,7 @@
     "filename-regex": "^2.0.0",
     "is-extglob": "^1.0.0",
     "is-glob": "^2.0.1",
-    "kind-of": "^2.0.1",
+    "kind-of": "^3.0.2",
     "lazy-cache": "^0.2.3",
     "normalize-path": "^2.0.0",
     "object.omit": "^2.0.0",
