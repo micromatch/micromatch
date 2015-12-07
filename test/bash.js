@@ -20,27 +20,27 @@ if ('minimatch' in argv) {
 // from the Bash 4.3 specification/unit tests
 var arr = ['a','b','c','d','abc','abd','abe','bb','bcd','ca','cb','dd','de','Beware','bdir/', '*'];
 
-describe('bash options and features:', function () {
-  describe('failglob:', function () {
-    it('should throw an error when no matches are found:', function () {
-      (function () {
+describe('bash options and features:', function() {
+  describe('failglob:', function() {
+    it('should throw an error when no matches are found:', function() {
+      (function() {
         mm.match(arr, '\\^', {failglob: true})
       }).should.throw('micromatch.match() found no matches for: "\\^".');
     });
   });
 
   // $echo a/{1..3}/b
-  describe('bash', function () {
-    it('should handle "regular globbing":', function () {
+  describe('bash', function() {
+    it('should handle "regular globbing":', function() {
       mm.match(arr, 'a*').should.eql(['a','abc','abd','abe']);
       mm.match(arr, '\\a*').should.eql(['a','abc','abd','abe']);
     });
 
-    it('should match directories:', function () {
+    it('should match directories:', function() {
       mm.match(arr, 'b*/').should.eql(['bdir/']);
     });
 
-    it('should use quoted characters as literals:', function () {
+    it('should use quoted characters as literals:', function() {
       mm.match(arr, '\\*', {nonull: true}).should.eql(['*']);
       mm.match(arr, '\\^', {nonull: true}).should.eql(['^']);
       mm.match(arr, '\\^').should.eql([]);
@@ -63,17 +63,17 @@ describe('bash options and features:', function () {
       mm.match(arr, '\\**').should.eql(['*']); // `*` is in the fixtures array
     });
 
-    it('should work for escaped paths/dots:', function () {
+    it('should work for escaped paths/dots:', function() {
       mm.match(arr, '"\\.\\./*/"', {nonull: true}).should.eql(['../*/']);
       mm.match(arr, 's/\\..*//', {nonull: true}).should.eql(['s/..*//']);
     });
 
-    it('Pattern from Larry Wall\'s Configure that caused bash to blow up:', function () {
+    it('Pattern from Larry Wall\'s Configure that caused bash to blow up:', function() {
       mm.match(arr, '"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"', {nonull: true}).should.eql(['/^root:/{s/^[^:]*:[^:]*:([^:]*).*$/1/']);
       mm.match(arr, '[a-c]b*').should.eql(['abc','abd','abe','bb','cb']);
     });
 
-    it('Make sure character classes work properly:', function () {
+    it('Make sure character classes work properly:', function() {
       mm.match(arr, '[a-y]*[^c]').should.eql(['abd','abe','bb','bcd','ca','cb','dd','de']);
       mm.match(arr, 'a*[^c]').should.eql(['abd','abe']);
 
@@ -88,7 +88,7 @@ describe('bash options and features:', function () {
       mm.match(['man/man1/bash.1'], '*/man*/bash.*').should.eql(['man/man1/bash.1']);
     });
 
-    it('tests with multiple `*\'s:', function () {
+    it('tests with multiple `*\'s:', function() {
       mm.match(['bbc','abc', 'bbd'], 'a**c').should.eql(['abc']);
       mm.match(['bbc','abc', 'bbd'], 'a***c').should.eql(['abc']);
       mm.match(['bbc','abc', 'bbc'], 'a*****?c').should.eql(['abc']);
@@ -108,7 +108,7 @@ describe('bash options and features:', function () {
       mm.match(['abcdecdhjk'], 'a****c**?**??*****').should.eql(['abcdecdhjk']);
     });
 
-    it('none of these should output anything:', function () {
+    it('none of these should output anything:', function() {
       mm.match(['abc'], '??**********?****?').should.eql([]);
       mm.match(['abc'], '??**********?****c').should.eql([]);
       mm.match(['abc'], '?************c****?****').should.eql([]);

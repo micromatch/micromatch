@@ -17,35 +17,35 @@ if ('minimatch' in argv) {
   mm = ref;
 }
 
-describe('negation patterns', function () {
-  describe('.match()', function () {
-    it('should create a regular expression for negating extensions:', function () {
+describe('negation patterns', function() {
+  describe('.match()', function() {
+    it('should create a regular expression for negating extensions:', function() {
       mm.match(['.md'], '!.md').should.eql([]);
       mm.match(['foo.md'], '!.md').should.eql(['foo.md']);
       mm.match(['foo.md'], '!*.md').should.eql([]);
     });
 
-    it('should negate files with extensions:', function () {
+    it('should negate files with extensions:', function() {
       mm.match(['abc.md'], '!*.md').should.eql([]);
       mm.match(['abc.txt'], '!*.md').should.eql(['abc.txt']);
       mm.match(['a.js', 'b.md', 'c.txt'], '!**/*.md').should.eql(['a.js', 'c.txt']);
     });
 
-    it('should negate dotfiles:', function () {
+    it('should negate dotfiles:', function() {
       mm.match(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
       mm.match(['.dotfile.txt'], '!*.md').should.eql(['.dotfile.txt']);
       mm.match(['.gitignore', 'a', 'b'], '!.gitignore').should.eql(['a', 'b']);
     });
 
-    it('should negate files in the immediate directory:', function () {
+    it('should negate files in the immediate directory:', function() {
       mm.match(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!*.md').should.eql(['a/b.js', 'a.js', 'a/b.md']);
     });
 
-    it('should negate files in any directory:', function () {
+    it('should negate files in any directory:', function() {
       mm.match(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!**/*.md').should.eql(['a/b.js', 'a.js']);
     });
 
-    it('should create a regular expression for double stars:', function () {
+    it('should create a regular expression for double stars:', function() {
       mm.match(['.gitignore'], 'a/**/z/*.md').should.eql([]);
 
       mm.match(['a/b/z/.dotfile.md'], 'a/**/z/.*.md').should.eql(['a/b/z/.dotfile.md']);

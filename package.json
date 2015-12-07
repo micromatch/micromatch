@@ -79,11 +79,6 @@
     "wildcard"
   ],
   "verb": {
-    "deps": {
-      "ignore": [
-        "browser.js"
-      ]
-    },
     "related": {
       "list": [
         "braces",

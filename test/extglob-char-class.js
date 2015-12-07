@@ -21,8 +21,8 @@ if ('minimatch' in argv) {
  * minimatch and micromatch fail on all of these
  */
 
-describe.skip('character classes in extglobs', function () {
-  it('should match using POSIX character classes in extglobs:', function () {
+describe.skip('character classes in extglobs', function() {
+  it('should match using POSIX character classes in extglobs:', function() {
     assert.equal(mm.isMatch('a.c', '+([[:alpha:].])'), true);
     assert.equal(mm.isMatch('a.c', '+([[:alpha:].])+([[:alpha:].])'), true);
     assert.equal(mm.isMatch('a.c', '*([[:alpha:].])'), true);

@@ -17,8 +17,8 @@ if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
 
-describe('character classes', function () {
-  it('should match character classes:', function () {
+describe('character classes', function() {
+  it('should match character classes:', function() {
     mm.match(['ab', 'a', 'bb'], '[ab][ab]').should.eql(['ab', 'bb']);
     mm.match(['abc', 'abd', 'abe', 'ab', 'ac'], '[a-c]b*').should.eql(['abc', 'abd', 'abe', 'ab']);
     mm.match(['abc', 'abd', 'abe', 'aa', 'ab', 'ac'], '[a-j]*[^c]').should.eql(['abd', 'abe', 'aa', 'ab']);

@@ -17,8 +17,8 @@ if ('minimatch' in argv) {
   mm = ref.minimatch;
 }
 
-describe('extglob1a', function () {
-  it('should match extglobs:', function () {
+describe('extglob1a', function() {
+  it('should match extglobs:', function() {
     mm.match(['ba'], 'a!(x)').should.eql([]);
     mm.match(['ba', 'ab'], 'a!(x)').should.eql(['ab']);
     mm.match(['ba'], 'a*(?(x))').should.eql([]);
@@ -36,8 +36,8 @@ describe('extglob1a', function () {
   });
 })
 
-describe('extglobs', function () {
-  it('should match extended globs:', function () {
+describe('extglobs', function() {
+  it('should match extended globs:', function() {
     mm.match(['a/z', 'a/b'], 'a/!(z)').should.eql(['a/b']);
     mm.match(['c/z/v'], 'c/z/v').should.eql(['c/z/v']);
     mm.match(['c/a/v'], 'c/!(z)/v').should.eql(['c/a/v']);
@@ -59,31 +59,31 @@ describe('extglobs', function () {
     mm.match(['cz','abz','az'], 'a*!(z)').should.eql(['abz', 'az']);
   });
 
-  it('should match extglobs in file paths:', function () {
+  it('should match extglobs in file paths:', function() {
     mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*.!(js)').should.eql(['a.md', 'a.', 'd.js.d']);
     mm.match(['a.js', 'a.md', 'a.js.js', 'c.js', 'a.', 'd.js.d'], '*!(.js)').should.eql(['a.md', 'a.', 'd.js.d']);
   });
 
-  it('should support exclusion patterns:', function () {
+  it('should support exclusion patterns:', function() {
     var arr = ['a.a', 'a.b', 'a.a.a', 'c.a', 'a.', 'd.a.d'];
     mm.match(arr, '*.+(b|d)').should.eql(['a.b', 'd.a.d']);
     mm.match(arr, '*.!(a)').should.eql(['a.b', 'a.', 'd.a.d']);
     mm.match(arr, '*.!(*a)').should.eql(['a.b', 'a.', 'd.a.d']);
   });
 
-  it('should match exactly one of the given pattern:', function () {
+  it('should match exactly one of the given pattern:', function() {
     var arr = ['aa.aa', 'a.bb', 'a.aa.a', 'cc.a', 'a.a', 'c.a', 'dd.aa.d', 'b.a'];
     mm.match(arr, '@(b|a)\.@(a)').should.eql(['a.a', 'b.a']);
   });
 
-  it('should support multiple exclusion patterns in one extglob:', function () {
+  it('should support multiple exclusion patterns in one extglob:', function() {
     var arr = ['a.a', 'a.b', 'a.c.d', 'c.c', 'a.', 'd.d', 'e.e', 'f.f'];
     mm.match(arr, '!(*.a|*.b|*.c)').should.eql(['a.c.d', 'a.', 'd.d', 'e.e', 'f.f']);
   });
 });
 
-describe('bash', function () {
-  it('should match extended globs from the bash spec:', function () {
+describe('bash', function() {
+  it('should match extended globs from the bash spec:', function() {
     mm.match(['fofo'], '*(f*(o))').should.eql(['fofo']);
     mm.match(['ffo'], '*(f*(o))').should.eql(['ffo']);
     mm.match(['foooofo'], '*(f*(o))').should.eql(['foooofo']);

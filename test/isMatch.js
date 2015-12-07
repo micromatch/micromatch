@@ -10,27 +10,27 @@ if ('minimatch' in argv) {
   mm = minimatch;
 }
 
-describe('.isMatch()', function () {
-  describe('errors:', function () {
-    it('should throw on undefined args:', function () {
-      (function () {
+describe('.isMatch()', function() {
+  describe('errors:', function() {
+    it('should throw on undefined args:', function() {
+      (function() {
         mm.isMatch();
       }).should.throw('micromatch.isMatch(): filepath should be a string.');
     });
 
-    it('should throw on bad args:', function () {
-      (function () {
+    it('should throw on bad args:', function() {
+      (function() {
         mm.isMatch({});
       }).should.throw('micromatch.isMatch(): filepath should be a string.');
     });
   });
 
-  it('should work like `matcher` when a pattern and opts is passed', function () {
+  it('should work like `matcher` when a pattern and opts is passed', function() {
     assert(typeof mm.isMatch('*', {}), 'function');
     assert(mm.isMatch('*', {})('abc'), true);
   });
 
-  it('should escape plus signs to match string literals', function () {
+  it('should escape plus signs to match string literals', function() {
     assert(mm.isMatch('a+b/src/glimini.js', 'a+b/src/*.js'));
     assert(mm.isMatch('+b/src/glimini.js', '+b/src/*.js'));
     assert(mm.isMatch('coffee+/src/glimini.js', 'coffee+/src/*.js'));
@@ -38,13 +38,13 @@ describe('.isMatch()', function () {
     assert(mm.isMatch('coffee+/src/glimini.js', 'coffee+/src/*'));
   });
 
-  it('should correctly deal with empty globs', function () {
+  it('should correctly deal with empty globs', function() {
     mm.isMatch('ab', '').should.be.false;
     mm.isMatch('a', '').should.be.false;
     mm.isMatch('.', '').should.be.false;
   });
 
-  it('should match with non-glob patterns', function () {
+  it('should match with non-glob patterns', function() {
     mm.isMatch('.', '.').should.be.true;
     mm.isMatch('/a', '/a').should.be.true;
     mm.isMatch('/ab', '/a').should.be.false;
@@ -57,7 +57,7 @@ describe('.isMatch()', function () {
     mm.isMatch('abcd', 'ab').should.be.false;
   });
 
-  it('should match file names:', function () {
+  it('should match file names:', function() {
     mm.isMatch('a.b', 'a.b').should.be.true;
     mm.isMatch('a.b', '*.b').should.be.true;
     mm.isMatch('a.b', 'a.*').should.be.true;
@@ -77,7 +77,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a-b.c-d', '*-bc-*').should.be.false;
   });
 
-  it('should match with common glob patterns', function () {
+  it('should match with common glob patterns', function() {
     mm.isMatch('/ab', '/*').should.be.true;
     mm.isMatch('/cd', '/*').should.be.true;
     mm.isMatch('ef', '/*').should.be.false;
@@ -86,7 +86,7 @@ describe('.isMatch()', function () {
     mm.isMatch('ab', 'ab').should.be.true;
   });
 
-  it('should match files with the given extension:', function () {
+  it('should match files with the given extension:', function() {
     mm.isMatch('.md', '*.md').should.be.false;
     mm.isMatch('.md', '.md').should.be.true;
     mm.isMatch('.c.md', '*.md').should.be.false;
@@ -111,7 +111,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a/z.js', '*/z*.js').should.be.true;
   });
 
-  it('should match globstars:', function () {
+  it('should match globstars:', function() {
     mm.isMatch('a/b/c/z.js', '**/*.js').should.be.true;
     mm.isMatch('a/b/z.js', '**/*.js').should.be.true;
     mm.isMatch('a/z.js', '**/*.js').should.be.true;
@@ -197,11 +197,11 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/j/c/z/x.md', 'a/**/j/**/z/*.md').should.be.true;
   });
 
-  it('question marks should not match slashes:', function () {
+  it('question marks should not match slashes:', function() {
     mm.isMatch('aaa/bbb', 'aaa?bbb').should.be.false;
   });
 
-  it('should not match dotfiles when `dot` or `dotfiles` are not set:', function () {
+  it('should not match dotfiles when `dot` or `dotfiles` are not set:', function() {
     mm.isMatch('.c.md', '*.md').should.be.false;
     mm.isMatch('a/.c.md', '*.md').should.be.false;
     mm.isMatch('a/.c.md', 'a/.c.md').should.be.true;
@@ -222,14 +222,14 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/d/.md', 'a/b/c/*.md').should.be.false;
   });
 
-  it('should match dotfiles when `dot` or `dotfiles` is set:', function () {
+  it('should match dotfiles when `dot` or `dotfiles` is set:', function() {
     mm.isMatch('.c.md', '*.md', {dot: true}).should.be.true;
     mm.isMatch('.c.md', '.*', {dot: true}).should.be.true;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}).should.be.true;
     mm.isMatch('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}).should.be.true;
   });
 
-  it('should match file paths:', function () {
+  it('should match file paths:', function() {
     mm.isMatch('a/b/c/xyz.md', 'a/b/c/*.md').should.be.true;
     mm.isMatch('a/bb/c/xyz.md', 'a/*/c/*.md').should.be.true;
     mm.isMatch('a/bbbb/c/xyz.md', 'a/*/c/*.md').should.be.true;
@@ -238,7 +238,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md').should.be.true;
   });
 
-  it('should match full file paths:', function () {
+  it('should match full file paths:', function() {
     mm.isMatch('a/.b', 'a/**/z/*.md').should.be.false;
     mm.isMatch('a/.b', 'a/.*').should.be.true;
     mm.isMatch('a/b/z/.a', 'a/**/z/*.a').should.be.false;
@@ -253,7 +253,7 @@ describe('.isMatch()', function () {
     mm.isMatch('a/b/baz/ce/fez/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true;
   });
 
-  it('should match paths with leading `./`:', function () {
+  it('should match paths with leading `./`:', function() {
     mm.isMatch('./.a', 'a/**/z/*.md').should.be.false;
     mm.isMatch('./a/b/z/.a', 'a/**/z/.a').should.be.false;
     mm.isMatch('./a/b/z/.a', './a/**/z/.a').should.be.true;

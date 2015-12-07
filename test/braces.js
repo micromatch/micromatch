@@ -18,8 +18,8 @@ if ('minimatch' in argv) {
 }
 
 // $echo a/{1..3}/b
-describe('brace expansion', function () {
-  it('should create a regex for brace expansion:', function () {
+describe('brace expansion', function() {
+  it('should create a regex for brace expansion:', function() {
     mm.match(['iii.md'], 'a/b/c{d,e}/*.md').should.eql([]);
     mm.match(['a/a', 'b/b', 'a/b', 'a/c'], '*/{a,c}').should.eql(['a/a', 'a/c']);
     mm.match(['a/a/a', 'b/b/b', 'a/a/b', 'a/a/c'], '**/**/{a,c}').should.eql(['a/a/a', 'a/a/c']);
@@ -39,20 +39,20 @@ describe('brace expansion', function () {
     mm.match(['a/b/cd/xyz.md'], 'a/b/c{d,e{f,g}}/*.md').should.eql(['a/b/cd/xyz.md']);
   });
 
-  it('should match negation patterns:', function () {
+  it('should match negation patterns:', function() {
     mm.match(['iii.md'], '!a/b/c{d,e}/*.md').should.eql(['iii.md']);
   });
 
-  it('should match character classes:', function () {
+  it('should match character classes:', function() {
     mm.match(['aa', 'ab', 'ac', 'ad', 'bad', 'baa', 'bbaa'], '(a|b*|c)').should.eql(['bad', 'baa', 'bbaa']);
     mm.match(['aa', 'ab', 'ac', 'ad', 'bad', 'baa', 'bbaa'], '*(a|{b),c)}').should.eql(['aa', 'ab', 'ac', 'baa', 'bbaa']);
   });
 
-  it('should handle range expansion:', function () {
+  it('should handle range expansion:', function() {
     mm.match(['aa', 'ab', 'ac', 'acc', 'ad', 'ae', 'af', 'ag'], '*{a..e}').should.eql(['aa', 'ab', 'ac', 'acc', 'ad', 'ae']);
   });
 
-  it('should optimize regex when `optimize` is true:', function () {
+  it('should optimize regex when `optimize` is true:', function() {
     mm.match(['aa', 'ab', 'ac', 'acc', 'ad', 'ae', 'af', 'ag'], '*{a..e}').should.eql(['aa', 'ab', 'ac', 'acc', 'ad', 'ae']);
     mm.match(['./a/b/d/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
     mm.match(['./a/b/c/xyz.md'], './a/b/**/c{d,e}/**/xyz.md').should.eql([]);
