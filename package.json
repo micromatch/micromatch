@@ -23,15 +23,15 @@
   "dependencies": {
     "arr-diff": "^2.0.0",
     "array-unique": "^0.2.1",
-    "braces": "^1.8.1",
+    "braces": "^1.8.2",
     "expand-brackets": "^0.1.4",
     "extglob": "^0.3.1",
     "filename-regex": "^2.0.0",
     "is-extglob": "^1.0.0",
     "is-glob": "^2.0.1",
     "kind-of": "^3.0.2",
-    "lazy-cache": "^0.2.3",
-    "normalize-path": "^2.0.0",
+    "lazy-cache": "^1.0.0",
+    "normalize-path": "^2.0.1",
     "object.omit": "^2.0.0",
     "parse-glob": "^3.0.4",
     "regex-cache": "^0.4.2"
