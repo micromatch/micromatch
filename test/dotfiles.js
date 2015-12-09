@@ -16,23 +16,23 @@ if ('minimatch' in argv) {
   mm = ref;
 }
 
-describe('dotfiles', function () {
-  describe('file name', function () {
-    it('should not match a dot when the dot is not explicitly defined', function () {
+describe('dotfiles', function() {
+  describe('file name', function() {
+    it('should not match a dot when the dot is not explicitly defined', function() {
       mm.isMatch('.bashrc', '*bashrc').should.be.false;
       mm.isMatch('.bashrc', '[.]bashrc').should.be.false;
       mm.isMatch('.bashrc', '?bashrc').should.be.false;
     });
 
-    it('should match a dot when the dot is explicitly defined', function () {
+    it('should match a dot when the dot is explicitly defined', function() {
       mm.isMatch('.bashrc', '.[b]ashrc').should.be.true;
       mm.isMatch('.bashrc', '.ba?hrc').should.be.true;
       mm.isMatch('.bashrc', '.bashr*').should.be.true;
     });
   });
 
-  describe('multiple directories', function () {
-    it('should not match a dot when the dot is not explicitly defined', function () {
+  describe('multiple directories', function() {
+    it('should not match a dot when the dot is not explicitly defined', function() {
       mm.isMatch('/.bashrc', '/*bashrc').should.be.false;
       mm.isMatch('/.bashrc', '/?bashrc').should.be.false;
       mm.isMatch('/.bashrc', '/[.]bashrc').should.be.false;
@@ -50,7 +50,7 @@ describe('dotfiles', function () {
       mm.isMatch('a/b/.bashrc', '**/[.]bashrc').should.be.false;
     });
 
-    it('should match a dot when the dot is explicitly defined', function () {
+    it('should match a dot when the dot is explicitly defined', function() {
       mm.isMatch('/.bashrc', '**/.[b]ashrc').should.be.true;
       mm.isMatch('/.bashrc', '**/.ba?hrc').should.be.true;
       mm.isMatch('/.bashrc', '**/.bashr*').should.be.true;
@@ -63,8 +63,8 @@ describe('dotfiles', function () {
     });
   });
 
-  describe('options.dot', function () {
-    it('should match dotfiles when `options.dot` is true', function () {
+  describe('options.dot', function() {
+    it('should match dotfiles when `options.dot` is true', function() {
       mm.isMatch('.bashrc', '*bashrc', {dot: true}).should.be.true;
       mm.isMatch('.bashrc', '[.]bashrc', {dot: true}).should.be.true;
       mm.isMatch('.bashrc', '?bashrc', {dot: true}).should.be.true;
@@ -79,7 +79,7 @@ describe('dotfiles', function () {
       mm.isMatch('a/b/.bashrc', '**/?bashrc', {dot: true}).should.be.true;
     });
 
-    it('should not match dotfiles when `options.dot` is false', function () {
+    it('should not match dotfiles when `options.dot` is false', function() {
       mm.isMatch('a/b/.bashrc', '*bashrc', {dot: false, matchBase: true}).should.be.false;
       mm.isMatch('a/b/.bashrc', '[.]bashrc', {dot: false, matchBase: true}).should.be.false;
       mm.isMatch('a/b/.bashrc', '?bashrc', {dot: false, matchBase: true}).should.be.false;
@@ -90,8 +90,8 @@ describe('dotfiles', function () {
     });
   });
 
-  describe('options.dotfiles', function () {
-    it('should match a dotfile when `options.dotfiles` is true', function () {
+  describe('options.dotfiles', function() {
+    it('should match a dotfile when `options.dotfiles` is true', function() {
       mm.isMatch('.bashrc', '*bashrc', {dotfiles: true}).should.be.true;
       mm.isMatch('.bashrc', '[.]bashrc', {dotfiles: true}).should.be.true;
       mm.isMatch('.bashrc', '?bashrc', {dotfiles: true}).should.be.true;
@@ -106,7 +106,7 @@ describe('dotfiles', function () {
       mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotfiles: true}).should.be.true;
     });
 
-    it('should not match a dotfile when `options.dotfiles` is false', function () {
+    it('should not match a dotfile when `options.dotfiles` is false', function() {
       mm.isMatch('.bashrc', '*bashrc', {dotfiles: false}).should.be.false;
       mm.isMatch('.bashrc', '[.]bashrc', {dotfiles: false}).should.be.false;
       mm.isMatch('.bashrc', '?bashrc', {dotfiles: false}).should.be.false;
@@ -120,7 +120,7 @@ describe('dotfiles', function () {
       mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotfiles: false}).should.be.false;
     });
 
-    it('should not match a dotfile when `options.dotdirs` is true', function () {
+    it('should not match a dotfile when `options.dotdirs` is true', function() {
       // mm.isMatch('.bashrc', '*bashrc', {dotdirs: true}).should.be.false;
       // mm.isMatch('.bashrc', '[.]bashrc', {dotdirs: true}).should.be.false;
       // mm.isMatch('.bashrc', '?bashrc', {dotdirs: true}).should.be.false;
@@ -135,8 +135,8 @@ describe('dotfiles', function () {
     });
   });
 
-  describe('options.dot / options.dotfiles', function () {
-    it('should match a dot `options.dot` is true', function () {
+  describe('options.dot / options.dotfiles', function() {
+    it('should match a dot `options.dot` is true', function() {
       mm.isMatch('.bashrc', '*bashrc', {dot: true}).should.be.true;
       mm.isMatch('.bashrc', '[.]bashrc', {dot: true}).should.be.true;
       mm.isMatch('.bashrc', '?bashrc', {dot: true}).should.be.true;

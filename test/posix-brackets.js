@@ -17,7 +17,7 @@ if ('minimatch' in argv) {
   mm = ref;
 }
 
-describe('POSIX bracket expressions', function () {
+describe('POSIX bracket expressions', function() {
 
   it('character classes', function() {
     // mm.isMatch('ab', '[[:digit]ab]', {brackets: true}).should.be.true;

@@ -32,7 +32,7 @@ function unit(fixture, expected) {
 
 function writeActual(dest, fn, options) {
   options = options || {};
-  var res = patterns.reduce(function (acc, fixture) {
+  var res = patterns.reduce(function(acc, fixture) {
     if (options.negate) {
       fixture = '!' + fixture;
     }

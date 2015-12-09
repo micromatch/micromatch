@@ -37,7 +37,7 @@ function micromatch(files, patterns, opts) {
 
   while (len--) {
     var glob = patterns[i++];
-    if (glob.charCodeAt(0) === 33 /* ! */) {
+    if (typeof glob === 'string' && glob.charCodeAt(0) === 33 /* ! */) {
       omit.push.apply(omit, match(files, glob.slice(1), opts));
     } else {
       keep.push.apply(keep, match(files, glob, opts));
@@ -149,7 +149,7 @@ function filter(patterns, opts) {
     patternMatchers[i] = matcher(patterns[i++], opts);
   }
 
-  return function (fp) {
+  return function(fp) {
     if (fp == null) return [];
     var len = patternMatchers.length, i = 0;
     var res = true;
@@ -352,7 +352,7 @@ function toRegex(glob, options) {
   }
 
   // we're only here if a bad pattern was used and the user
-  // passed `options.silent`, match nothing
+  // passed `options.silent`, so match nothing
   return /$^/;
 }
 
@@ -375,7 +375,7 @@ function wrapGlob(glob, opts) {
 }
 
 /**
- * Wrap `toRegex` to memoize the generated regex
+ * Wrap `toRegex` to memoize the generated regex when
  * the string and options don't change
  */
 
@@ -409,6 +409,7 @@ function msg(method, what, type) {
  * Public methods
  */
 
+/* eslint no-multi-spaces: 0 */
 micromatch.any       = any;
 micromatch.braces    = micromatch.braceExpand = utils.braces;
 micromatch.contains  = contains;

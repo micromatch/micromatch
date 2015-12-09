@@ -4,8 +4,8 @@ require('should');
 var assert = require('assert');
 var mm = require('..');
 
-describe('basic extglobs', function () {
-  it('should NOT optimize extglobs if `options.noextglob` is `true`:', function () {
+describe('basic extglobs', function() {
+  it('should NOT optimize extglobs if `options.noextglob` is `true`:', function() {
     var opts = { noextglob: true };
     assert.equal(mm.expand('a?(b*)', opts).pattern, 'a[^/](b(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?)');
     assert.equal(mm.expand('?(a.*|b)', opts).pattern, '(?!\\.)(?=.)[^/](a.(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)');
@@ -15,7 +15,7 @@ describe('basic extglobs', function () {
     assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?!\\.)(?=.)[^/](a(?!(?:\\/|^)\\.{1,2}($|\\/))(?=.)[^/]*?|b)');
   });
 
-  it('should optimize extglobs if `options.noextglob` is `false`:', function () {
+  it('should optimize extglobs if `options.noextglob` is `false`:', function() {
     var opts = { noextglob: false };
     assert.equal(mm.expand('a?(b*)', opts).pattern, 'a(?:b[^/]*?|)');
     assert.equal(mm.expand('?(a.*|b)', opts).pattern, '(?:a\\.[^/]*?|b|)');
@@ -25,7 +25,7 @@ describe('basic extglobs', function () {
     assert.equal(mm.expand('?(a*|b)', opts).pattern, '(?:a[^/]*?|b|)');
   });
 
-  it('should optimize extglobs if `options.noextglob` is undefined:', function () {
+  it('should optimize extglobs if `options.noextglob` is undefined:', function() {
     assert.equal(mm.expand('a?(b*)').pattern, 'a(?:b[^/]*?|)');
     assert.equal(mm.expand('?(a.*|b)').pattern, '(?:a\\.[^/]*?|b|)');
     assert.equal(mm.expand('a?(b*)').pattern, 'a(?:b[^/]*?|)');
@@ -34,7 +34,7 @@ describe('basic extglobs', function () {
     assert.equal(mm.expand('?(a*|b)').pattern, '(?:a[^/]*?|b|)');
   });
 
-  it('should match extglobs:', function () {
+  it('should match extglobs:', function() {
     mm.match(['a', 'b', 'c'], '(a|c)').should.eql(['a', 'c']);
     mm.match(['axb'], 'a?(b*)').should.eql([]);
     mm.match(['ax'], '?(a.*|b)').should.eql([]);
@@ -44,7 +44,7 @@ describe('basic extglobs', function () {
     mm.match(['ax'], '?(a*|b)').should.eql(['ax']);
   });
 
-  it('should support matching with extglobs:', function () {
+  it('should support matching with extglobs:', function() {
     mm.isMatch('foo/abbbb', 'foo/a?(b*)').should.be.true;
     mm.isMatch('abbbb', 'a!(b*)').should.be.false;
     mm.isMatch('foo/abbbb', 'foo/a!(b*)').should.be.false;

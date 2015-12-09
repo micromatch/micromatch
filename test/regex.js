@@ -10,8 +10,8 @@
 require('should');
 var mm = require('..');
 
-describe('regex matching', function () {
-  it('should support matching with regex', function () {
+describe('regex matching', function() {
+  it('should support matching with regex', function() {
     mm(['.'], /\./).should.eql(['.']);
     mm(['ab'], /ab/).should.eql(['ab']);
     mm(['ab', 'a'], /a$/).should.eql(['a']);
@@ -20,7 +20,7 @@ describe('regex matching', function () {
     mm(['/ab', '/a'], /\/a$/).should.eql(['/a']);
   });
 
-  it('should support matching with regex', function () {
+  it('should support matching with regex', function() {
     mm.match(['.'], /\./).should.eql(['.']);
     mm.match(['ab'], /ab/).should.eql(['ab']);
     mm.match(['ab', 'a'], /a$/).should.eql(['a']);

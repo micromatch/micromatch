@@ -7,7 +7,7 @@ if ('minimatch' in argv) {
   mm = require('minimatch');
 }
 
-it('minimatch tests:', function () {
+it('minimatch tests:', function() {
   // http://www.bashcookbook.com/bashinfo/source/bash-1.14.7/tests/glob-test
   mm.makeRe('a*').should.eql(/^(?:(?=.)a[^/]*?)$/);
   mm.makeRe('X*', {nonull: true}).should.eql(/^(?:(?=.)X[^/]*?)$/);

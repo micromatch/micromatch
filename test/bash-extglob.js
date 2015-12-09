@@ -24,8 +24,8 @@ function match(a, pattern, b) {
   console.log('    ' + i++);
 }
 
-describe('bash', function () {
-  it('should match extended globs:', function () {
+describe('bash', function() {
+  it('should match extended globs:', function() {
     match(['aaac', 'foo'], '*(@(a))a@(c)', ['aaac']);
     match(['aaac'], '*(@(a))a@(c)', ['aaac']);
     match(['aac'], '*(@(a))a@(c)', ['aac']);
