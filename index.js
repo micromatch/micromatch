@@ -47,14 +47,14 @@ function micromatch(files, patterns, opts) {
 }
 
 /**
- * Pass an array of files and a glob pattern as a string.
+ * Return an array of files that match the given glob pattern.
  *
- * This function is called by the main `micromatch` function
- * If you only need to pass a single pattern you might get
- * very minor speed improvements using this function.
+ * This function is called by the main `micromatch` function If you only
+ * need to pass a single pattern you might get very minor speed improvements
+ * using this function.
  *
  * @param  {Array} `files`
- * @param  {Array} `pattern`
+ * @param  {String} `pattern`
  * @param  {Object} `options`
  * @return {Array}
  */
@@ -131,7 +131,6 @@ function match(files, pattern, opts) {
  * ['a', 'b', 'c', 'd', 'e'].filter(fn);
  * //=> ['a', 'b', 'c']
  * ```
- *
  * @param  {String|Array} `patterns` Can be a glob or array of globs.
  * @param  {Options} `opts` Options to pass to the [matcher] method.
  * @return {Function} Filter function to be passed to `Array#filter()`.
@@ -177,7 +176,6 @@ function filter(patterns, opts) {
  * isMatch('*.md', {})('foo.md')
  * //=> true
  * ```
- *
  * @param  {String} `fp`
  * @param  {String} `pattern`
  * @param  {Object} `opts`
@@ -375,8 +373,13 @@ function wrapGlob(glob, opts) {
 }
 
 /**
- * Wrap `toRegex` to memoize the generated regex when
- * the string and options don't change
+ * Create and cache a regular expression for matching file paths.
+ * If the leading character in the `glob` is `!`, a negation
+ * regex is returned.
+ *
+ * @param  {String} `glob`
+ * @param  {Object} `options`
+ * @return {RegExp}
  */
 
 function makeRe(glob, opts) {
