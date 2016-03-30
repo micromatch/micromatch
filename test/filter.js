@@ -32,7 +32,7 @@ describe('.filter()', function() {
   });
 
   it('should create a filter function to filter files', function() {
-    mm.filter('*').should.be.a.function;
+    mm.filter('*').should.be.a.Function();
   });
 
   it('should return an empty array when no pattern is passed:', function() {

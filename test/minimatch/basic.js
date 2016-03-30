@@ -40,7 +40,7 @@ it('minimatch tests:', function() {
   mm.makeRe('a[\\b]c').should.eql(/^(?:(?=.)a[b]c)$/);
   mm.makeRe('a?c').should.eql(/^(?:(?=.)a[^/]c)$/);
   mm.makeRe('a\\*c').should.eql(/^(?:a\*c)$/);
-  mm.makeRe('').should.be.false;
+  mm.makeRe('').should.be.false();
 
   // http://www.opensource.apple.com/source/bash/bash-23/bash/tests/glob-test
   mm.makeRe('*/man*/bash.*').should.eql(/^(?:(?!\.)(?=.)[^/]*?\/(?=.)man[^/]*?\/(?=.)bash\.[^/]*?)$/);

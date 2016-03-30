@@ -45,24 +45,24 @@ describe('basic extglobs', function() {
   });
 
   it('should support matching with extglobs:', function() {
-    mm.isMatch('foo/abbbb', 'foo/a?(b*)').should.be.true;
-    mm.isMatch('abbbb', 'a!(b*)').should.be.false;
-    mm.isMatch('foo/abbbb', 'foo/a!(b*)').should.be.false;
-    mm.isMatch('abbbb', 'a?(b*)').should.be.true;
-    mm.isMatch('abbbb', 'a?(b*)').should.be.true;
-    mm.isMatch('abx', 'a?(b*)').should.be.true;
-    mm.isMatch('ax', '?(a*|b)').should.be.true;
-    mm.isMatch('ax', 'a?(b*)').should.be.false;
-    mm.isMatch('ax', 'a?(b*)').should.be.false;
-    mm.isMatch('ax', 'a?(b+)').should.be.false;
-    mm.isMatch('axb', 'a?(b*)').should.be.false;
-    mm.isMatch('axb', 'a?(b*)').should.be.false;
-    mm.isMatch('axbbbb', 'a?(b*)').should.be.false;
-    mm.isMatch('axbx', 'a?(b*)').should.be.false;
-    mm.isMatch('xabbbb', 'a?(b*)').should.be.false;
-    mm.isMatch('xbbbb', 'a?(b*)').should.be.false;
-    mm.isMatch('xbx', 'a?(b*)').should.be.false;
-    mm.isMatch('yax', '?(a*|b)').should.be.false;
+    mm.isMatch('foo/abbbb', 'foo/a?(b*)').should.be.true();
+    mm.isMatch('abbbb', 'a!(b*)').should.be.false();
+    mm.isMatch('foo/abbbb', 'foo/a!(b*)').should.be.false();
+    mm.isMatch('abbbb', 'a?(b*)').should.be.true();
+    mm.isMatch('abbbb', 'a?(b*)').should.be.true();
+    mm.isMatch('abx', 'a?(b*)').should.be.true();
+    mm.isMatch('ax', '?(a*|b)').should.be.true();
+    mm.isMatch('ax', 'a?(b*)').should.be.false();
+    mm.isMatch('ax', 'a?(b*)').should.be.false();
+    mm.isMatch('ax', 'a?(b+)').should.be.false();
+    mm.isMatch('axb', 'a?(b*)').should.be.false();
+    mm.isMatch('axb', 'a?(b*)').should.be.false();
+    mm.isMatch('axbbbb', 'a?(b*)').should.be.false();
+    mm.isMatch('axbx', 'a?(b*)').should.be.false();
+    mm.isMatch('xabbbb', 'a?(b*)').should.be.false();
+    mm.isMatch('xbbbb', 'a?(b*)').should.be.false();
+    mm.isMatch('xbx', 'a?(b*)').should.be.false();
+    mm.isMatch('yax', '?(a*|b)').should.be.false();
   });
 });
 

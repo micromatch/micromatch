@@ -35,45 +35,45 @@ describe('matcher', function() {
   describe('should return matcher functions', function() {
     it('when the pattern is regex:', function() {
       var isMatch = mm.matcher(/[a-c]\.md$/);
-      isMatch('a.md').should.be.true;
-      isMatch('b.md').should.be.true;
-      isMatch('c.md').should.be.true;
-      isMatch('e.md').should.be.false;
-      isMatch('d.md').should.be.false;
-      isMatch('a.js').should.be.false;
-      isMatch('c.js').should.be.false;
+      isMatch('a.md').should.be.true();
+      isMatch('b.md').should.be.true();
+      isMatch('c.md').should.be.true();
+      isMatch('e.md').should.be.false();
+      isMatch('d.md').should.be.false();
+      isMatch('a.js').should.be.false();
+      isMatch('c.js').should.be.false();
     });
 
     it('when the pattern is a glob string:', function() {
       var isMatch = mm.matcher('**/*.js');
-      isMatch('a/a.md').should.be.false;
-      isMatch('a/b.md').should.be.false;
-      isMatch('a/c.md').should.be.false;
-      isMatch('a/e.md').should.be.false;
-      isMatch('a/d.md').should.be.false;
-      isMatch('a/a.js').should.be.true;
-      isMatch('a/c.js').should.be.true;
+      isMatch('a/a.md').should.be.false();
+      isMatch('a/b.md').should.be.false();
+      isMatch('a/c.md').should.be.false();
+      isMatch('a/e.md').should.be.false();
+      isMatch('a/d.md').should.be.false();
+      isMatch('a/a.js').should.be.true();
+      isMatch('a/c.js').should.be.true();
     });
 
     it('when the pattern is a glob it should support `matchBase`:', function() {
       var matcherA = mm.matcher('*.js', {matchBase: false});
-      matcherA('a/a.js').should.be.false;
-      matcherA('a/c.js').should.be.false;
+      matcherA('a/a.js').should.be.false();
+      matcherA('a/c.js').should.be.false();
 
       var matcherB = mm.matcher('*.js', {matchBase: true});
-      matcherB('a/a.js').should.be.true;
-      matcherB('a/c.js').should.be.true;
+      matcherB('a/a.js').should.be.true();
+      matcherB('a/c.js').should.be.true();
     });
 
     it('when the pattern is a non-glob string:', function() {
       var isMatch = mm.matcher('b.md');
-      isMatch('a.md').should.be.false;
-      isMatch('b.md').should.be.true;
-      isMatch('c.md').should.be.false;
-      isMatch('e.md').should.be.false;
-      isMatch('d.md').should.be.false;
-      isMatch('a.js').should.be.false;
-      isMatch('c.js').should.be.false;
+      isMatch('a.md').should.be.false();
+      isMatch('b.md').should.be.true();
+      isMatch('c.md').should.be.false();
+      isMatch('e.md').should.be.false();
+      isMatch('d.md').should.be.false();
+      isMatch('a.js').should.be.false();
+      isMatch('c.js').should.be.false();
     });
 
     it('when the pattern is a function:', function() {
@@ -81,11 +81,11 @@ describe('matcher', function() {
         return fp === 'a.md';
       });
 
-      isMatch('a.md').should.be.true;
-      isMatch('b.md').should.be.false;
-      isMatch('c.md').should.be.false;
-      isMatch('d.md').should.be.false;
-      isMatch('e.md').should.be.false;
+      isMatch('a.md').should.be.true();
+      isMatch('b.md').should.be.false();
+      isMatch('c.md').should.be.false();
+      isMatch('d.md').should.be.false();
+      isMatch('e.md').should.be.false();
     });
   });
 });
