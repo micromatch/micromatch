@@ -252,6 +252,10 @@ function possibleParent(fp, pattern, opts) {
   opts = opts || {};
   opts.possibleParent = true;
   fp = utils.unixify(fp, opts);
+
+  if (!utils.isGlob(pattern)) {
+    return utils.matchPath(pattern, opts)(fp);
+  }
   return matcher(pattern, opts)(fp);
 }
 
