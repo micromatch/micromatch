@@ -244,6 +244,17 @@ function any(fp, patterns, opts) {
   return false;
 }
 
+function possibleParent(fp, pattern, opts) {
+  if (typeof fp !== 'string') {
+    throw new TypeError(msg('possibleParent', 'filepath', 'a string'));
+  }
+
+  opts = opts || {};
+  opts.possibleParent = true;
+  fp = utils.unixify(fp, opts);
+  return matcher(pattern, opts)(fp);
+}
+
 /**
  * Filter the keys of an object with the given `glob` pattern
  * and `options`
@@ -335,12 +346,22 @@ function toRegex(glob, options) {
     flags += 'i';
   }
 
-  var parsed = expand(glob, opts);
+  if (!opts.possibleParent) {
+    var parsed = expand(glob, opts);
 
-  // pass in tokens to avoid parsing more than once
-  opts.negated = opts.negated || parsed.negated;
-  opts.negate = opts.negated;
-  glob = wrapGlob(parsed.pattern, opts);
+    // pass in tokens to avoid parsing more than once
+    opts.negated = opts.negated || parsed.negated;
+    opts.negate = opts.negated;
+    glob = wrapGlob(parsed.pattern, opts);
+  } else {
+    // required by gpp
+    options.dot = true;
+
+    glob = wrapGlob('\\/$|(?:' + utils.globPossibleParent(glob, options).map(function (pattern) {
+        return expand(pattern, options).pattern;
+    }).join('|') + ')', options);
+  }
+
   var re;
 
   try {
@@ -410,16 +431,17 @@ function msg(method, what, type) {
  */
 
 /* eslint no-multi-spaces: 0 */
-micromatch.any       = any;
-micromatch.braces    = micromatch.braceExpand = utils.braces;
-micromatch.contains  = contains;
-micromatch.expand    = expand;
-micromatch.filter    = filter;
-micromatch.isMatch   = isMatch;
-micromatch.makeRe    = makeRe;
-micromatch.match     = match;
-micromatch.matcher   = matcher;
-micromatch.matchKeys = matchKeys;
+micromatch.any            = any;
+micromatch.braces         = micromatch.braceExpand = utils.braces;
+micromatch.contains       = contains;
+micromatch.expand         = expand;
+micromatch.filter         = filter;
+micromatch.isMatch        = isMatch;
+micromatch.makeRe         = makeRe;
+micromatch.match          = match;
+micromatch.matcher        = matcher;
+micromatch.matchKeys      = matchKeys;
+micromatch.possibleParent = possibleParent;
 
 /**
  * Expose `micromatch`
