@@ -2,7 +2,7 @@
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
-Micromatch supports all of the same matching features as minimatch and micromatch.
+Micromatch supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch#readme) and [multimatch](https://github.com/sindresorhus/multimatch).
 
 * [mm()](#usage) is the same as [multimatch()](https://github.com/sindresorhus/multimatch)
 * [mm.match()](#match) is the same as [minimatch.match()](https://github.com/isaacs/minimatch#readme)
