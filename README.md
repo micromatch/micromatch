@@ -449,6 +449,14 @@ Type: `{Boolean}`
 
 Default: `false`
 
+### options.nonegate
+
+Disallow negation (`!`) patterns.
+
+Type: `{Boolean}`
+
+Default: `false`
+
 ### options.nonull
 
 If `true`, when no matches are found the actual (array-ified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme).
