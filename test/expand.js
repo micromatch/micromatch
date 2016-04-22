@@ -32,12 +32,12 @@ describe('expand()', function() {
   });
 
   it('should return an object with information about the glob pattern', function() {
-    mm.expand('*').should.be.an.object;
+    mm.expand('*').should.be.an.Object();
     mm.expand('*').should.have.properties('options', 'pattern');
   });
 
   it('should return a string on the `glob` property:', function() {
-    mm.expand('*').pattern.should.be.a.string;
+    mm.expand('*').pattern.should.be.a.String();
     mm.expand('*').pattern.should.equal('(?!\\.)(?=.)[^/]*?');
     mm.expand('*.{js,md}').pattern.should.equal('(?!\\.)(?=.)[^/]*?\\.(js|md)');
     mm.expand('{a,b\\}').pattern.should.eql('{a,b}');
