@@ -189,7 +189,7 @@ describe('.any()', function() {
     mm.any('aaa/bba/ccc', 'aaa/**').should.be.true();
     mm.any('aaa/bba/ccc', 'aaa*').should.be.false();
     mm.any('aaa/bba/ccc', 'aaa**').should.be.false();
-    // mm.any('aaa/bba/ccc', 'aaa/*ccc').should.be.true();
+    mm.any('aaa/bba/ccc', 'aaa/*ccc').should.be.false();
     mm.any('aaa/bba/ccc', 'aaa/**ccc').should.be.true();
     mm.any('aaa/bba/ccc', 'aaa/*z').should.be.false();
     mm.any('aaa/bba/ccc', 'aaa/**z').should.be.false();

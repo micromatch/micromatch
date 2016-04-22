@@ -122,7 +122,7 @@ describe('dotfiles', function() {
 
     it('should not match a dotfile when `options.dotdirs` is true', function() {
       // mm.isMatch('.bashrc', '*bashrc', {dotdirs: true}).should.be.false();
-      // mm.isMatch('.bashrc', '[.]bashrc', {dotdirs: true}).should.be.false();
+      mm.isMatch('.bashrc', '[.]bashrc', {dotdirs: true}).should.be.true();
       // mm.isMatch('.bashrc', '?bashrc', {dotdirs: true}).should.be.false();
 
       mm.isMatch('a/b/.bashrc', '*bashrc', {dotdirs: true, matchBase: false}).should.be.false();
@@ -130,7 +130,7 @@ describe('dotfiles', function() {
       mm.isMatch('a/b/.bashrc', '?bashrc', {dotdirs: true, matchBase: false}).should.be.false();
 
       // mm.isMatch('a/b/.bashrc', '**/*bashrc', {dotdirs: true}).should.be.false();
-      // mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dotdirs: true}).should.be.false();
+      mm.isMatch('a/b/.bashrc', '**/[.]bashrc', {dotdirs: true}).should.be.true();
       // mm.isMatch('a/b/.bashrc', '**/?bashrc', {dotdirs: true}).should.be.false();
     });
   });

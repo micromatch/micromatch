@@ -20,6 +20,8 @@ if ('minimatch' in argv) {
 describe('POSIX bracket expressions', function() {
 
   it('character classes', function() {
+    // spec says this should match, I assume b/c the malformed backet pattern
+    // should be stripped completely from the pattern before performing the match
     // mm.isMatch('ab', '[[:digit]ab]', {brackets: true}).should.be.true();
     mm.isMatch('A', '[[:lower:]]', {brackets: true}).should.be.false();
     mm.isMatch('A', '[![:lower:]]', {brackets: true}).should.be.true();

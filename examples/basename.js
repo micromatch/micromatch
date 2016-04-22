@@ -17,11 +17,13 @@ var files = [
   'a/b/c/d/eeeeeee/f.md',
   'a/b/c/d/e.js',
   'a/b/c/d/e.md',
+  'a/b/c/d/e.txt',
+  'a/b/c/d/e.txt',
   'a/b/c/ddd/e.js',
   'a/b/c/ddd/e.md'
 ];
 
-console.log(mm(files, '**/*.!(md)'))
+console.log(mm(files, '**/*.!(md|txt)'))
 // var re = mm.makeRe('**/*!(.md)');
 
 // var res = files.filter(function (fp) {

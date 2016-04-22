@@ -157,7 +157,7 @@ describe('.contains()', function() {
     mm.contains('aaa/bba/ccc', 'aaa/**').should.be.true();
     mm.contains('aaa/bba/ccc', 'aaa*').should.be.true();
     mm.contains('aaa/bba/ccc', 'aaa**').should.be.true();
-    // mm.contains('aaa/bba/ccc', 'aaa/*ccc').should.be.true();
+    mm.contains('aaa/bba/ccc', 'aaa/*ccc').should.be.false();
     mm.contains('aaa/bba/ccc', 'aaa/**ccc').should.be.true();
     mm.contains('aaa/bba/ccc', 'aaa/*z').should.be.false();
     mm.contains('aaa/bba/ccc', 'aaa/**z').should.be.false();
