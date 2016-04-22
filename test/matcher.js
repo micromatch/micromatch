@@ -16,7 +16,6 @@ if ('minimatch' in argv) {
   mm = minimatch;
 }
 
-
 describe('matcher', function() {
   describe('errors:', function() {
     it('should throw on undefined args:', function() {

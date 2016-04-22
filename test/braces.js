@@ -61,7 +61,6 @@ describe('brace expansion', function() {
   });
 });
 
-
 // tests based on https://github.com/vmeurisse/wildmatch
 describe('braces sequences', function() {
   it('normal sequence', function() {

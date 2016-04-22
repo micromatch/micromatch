@@ -212,7 +212,6 @@ describe('.makeRe()', function() {
     });
   });
 
-
   describe('options', function() {
     it('should support the `matchBase` option:', function() {
       mm.makeRe('*.md').test('a/b/c/foo.md').should.be.false();

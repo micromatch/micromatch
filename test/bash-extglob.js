@@ -7,7 +7,7 @@
 
 'use strict';
 
-/* deps: mocha */
+require('mocha');
 var path = require('path');
 var argv = require('minimist')(process.argv.slice(2));
 var ref = require('./support/reference');

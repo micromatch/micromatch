@@ -46,7 +46,6 @@ describe('special characters', function() {
       mm.match(['a/b/c/zzz/e.md'], 'a/?/c/???/e.md').should.eql(['a/b/c/zzz/e.md']);
     });
 
-
     it('should use special characters and glob stars together:', function() {
       mm.match(['a/b/c/d/e.md'], 'a/?/c/?/*/e.md').should.eql([]);
       mm.match(['a/b/c/d/e/e.md'], 'a/?/c/?/*/e.md').should.eql(['a/b/c/d/e/e.md']);

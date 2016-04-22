@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * Based on tests from <https://github.com/vmeurisse/wildmatch>,
  * which were extracted from the `github.com/git/git` repository

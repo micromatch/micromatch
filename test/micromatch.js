@@ -65,7 +65,6 @@ describe('micromatch array patterns', function() {
     });
   });
 
-
   describe('special characters:', function() {
     it('should match one character per question mark:', function() {
       mm(['a/b/c.md'], ['a/?/c.md']).should.eql(['a/b/c.md']);
@@ -192,7 +191,6 @@ describe('micromatch array patterns', function() {
       mm(['a/b/baz/ce/fez/xyz.md'], ['a/b/**/c{d,e}/**/xyz.md']).should.eql(['a/b/baz/ce/fez/xyz.md']);
     });
   });
-
 
   describe('options', function() {
     it('should support the `matchBase` option:', function() {
