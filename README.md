@@ -2,11 +2,11 @@
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
-Micromatch supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch#readme) and [multimatch](https://github.com/sindresorhus/multimatch).
+Micromatch supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch).
 
 * [mm()](#usage) is the same as [multimatch()](https://github.com/sindresorhus/multimatch)
-* [mm.match()](#match) is the same as [minimatch.match()](https://github.com/isaacs/minimatch#readme)
-* use [mm.isMatch()](#ismatch) instead of [minimatch()](https://github.com/isaacs/minimatch#readme)
+* [mm.match()](#match) is the same as [minimatch.match()](https://github.com/isaacs/minimatch)
+* use [mm.isMatch()](#ismatch) instead of [minimatch()](https://github.com/isaacs/minimatch)
 
 ## Install
 
@@ -29,7 +29,7 @@ console.log(mm(['']))
 
 ### Features
 
-* [Drop-in replacement](#switch-from-minimatch) for [minimatch](https://github.com/isaacs/minimatch#readme) and [multimatch](https://github.com/sindresorhus/multimatch)
+* [Drop-in replacement](#switch-from-minimatch) for [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch)
 * Built-in support for multiple glob patterns, like `['foo/*.js', '!bar.js']`
 * [Brace Expansion](https://github.com/jonschlinkert/braces) (`foo/bar-{1..5}.md`, `one/{two,three}/four.md`)
 * Typical glob patterns, like `**/*`, `a/b/*.js`, or `['foo/*.js', '!bar.js']`
@@ -55,7 +55,7 @@ mm(['fa', 'fb', 'f', 'fo'], '!(f!(o))');
 ## Why switch to micromatch?
 
 * Native support for multiple glob patterns, no need for wrappers like [multimatch](https://github.com/sindresorhus/multimatch)
-* [10-55x faster](#benchmarks) and more performant than [minimatch](https://github.com/isaacs/minimatch#readme) and [multimatch](https://github.com/sindresorhus/multimatch). This is achieved through a combination of caching and regex optimization strategies, a fundamentally different approach than minimatch.
+* [10-55x faster](#benchmarks) and more performant than [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch). This is achieved through a combination of caching and regex optimization strategies, a fundamentally different approach than minimatch.
 * More extensive support for the Bash 4.3 specification
 * More complete extglob support
 * Extensive [unit tests](./test) (approx. 1,300 tests). Minimatch fails many of the tests.
@@ -142,7 +142,7 @@ mm(['a.md', 'b.js', 'c.txt', 'd.json'], ['*.md', '*.txt']);
 
 Behavior is designed to be what users would expect, based on conventions that are already well-established.
 
-* [minimatch](https://github.com/isaacs/minimatch#readme) behavior is used when the pattern is a string, so patterns are **inclusive by default**.
+* [minimatch](https://github.com/isaacs/minimatch) behavior is used when the pattern is a string, so patterns are **inclusive by default**.
 * [multimatch](https://github.com/sindresorhus/multimatch) behavior is used when an array of patterns is passed, so patterns are **exclusive by default**.
 
 ```js
@@ -352,7 +352,7 @@ Default: `undefined` on non-windows, `true` on windows.
 
 ### options.dot
 
-Match dotfiles. Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme).
+Match dotfiles. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
 
 Type: `{Boolean}`
 
@@ -395,7 +395,7 @@ mm.match(['abc', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true, nodupes: true});
 
 ### options.matchBase
 
-Allow glob patterns without slashes to match a file path based on its basename. . Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme).
+Allow glob patterns without slashes to match a file path based on its basename. . Same behavior as [minimatch](https://github.com/isaacs/minimatch).
 
 Type: `{Boolean}`
 
@@ -413,7 +413,7 @@ mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
 
 ### options.nobraces
 
-Don't expand braces in glob patterns. Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme) `nobrace`.
+Don't expand braces in glob patterns. Same behavior as [minimatch](https://github.com/isaacs/minimatch) `nobrace`.
 
 Type: `{Boolean}`
 
@@ -443,7 +443,7 @@ See [extglob](https://github.com/jonschlinkert/extglob) for more information abo
 
 ### options.nocase
 
-Use a case-insensitive regex for matching files. Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme).
+Use a case-insensitive regex for matching files. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
 
 Type: `{Boolean}`
 
@@ -459,7 +459,7 @@ Default: `false`
 
 ### options.nonull
 
-If `true`, when no matches are found the actual (array-ified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch#readme).
+If `true`, when no matches are found the actual (array-ified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
 
 Type: `{Boolean}`
 
@@ -558,60 +558,99 @@ Run the [benchmarks](./benchmark):
 node benchmark
 ```
 
-As of April 22, 2016:
+As of May 16, 2016:
 
 ```bash
-#1: basename-braces
-  micromatch x 26,420 ops/sec ±0.89% (91 runs sampled)
-  minimatch x 3,507 ops/sec ±0.64% (97 runs sampled)
+# benchmark/fixtures/basename-braces.js (12343 bytes)
+  micromatch x 27,210 ops/sec ±1.23% (87 runs sampled)
+  minimatch x 3,976 ops/sec ±1.41% (86 runs sampled)
+  multimatch x 3,818 ops/sec ±1.35% (89 runs sampled)
 
-#2: basename
-  micromatch x 25,315 ops/sec ±0.82% (93 runs sampled)
-  minimatch x 4,398 ops/sec ±0.86% (94 runs sampled)
+  fastest is micromatch
 
-#3: braces-no-glob
-  micromatch x 341,254 ops/sec ±0.78% (93 runs sampled)
-  minimatch x 30,197 ops/sec ±1.12% (91 runs sampled)
+# benchmark/fixtures/basename.js (12339 bytes)
+  micromatch x 18,867 ops/sec ±3.96% (73 runs sampled)
+  minimatch x 4,611 ops/sec ±1.32% (85 runs sampled)
+  multimatch x 4,667 ops/sec ±1.37% (87 runs sampled)
 
-#4: braces
-  micromatch x 54,649 ops/sec ±0.74% (94 runs sampled)
-  minimatch x 3,095 ops/sec ±0.82% (95 runs sampled)
+  fastest is micromatch
 
-#5: immediate
-  micromatch x 16,719 ops/sec ±0.79% (95 runs sampled)
-  minimatch x 4,348 ops/sec ±0.86% (96 runs sampled)
+# benchmark/fixtures/braces-no-glob.js (706 bytes)
+  micromatch x 316,578 ops/sec ±1.00% (87 runs sampled)
+  minimatch x 31,374 ops/sec ±1.03% (86 runs sampled)
+  multimatch x 29,461 ops/sec ±1.47% (87 runs sampled)
 
-#6: large
-  micromatch x 721 ops/sec ±0.77% (94 runs sampled)
-  minimatch x 17.73 ops/sec ±1.08% (50 runs sampled)
+  fastest is micromatch
 
-#7: long
-  micromatch x 5,051 ops/sec ±0.87% (97 runs sampled)
-  minimatch x 628 ops/sec ±0.83% (94 runs sampled)
+# benchmark/fixtures/braces.js (2858 bytes)
+  micromatch x 61,618 ops/sec ±1.25% (86 runs sampled)
+  minimatch x 2,947 ops/sec ±1.28% (87 runs sampled)
+  multimatch x 2,460 ops/sec ±1.23% (87 runs sampled)
 
-#8: mid
-  micromatch x 51,280 ops/sec ±0.80% (95 runs sampled)
-  minimatch x 1,923 ops/sec ±0.84% (95 runs sampled)
+  fastest is micromatch
 
-#9: multi-patterns
-  micromatch x 22,440 ops/sec ±0.97% (94 runs sampled)
-  minimatch x 2,481 ops/sec ±1.10% (94 runs sampled)
+# benchmark/fixtures/immediate.js (12338 bytes)
+  micromatch x 19,112 ops/sec ±0.99% (87 runs sampled)
+  minimatch x 4,551 ops/sec ±1.23% (88 runs sampled)
+  multimatch x 4,656 ops/sec ±1.31% (88 runs sampled)
 
-#10: no-glob
-  micromatch x 722,823 ops/sec ±1.30% (87 runs sampled)
-  minimatch x 52,967 ops/sec ±1.09% (94 runs sampled)
+  fastest is micromatch
 
-#11: range
-  micromatch x 243,471 ops/sec ±0.79% (94 runs sampled)
-  minimatch x 11,736 ops/sec ±0.82% (96 runs sampled)
+# benchmark/fixtures/large.js (485691 bytes)
+  micromatch x 757 ops/sec ±0.99% (86 runs sampled)
+  minimatch x 20.97 ops/sec ±1.64% (35 runs sampled)
+  multimatch x 20.78 ops/sec ±1.66% (35 runs sampled)
 
-#12: shallow
-  micromatch x 190,874 ops/sec ±0.98% (95 runs sampled)
-  minimatch x 21,699 ops/sec ±0.81% (97 runs sampled)
+  fastest is micromatch
 
-#13: short
-  micromatch x 496,393 ops/sec ±3.86% (90 runs sampled)
-  minimatch x 53,765 ops/sec ±0.75% (95 runs sampled)
+# benchmark/fixtures/long.js (90647 bytes)
+  micromatch x 6,356 ops/sec ±1.02% (86 runs sampled)
+  minimatch x 619 ops/sec ±1.16% (85 runs sampled)
+  multimatch x 581 ops/sec ±1.44% (84 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/mid.js (3258 bytes)
+  micromatch x 61,002 ops/sec ±1.60% (82 runs sampled)
+  minimatch x 2,075 ops/sec ±1.15% (87 runs sampled)
+  multimatch x 1,951 ops/sec ±1.23% (85 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/multi-patterns.js (2872 bytes)
+  micromatch x 22,986 ops/sec ±1.16% (88 runs sampled)
+  minimatch x 2,363 ops/sec ±1.58% (86 runs sampled)
+  multimatch x 2,380 ops/sec ±1.11% (88 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/no-glob.js (701 bytes)
+  micromatch x 908,468 ops/sec ±1.36% (81 runs sampled)
+  minimatch x 57,417 ops/sec ±1.22% (87 runs sampled)
+  multimatch x 55,250 ops/sec ±1.29% (88 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/range.js (727 bytes)
+  micromatch x 291,205 ops/sec ±1.39% (84 runs sampled)
+  minimatch x 12,615 ops/sec ±1.08% (87 runs sampled)
+  multimatch x 13,341 ops/sec ±1.27% (84 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/shallow.js (701 bytes)
+  micromatch x 234,602 ops/sec ±1.30% (89 runs sampled)
+  minimatch x 21,503 ops/sec ±1.48% (85 runs sampled)
+  multimatch x 23,195 ops/sec ±1.13% (87 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/short.js (220 bytes)
+  micromatch x 640,928 ops/sec ±4.81% (84 runs sampled)
+  minimatch x 66,070 ops/sec ±1.53% (88 runs sampled)
+  multimatch x 65,086 ops/sec ±1.89% (88 runs sampled)
+
+  fastest is micromatch
 ```
 
 ## Tests
@@ -626,7 +665,7 @@ $ npm install -d && npm test
 
 ### Coverage
 
-As of April 22, 2016:
+As of May 16, 2016:
 
 ```sh
 Statements : 100% (441/441)
@@ -692,4 +731,4 @@ Released under the [MIT license](https://github.com/jonschlinkert/micromatch/blo
 
 ***
 
-_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on April 22, 2016._
+_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on May 16, 2016._

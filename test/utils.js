@@ -6,13 +6,13 @@ var assert = require('assert');
 var utils = require('../lib/utils');
 var mm = require('..');
 
-describe('utils.hasPath', function() {
+describe('utils.pathContains', function() {
   it('should return a function', function() {
-    assert.equal(typeof utils.hasPath('foo/bar'), 'function');
+    assert.equal(typeof utils.pathContains('foo/bar'), 'function');
   });
 
-  it('should return true if the first path contains the second:', function() {
-    assert.equal(utils.hasPath('foo/bar')('foo'), true);
+  it('should return true if the second path contains the first:', function() {
+    assert.equal(utils.pathContains('foo')('foo/bar'), true);
   });
 });
 
@@ -21,8 +21,8 @@ describe('utils.matchPath', function() {
     assert.equal(utils.matchPath('foo')('foo'), true);
   });
 
-  it('should return true if the first path contains the second:', function() {
-    assert.equal(utils.matchPath('foo/bar', {contains: true})('foo'), true);
+  it('should return true if the second path contains the first:', function() {
+    assert.equal(utils.matchPath('foo', {contains: true})('foo/bar'), true);
   });
 });
 

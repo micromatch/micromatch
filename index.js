@@ -67,7 +67,7 @@ function match(files, pattern, opts) {
   files = utils.arrayify(files);
   opts = opts || {};
 
-  var negate = opts.negate || false;
+  var negate = !!opts.negate;
   var orig = pattern;
 
   if (typeof pattern === 'string') {
@@ -91,8 +91,9 @@ function match(files, pattern, opts) {
     var file = files[i++];
     var fp = utils.unixify(file, opts);
 
-    if (!_isMatch(fp)) { continue; }
-    res.push(fp);
+    if (_isMatch(fp)) {
+      res.push(fp);
+    }
   }
 
   if (res.length === 0) {
@@ -108,7 +109,7 @@ function match(files, pattern, opts) {
   // if `negate` was defined, diff negated files
   if (negate) { res = utils.diff(files, res); }
 
-  // if `ignore` was defined, diff ignored filed
+  // if `ignore` was defined, diff ignored files
   if (opts.ignore && opts.ignore.length) {
     pattern = opts.ignore;
     opts = utils.omit(opts, ['ignore']);
@@ -308,8 +309,7 @@ function matcher(pattern, opts) {
   }
   // `matchBase` is not defined
   return function(fp) {
-    fp = utils.unixify(fp, opts);
-    return re.test(fp);
+    return re.test(utils.unixify(fp, opts));
   };
 }
 
