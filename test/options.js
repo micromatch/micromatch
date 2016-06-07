@@ -35,6 +35,8 @@ describe('options.nocase', function() {
     mm.match(['a/b/c/e.md'], 'A/b/*/E.md', {nocase: true}).should.eql(['a/b/c/e.md']);
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD').should.eql([], 'should not match a file extension');
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/C/E.MD').should.eql([], 'should not match a file extension');
+    mm.match(['a/b/c/e.md'], 'A/b/C/E.MD', {nocase: true}).should.eql(['a/b/c/e.md']);
   });
 
   it('should use correct flags when `flags` and `nocase` are used (no double `i`):', function() {
@@ -45,6 +47,8 @@ describe('options.nocase', function() {
     mm.match(['a/b/c/e.md'], 'A/b/*/E.md', opts).should.eql(['a/b/c/e.md']);
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD').should.eql([], 'should not match a file extension');
     mm.match(['a/b/c/e.md'], 'A/b/C/*.MD', opts).should.eql(['a/b/c/e.md']);
+    mm.match(['a/b/c/e.md'], 'A/b/C/E.MD').should.eql([], 'should not match a file extension');
+    mm.match(['a/b/c/e.md'], 'A/b/C/E.MD', opts).should.eql(['a/b/c/e.md']);
   });
 });
 
