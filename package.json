@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.",
-  "version": "2.3.10",
+  "version": "2.3.11",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/micromatch",
