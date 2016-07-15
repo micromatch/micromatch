@@ -7,8 +7,9 @@
 
 'use strict';
 
-var path = require('path');
 require('should');
+var path = require('path');
+var assert = require('assert');
 var argv = require('minimist')(process.argv.slice(2));
 var mm = require('..');
 
@@ -108,6 +109,28 @@ describe('micromatch array patterns', function() {
       mm(['a/b/c/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql([]);
       mm(['a/b/cd/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/cd/xyz.md']);
       mm(['a/b/ce/xyz.md'], ['a/b/c{d,e}/*.md']).should.eql(['a/b/ce/xyz.md']);
+    });
+  });
+
+  describe('directories:', function() {
+    it('should match a single directory deep:', function() {
+      assert.deepEqual(mm(['a/b/c/d/e', 'a/b/c/d', 'a/b/c', 'a/b', 'a'], ['*']), ['a']);
+    });
+
+    it('should match a directory for each `*/`', function() {
+      var fixture = ['a/b/c/d/e', 'a/b/c/d', 'a/b/c', 'a/b', 'a'];
+      assert.deepEqual(mm(fixture, ['*/*']), ['a/b']);
+      assert.deepEqual(mm(fixture, ['*/*/*']), ['a/b/c']);
+      assert.deepEqual(mm(fixture, ['*/*/*/*']), ['a/b/c/d']);
+      assert.deepEqual(mm(fixture, ['*/*/*/*/*']), ['a/b/c/d/e']);
+    });
+
+    it('should match no less than the numbe of `*/` patterns when a globstar is passed', function() {
+      var fixture = ['a/b/c/d/e', 'a/b/c/d', 'a/b/c', 'a/b', 'a'];
+      assert.deepEqual(mm(fixture, ['*/*/**']), ['a/b/c/d/e', 'a/b/c/d', 'a/b/c']);
+      assert.deepEqual(mm(fixture, ['*/*/*/**']), ['a/b/c/d/e', 'a/b/c/d']);
+      assert.deepEqual(mm(fixture, ['*/*/*/*/**']), ['a/b/c/d/e']);
+      assert.deepEqual(mm(fixture, ['*/*/*/*/*/**']), []);
     });
   });
 
