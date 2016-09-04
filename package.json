@@ -4,6 +4,18 @@
   "version": "2.3.11",
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "contributors": [
+    "Amila Welihinda <amilajack@gmail.com> (http://amilawelihinda.com)",
+    "Bogdan Chadkin <trysound@yandex.ru> (https://github.com/TrySound)",
+    "Brian Woodward <brian.woodward@gmail.com> (https://github.com/doowb)",
+    "Charlike Mike Reagent (http://www.tunnckocore.tk)",
+    "Elan Shanker (https://github.com/es128)",
+    "Fabrício Matté (http://ultcombo.js.org)",
+    "Jon Schlinkert <jon.schlinkert@sellside.com> (http://twitter.com/jonschlinkert)",
+    "Martin Kolárik <martin@kolarik.sk> (http://kolarik.sk)",
+    "Paul Miller <paul+gh@paulmillr.com> (paulmillr.com)",
+    "Tom Byrer (https://github.com/tomByrer)"
+  ],
   "repository": "jonschlinkert/micromatch",
   "bugs": {
     "url": "https://github.com/jonschlinkert/micromatch/issues"
@@ -11,7 +23,9 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "LICENSE",
+    "README.md"
   ],
   "main": "index.js",
   "engines": {
@@ -67,6 +81,7 @@
     "matcher",
     "matches",
     "matching",
+    "micromatch",
     "minimatch",
     "multimatch",
     "path",
