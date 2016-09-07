@@ -1,6 +1,6 @@
 var path = require('path');
 var should = require('should');
-var argv = require('minimist')(process.argv.slice(2));
+var argv = require('yargs-parser')(process.argv.slice(2));
 var mm = require('../..');
 
 if ('minimatch' in argv) {

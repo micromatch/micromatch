@@ -1,232 +1,225 @@
 'use strict';
 
-require('should');
-var mm = require('..');
+require('mocha');
+var assert = require('assert');
+var nm = require('..');
 
 describe('.any()', function() {
-  describe('errors:', function() {
+  describe('error handling', function() {
     it('should throw on undefined args:', function() {
-      (function() {
-        mm.any();
-      }).should.throw('micromatch.any(): patterns should be a string or array.');
+      assert.throws(function() {
+        nm.any();
+      }, /expected patterns to be a string or array/);
     });
 
     it('should throw on bad args:', function() {
-      (function() {
-        mm.any({});
-      }).should.throw('micromatch.any(): patterns should be a string or array.');
+      assert.throws(function() {
+        nm.any({});
+      }, /expected patterns to be a string or array/);
     });
   });
 
   it('should correctly handle empty patterns', function() {
-    mm.any('ab', '').should.be.false();
-    mm.any('a', '').should.be.false();
-    mm.any('.', '').should.be.false();
+    assert(!nm.any('ab', ''));
+    assert(!nm.any('a', ''));
+    assert(!nm.any('.', ''));
   });
 
   it('should support an array of patterns', function() {
-    mm.any('ab', ['']).should.be.false();
-    mm.any('a', ['']).should.be.false();
-    mm.any('.', ['']).should.be.false();
+    assert(!nm.any('ab', ['']));
+    assert(!nm.any('a', ['']));
+    assert(!nm.any('.', ['']));
   });
 
   it('should return true when the path contains the pattern', function() {
-    mm.any('ab', 'b').should.be.false();
-    mm.any('.', '.').should.be.true();
-    mm.any('a/b/c', 'a/b').should.be.false();
-    mm.any('/ab', '/a').should.be.false();
-    mm.any('a', 'a').should.be.true();
-    mm.any('ab', 'a').should.be.false();
-    mm.any('ab', 'ab').should.be.true();
-    mm.any('abcd', 'd').should.be.false();
-    mm.any('abcd', 'c').should.be.false();
-    mm.any('abcd', 'cd').should.be.false();
-    mm.any('abcd', 'bc').should.be.false();
-    mm.any('abcd', 'ab').should.be.false();
+    assert(!nm.any('ab', 'b'));
+    assert(nm.any('.', '.'));
+    assert(!nm.any('a/b/c', 'a/b'));
+    assert(!nm.any('/ab', '/a'));
+    assert(nm.any('a', 'a'));
+    assert(!nm.any('ab', 'a'));
+    assert(nm.any('ab', 'ab'));
+    assert(!nm.any('abcd', 'd'));
+    assert(!nm.any('abcd', 'c'));
+    assert(!nm.any('abcd', 'cd'));
+    assert(!nm.any('abcd', 'bc'));
+    assert(!nm.any('abcd', 'ab'));
   });
 
   it('should return true when the path contains any of the patterns', function() {
-    mm.any('ab', ['b', 'foo']).should.be.false();
-    mm.any('.', ['.', 'foo']).should.be.true();
-    mm.any('a/b/c', ['a/b', 'foo']).should.be.false();
-    mm.any('/ab', ['/a', 'foo']).should.be.false();
-    mm.any('a', ['a', 'foo']).should.be.true();
-    mm.any('ab', ['a', 'foo']).should.be.false();
-    mm.any('ab', ['ab', 'foo']).should.be.true();
-    mm.any('abcd', ['d', 'foo']).should.be.false();
-    mm.any('abcd', ['c', 'foo']).should.be.false();
-    mm.any('abcd', ['cd', 'foo']).should.be.false();
-    mm.any('abcd', ['bc', 'foo']).should.be.false();
-    mm.any('abcd', ['ab', 'foo']).should.be.false();
+    assert(!nm.any('ab', ['b', 'foo']));
+    assert(nm.any('.', ['.', 'foo']));
+    assert(!nm.any('a/b/c', ['a/b', 'foo']));
+    assert(!nm.any('/ab', ['/a', 'foo']));
+    assert(nm.any('a', ['a', 'foo']));
+    assert(!nm.any('ab', ['a', 'foo']));
+    assert(nm.any('ab', ['ab', 'foo']));
+    assert(!nm.any('abcd', ['d', 'foo']));
+    assert(!nm.any('abcd', ['c', 'foo']));
+    assert(!nm.any('abcd', ['cd', 'foo']));
+    assert(!nm.any('abcd', ['bc', 'foo']));
+    assert(!nm.any('abcd', ['ab', 'foo']));
   });
 
-  it('should match with common glob patterns', function() {
-    mm.any('a/b/c', 'a/*').should.be.false();
-    mm.any('/ab', '/a').should.be.false();
-    mm.any('/ab', '/*').should.be.true();
-    mm.any('/cd', '/*').should.be.true();
-    mm.any('ab', '*').should.be.true();
-    mm.any('ab', 'ab').should.be.true();
-    mm.any('/ab', '*/a').should.be.false();
-    mm.any('/ab', '*/').should.be.false();
-    mm.any('/ab', '*/*').should.be.true();
-    mm.any('/ab', '/').should.be.false();
-    mm.any('/ab', '/??').should.be.true();
-    mm.any('/ab', '/?b').should.be.true();
-    mm.any('/ab', '/?').should.be.false();
-    mm.any('a/b', '?/?').should.be.true();
+  it('should match with conmon glob patterns', function() {
+    assert(nm.any('/ab', '*/*'));
+    assert(nm.any('/ab', '/*'));
+    assert(nm.any('/ab', '/??'));
+    assert(nm.any('/ab', '/?b'));
+    assert(nm.any('/cd', '/*'));
+    assert(nm.any('a/b', '?/?'));
+    assert(nm.any('ab', '*'));
+    assert(nm.any('ab', 'ab'));
+    assert(!nm.any('/ab', '*/'));
+    assert(!nm.any('/ab', '*/a'));
+    assert(!nm.any('/ab', '/'));
+    assert(!nm.any('/ab', '/?'));
+    assert(!nm.any('/ab', '/a'));
+    assert(!nm.any('a/b/c', 'a/*'));
   });
 
   it('should return false when the path does not contain the pattern', function() {
-    mm.any('/ab', '?/?').should.be.false();
-    mm.any('ab', '*/*').should.be.false();
-    mm.any('abcd', 'f').should.be.false();
-    mm.any('ab', 'c').should.be.false();
-    mm.any('ab', '/a').should.be.false();
-    mm.any('/ab', 'a/*').should.be.false();
-    mm.any('ef', '/*').should.be.false();
-    mm.any('ab', './*').should.be.false();
+    assert(!nm.any('/ab', '?/?'));
+    assert(!nm.any('ab', '*/*'));
+    assert(!nm.any('abcd', 'f'));
+    assert(!nm.any('ab', 'c'));
+    assert(!nm.any('ab', '/a'));
+    assert(!nm.any('/ab', 'a/*'));
+    assert(!nm.any('ef', '/*'));
+    assert(!nm.any('ab', './*'));
   });
 
   it('should return false when the path does not contain any pattern', function() {
-    mm.any('/ab', ['?/?', 'foo', 'bar']).should.be.false();
-    mm.any('ab', ['*/*', 'foo', 'bar']).should.be.false();
-    mm.any('abcd', ['f', 'foo', 'bar']).should.be.false();
-    mm.any('ab', ['c', 'foo', 'bar']).should.be.false();
-    mm.any('ab', ['/a', 'foo', 'bar']).should.be.false();
-    mm.any('/ab', ['a/*', 'foo', 'bar']).should.be.false();
-    mm.any('ef', ['/*', 'foo', 'bar']).should.be.false();
-    mm.any('ab', ['./*', 'foo', 'bar']).should.be.false();
+    assert(!nm.any('/ab', ['?/?', 'foo', 'bar']));
+    assert(!nm.any('ab', ['*/*', 'foo', 'bar']));
+    assert(!nm.any('abcd', ['f', 'foo', 'bar']));
+    assert(!nm.any('ab', ['c', 'foo', 'bar']));
+    assert(!nm.any('ab', ['/a', 'foo', 'bar']));
+    assert(!nm.any('/ab', ['a/*', 'foo', 'bar']));
+    assert(!nm.any('ef', ['/*', 'foo', 'bar']));
+    assert(!nm.any('ab', ['./*', 'foo', 'bar']));
   });
 
   it('should match files that contain the given extension:', function() {
-    mm.any('.md', '.m').should.be.false();
-    mm.any('.c.md', '.*.md').should.be.true();
-    mm.any('c.md', '*.md').should.be.true();
-    mm.any('a/b/c.md', '.md').should.be.false();
-    mm.any('a/b/c.md', 'a/*/*.md').should.be.true();
-    mm.any('a/b/c.md', '**/*.md').should.be.true();
-    mm.any('c.md', '*.md').should.be.true();
-    mm.any('.c.md', '.md').should.be.false();
-    mm.any('.c.md', '.c.').should.be.false();
-    mm.any('a/b/c.md', '*.md').should.be.false();
-    mm.any('a/b/c/c.md', '*.md').should.be.false();
-    mm.any('.c.md', '*.md').should.be.false();
+    assert(!nm.any('.md', '.m'));
+    assert(nm.any('.c.md', '.*.md'));
+    assert(nm.any('c.md', '*.md'));
+    assert(!nm.any('a/b/c.md', '.md'));
+    assert(nm.any('a/b/c.md', 'a/*/*.md'));
+    assert(nm.any('a/b/c.md', '**/*.md'));
+    assert(nm.any('c.md', '*.md'));
+    assert(!nm.any('.c.md', '.md'));
+    assert(!nm.any('.c.md', '.c.'));
+    assert(!nm.any('a/b/c.md', '*.md'));
+    assert(!nm.any('a/b/c/c.md', '*.md'));
+    assert(!nm.any('.c.md', '*.md'));
   });
 
   it('should not match files that do not contain the given extension:', function() {
-    mm.any('.md', '*.md').should.be.false();
-    mm.any('a/b/c/c.md', 'c.js').should.be.false();
-    mm.any('a/b/c.md', 'a/*.md').should.be.false();
+    assert(!nm.any('.md', '*.md'));
+    assert(!nm.any('a/b/c/c.md', 'c.js'));
+    assert(!nm.any('a/b/c.md', 'a/*.md'));
   });
 
   it('should match dotfiles when a dot is explicitly defined in the pattern:', function() {
-    mm.any('.a', '.a').should.be.true();
-    mm.any('.ab', '.*').should.be.true();
-    mm.any('.ab', '.a*').should.be.true();
-    mm.any('.abc', '.a').should.be.false();
-    mm.any('.b', '.b*').should.be.true();
-    mm.any('.md', '.md').should.be.true();
-    mm.any('.c.md', '*.md').should.be.false();
-    mm.any('a/.c.md', 'a/.c.md').should.be.true();
-    mm.any('a/b/c/.xyz.md', 'a/b/c/.*.md').should.be.true();
-    mm.any('a/.c.md', '*.md').should.be.false();
-    mm.any('a/b/c/d.a.md', 'a/b/c/*.md').should.be.true();
+    assert(nm.any('.a', '.a'));
+    assert(nm.any('.ab', '.*'));
+    assert(nm.any('.ab', '.a*'));
+    assert(!nm.any('.abc', '.a'));
+    assert(nm.any('.b', '.b*'));
+    assert(nm.any('.md', '.md'));
+    assert(!nm.any('.c.md', '*.md'));
+    assert(nm.any('a/.c.md', 'a/.c.md'));
+    assert(nm.any('a/b/c/.xyz.md', 'a/b/c/.*.md'));
+    assert(!nm.any('a/.c.md', '*.md'));
+    assert(nm.any('a/b/c/d.a.md', 'a/b/c/*.md'));
   });
 
   it('should match dotfiles when `dot` or `dotfiles` is set:', function() {
-    mm.any('a/b/c/.xyz.md', '.*.md', {dot: true}).should.be.false();
-    mm.any('.c.md', '*.md', {dot: true}).should.be.true();
-    mm.any('.c.md', '.*', {dot: true}).should.be.true();
-    mm.any('a/b/c/.xyz.md', '**/*.md', {dot: true}).should.be.true();
-    mm.any('a/b/c/.xyz.md', '**/.*.md', {dot: true}).should.be.true();
-    mm.any('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}).should.be.true();
-    mm.any('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}).should.be.true();
+    assert(!nm.any('a/b/c/.xyz.md', '.*.md', {dot: true}));
+    assert(nm.any('.c.md', '*.md', {dot: true}));
+    assert(nm.any('.c.md', '.*', {dot: true}));
+    assert(nm.any('a/b/c/.xyz.md', '**/*.md', {dot: true}));
+    assert(nm.any('a/b/c/.xyz.md', '**/.*.md', {dot: true}));
+    assert(nm.any('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}));
+    assert(nm.any('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}));
   });
 
   it('should not match dotfiles when `dot` or `dotfiles` is not set:', function() {
-    mm.any('.a', '*.md').should.be.false();
-    mm.any('.ba', '.a').should.be.false();
-    mm.any('.a.md', 'a/b/c/*.md').should.be.false();
-    mm.any('.ab', '*.*').should.be.false();
-    mm.any('.md', 'a/b/c/*.md').should.be.false();
-    mm.any('.txt', '.md').should.be.false();
-    mm.any('.verb.txt', '*.md').should.be.false();
-    mm.any('a/b/d/.md', 'a/b/c/*.md').should.be.false();
+    assert(!nm.any('.a', '*.md'));
+    assert(!nm.any('.ba', '.a'));
+    assert(!nm.any('.a.md', 'a/b/c/*.md'));
+    assert(!nm.any('.ab', '*.*'));
+    assert(!nm.any('.md', 'a/b/c/*.md'));
+    assert(!nm.any('.txt', '.md'));
+    assert(!nm.any('.verb.txt', '*.md'));
+    assert(!nm.any('a/b/d/.md', 'a/b/c/*.md'));
   });
 
   it('should match file paths:', function() {
-    mm.any('a/b/c/xyz.md', 'a/b/c/*.md').should.be.true();
-    mm.any('a/bb/c/xyz.md', 'a/*/c/*.md').should.be.true();
-    mm.any('a/bbbb/c/xyz.md', 'a/*/c/*.md').should.be.true();
-    mm.any('a/bb.bb/c/xyz.md', 'a/*/c/*.md').should.be.true();
-    mm.any('a/bb.bb/aa/bb/aa/c/xyz.md', 'a/**/c/*.md').should.be.true();
-    mm.any('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md').should.be.true();
+    assert(nm.any('a/b/c/xyz.md', 'a/b/c/*.md'));
+    assert(nm.any('a/bb/c/xyz.md', 'a/*/c/*.md'));
+    assert(nm.any('a/bbbb/c/xyz.md', 'a/*/c/*.md'));
+    assert(nm.any('a/bb.bb/c/xyz.md', 'a/*/c/*.md'));
+    assert(nm.any('a/bb.bb/aa/bb/aa/c/xyz.md', 'a/**/c/*.md'));
+    assert(nm.any('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md'));
   });
 
   it('should return true when full file paths are matched:', function() {
-    mm.any('a/.b', 'a/.*').should.be.true();
-    mm.any('a/.b', 'a/').should.be.false();
-    mm.any('a/b/z/.a', 'b/z').should.be.false();
-    mm.any('a/b/z/.a', 'a/*/z/.a').should.be.true();
-    mm.any('a/b/c/d/e/z/c.md', 'a/**/z/*.md').should.be.true();
-    mm.any('a/b/c/d/e/z/c.md', 'b/c/d/e').should.be.false();
-    mm.any('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md').should.be.true();
-    mm.any('a/b/c/cd/bbb/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true();
-    mm.any('a/b/baz/ce/fez/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.true();
+    assert(nm.any('a/.b', 'a/.*'));
+    assert(!nm.any('a/.b', 'a/'));
+    assert(!nm.any('a/b/z/.a', 'b/z'));
+    assert(nm.any('a/b/z/.a', 'a/*/z/.a'));
+    assert(nm.any('a/b/c/d/e/z/c.md', 'a/**/z/*.md'));
+    assert(!nm.any('a/b/c/d/e/z/c.md', 'b/c/d/e'));
+    assert(nm.any('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md'));
   });
 
   it('question marks should not match slashes:', function() {
-    mm.any('aaa/bbb', 'aaa?bbb').should.be.false();
+    assert(!nm.any('aaa/bbb', 'aaa?bbb'));
   });
 
   it('should match path segments:', function() {
-    mm.any('aaa', 'aaa').should.be.true();
-    mm.any('aaa', 'aa').should.be.false();
-    mm.any('aaa/bbb', 'aaa/bbb').should.be.true();
-    mm.any('aaa/bbb', 'aaa/*').should.be.true();
-    mm.any('aaa/bba/ccc', 'aaa/*').should.be.false();
-    mm.any('aaa/bba/ccc', 'aaa/**').should.be.true();
-    mm.any('aaa/bba/ccc', 'aaa*').should.be.false();
-    mm.any('aaa/bba/ccc', 'aaa**').should.be.false();
-    mm.any('aaa/bba/ccc', 'aaa/*ccc').should.be.false();
-    mm.any('aaa/bba/ccc', 'aaa/**ccc').should.be.true();
-    mm.any('aaa/bba/ccc', 'aaa/*z').should.be.false();
-    mm.any('aaa/bba/ccc', 'aaa/**z').should.be.false();
-    mm.any('aaa/bbb', 'aaa[/]bbb').should.be.true();
-    mm.any('aaa', '*/*/*').should.be.false();
-    mm.any('aaa/bbb', '*/*/*').should.be.false();
-    mm.any('aaa/bba/ccc', '*/*/*').should.be.true();
-    mm.any('aaa/bb/aa/rr', '*/*/*').should.be.false();
-    mm.any('abzzzejklhi', '*j*i').should.be.true();
-    mm.any('ab/zzz/ejkl/hi', '*/*z*/*/*i').should.be.true();
-    mm.any('ab/zzz/ejkl/hi', '*/*jk*/*i').should.be.false();
+    assert(nm.any('aaa', 'aaa'));
+    assert(!nm.any('aaa', 'aa'));
+    assert(nm.any('aaa/bbb', 'aaa/bbb'));
+    assert(nm.any('aaa/bbb', 'aaa/*'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa/*'));
+    assert(nm.any('aaa/bba/ccc', 'aaa/**'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa*'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa**'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa/*ccc'));
+    assert(nm.any('aaa/bba/ccc', 'aaa/**ccc'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa/*z'));
+    assert(!nm.any('aaa/bba/ccc', 'aaa/**z'));
+    assert(nm.any('aaa/bbb', 'aaa[/]bbb'));
+    assert(!nm.any('aaa', '*/*/*'));
+    assert(!nm.any('aaa/bbb', '*/*/*'));
+    assert(nm.any('aaa/bba/ccc', '*/*/*'));
+    assert(!nm.any('aaa/bb/aa/rr', '*/*/*'));
+    assert(nm.any('abzzzejklhi', '*j*i'));
+    assert(nm.any('ab/zzz/ejkl/hi', '*/*z*/*/*i'));
+    assert(!nm.any('ab/zzz/ejkl/hi', '*/*jk*/*i'));
   });
 
   it('should return false when full file paths are not matched:', function() {
-    mm.any('a/b/z/.a', 'b/a').should.be.false();
-    mm.any('a/.b', 'a/**/z/*.md').should.be.false();
-    mm.any('a/b/z/.a', 'a/**/z/*.a').should.be.false();
-    mm.any('a/b/z/.a', 'a/*/z/*.a').should.be.false();
-    mm.any('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md').should.be.false();
-    mm.any('a/b/d/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.false();
-    mm.any('a/b/c/xyz.md', 'a/b/**/c{d,e}/**/xyz.md').should.be.false();
+    assert(!nm.any('a/b/z/.a', 'b/a'));
+    assert(!nm.any('a/.b', 'a/**/z/*.md'));
+    assert(!nm.any('a/b/z/.a', 'a/**/z/*.a'));
+    assert(!nm.any('a/b/z/.a', 'a/*/z/*.a'));
+    assert(!nm.any('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md'));
   });
 
   it('should match paths with leading `./`:', function() {
-    mm.any('./.a', 'a/**/z/*.md').should.be.false();
-    mm.any('./a/b/z/.a', 'a/**/z/.a').should.be.false();
-    mm.any('./a/b/z/.a', './a/**/z/.a').should.be.true();
-    mm.any('./a/b/c/d/e/z/c.md', 'a/**/z/*.md').should.be.false();
-    mm.any('./a/b/c/d/e/z/c.md', './a/**/z/*.md').should.be.true();
-    mm.any('./a/b/c/d/e/z/c.md', './a/**/j/**/z/*.md').should.be.false();
-    mm.any('./a/b/c/j/e/z/c.md', './a/**/j/**/z/*.md').should.be.true();
-    mm.any('./a/b/c/j/e/z/c.md', 'a/**/j/**/z/*.md').should.be.false();
-    mm.any('./a/b/c/d/e/j/n/p/o/z/c.md', './a/**/j/**/z/*.md').should.be.true();
-    mm.any('./a/b/c/j/e/z/c.txt', './a/**/j/**/z/*.md').should.be.false();
-    mm.any('./a/b/d/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false();
-    mm.any('./a/b/c/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.false();
-    mm.any('./a/b/c/cd/bbb/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true();
-    mm.any('./a/b/baz/ce/fez/xyz.md', './a/b/**/c{d,e}/**/xyz.md').should.be.true();
+    assert(!nm.any('./.a', 'a/**/z/*.md'));
+    assert(!nm.any('./a/b/z/.a', 'a/**/z/.a'));
+    assert(nm.any('./a/b/z/.a', './a/**/z/.a'));
+    assert(!nm.any('./a/b/c/d/e/z/c.md', 'a/**/z/*.md'));
+    assert(nm.any('./a/b/c/d/e/z/c.md', './a/**/z/*.md'));
+    assert(!nm.any('./a/b/c/d/e/z/c.md', './a/**/j/**/z/*.md'));
+    assert(nm.any('./a/b/c/j/e/z/c.md', './a/**/j/**/z/*.md'));
+    assert(!nm.any('./a/b/c/j/e/z/c.md', 'a/**/j/**/z/*.md'));
+    assert(nm.any('./a/b/c/d/e/j/n/p/o/z/c.md', './a/**/j/**/z/*.md'));
+    assert(!nm.any('./a/b/c/j/e/z/c.txt', './a/**/j/**/z/*.md'));
   });
 });
