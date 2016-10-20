@@ -42,15 +42,15 @@ module.exports = [
   ['[a-c]b*', ['abc', 'abd', 'abe', 'bb', 'cb']],
   ['[a-y]*[^c]', ['abd', 'abe', 'bb', 'bcd', 'bdir/', 'ca', 'cb', 'dd', 'de']],
   ['a*[^c]', ['abd', 'abe']],
-  function () {
+  function() {
     fixtures.push('a-b', 'aXb');
   },
   ['a[X-]b', ['a-b', 'aXb']],
-  function () {
+  function() {
     fixtures.push('.x', '.y');
   },
   ['[^a-c]*', ['d', 'dd', 'de']],
-  function () {
+  function() {
     fixtures.push('a*b/', 'a*b/ooo', 'ab/ooo');
   },
 
@@ -73,7 +73,7 @@ module.exports = [
    */
 
   'http://www.opensource.apple.com/source/bash/bash-23/bash/tests/glob-test',
-  function () {
+  function() {
     fixtures.push('man/', 'man/man1/', 'man/man1/bash.1');
   },
   ['*/man*/bash.*', ['man/man1/bash.1']],
@@ -140,7 +140,7 @@ module.exports = [
 
   // .. and . can only match patterns starting with .,
   // even when options.dot is set.
-  function () {
+  function() {
     fixtures = ['a/./b', 'a/../b', 'a/c/b', 'a/.d/b'];
   },
   ['a/*/b', ['a/c/b', 'a/.d/b'], {dot: true}],
@@ -182,7 +182,7 @@ module.exports = [
 
 
   // crazy nested {,,} and *(||) tests.
-  function () {
+  function() {
     fixtures = [
       'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
       'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
@@ -212,7 +212,7 @@ module.exports = [
 
   // begin channelling Boole and deMorgan...
   'negation tests',
-  function () {
+  function() {
     fixtures = ['d', 'e', '!ab', '!abc', 'a!b', '\\!a'];
   },
 
@@ -229,7 +229,7 @@ module.exports = [
   ['!\\!a*', ['a!b', 'd', 'e', '\\!a']],
 
   // negation nestled within a pattern
-  function () {
+  function() {
     fixtures = [
       'foo.js',
       'foo.bar',
@@ -243,7 +243,7 @@ module.exports = [
   // copy bash 4.3 behavior on this.
 
   'https://github.com/isaacs/minimatch/issues/5',
-  function () {
+  function() {
     fixtures = [
       'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e', 'a/b/.x', 'a/b/.x/',
       'a/.x/b', '.x', '.x/', '.x/a', '.x/a/b', 'a/.x/b/.x/c', '.x/.x'
@@ -264,7 +264,7 @@ module.exports = [
 ];
 
 Object.defineProperty(module.exports, 'fixtures', {
-  get: function () {
+  get: function() {
     return fixtures;
   }
 });
