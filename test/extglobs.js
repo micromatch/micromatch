@@ -3,14 +3,17 @@
 var assert = require('assert');
 var argv = require('yargs-parser')(process.argv.slice(2));
 var minimatch = require('minimatch');
-var micromatch = require('..');;
+var micromatch = require('..');
+var extglob = require('extglob');
+var nm = require('nanomatch');
 
 var matcher = argv.mm ? minimatch : micromatch;
 var isMatch = argv.mm ? minimatch : micromatch.isMatch;
 
 function match(arr, pattern, expected, options) {
-  var actual = matcher.match(arr, pattern, options);
-  assert.deepEqual(actual.sort(), expected.sort(), micromatch.makeRe(pattern));
+  var actual = matcher.match(arr, pattern, options).sort();
+  expected.sort();
+  assert.deepEqual(actual, expected, micromatch.makeRe(pattern));
 }
 
 /**
@@ -22,20 +25,14 @@ describe('extglobs', function() {
     assert.equal(typeof matcher, 'function');
   });
 
-  it('should throw on imbalanced sets when `options.strict` is true', function() {
+  it('should throw on imbalanced sets when `options.strictErrors` is true', function() {
     assert.throws(function() {
-      isMatch('a((b', 'a(b', {strict: true});
+      isMatch('a((b', 'a(b', {strictErrors: true});
     }, 'row:1 col:2 missing opening parens: "a(b"');
 
     assert.throws(function() {
-      isMatch('a((b', 'a(*b', {strict: true});
+      isMatch('a((b', 'a(*b', {strictErrors: true});
     }, 'row:1 col:2 missing opening parens: "a(*b"');
-  });
-
-  it.skip('Bash 4.3 disagrees!', function() {
-    match(['foo'], '*(!(foo))', ['foo']);
-    match(['foo', 'bar', 'baz', 'foobar'], '!(foo)*', ['foo', 'bar', 'baz', 'foobar']);
-    match(['moo.cow', 'mad.moo.cow'], '!(*.*).!(*.*)', ['moo.cow']);
   });
 
   it('should match extglobs ending with statechar', function() {
@@ -45,6 +42,7 @@ describe('extglobs', function() {
   });
 
   it('should match extended globs:', function() {
+    match(['a.js.js', 'a.md.js'], '*.*(js).js', ['a.js.js']);
     match(['a/z', 'a/b'], 'a/!(z)', ['a/b']);
     match(['c/z/v'], 'c/z/v', ['c/z/v']);
     match(['c/a/v'], 'c/!(z)/v', ['c/a/v']);
@@ -88,7 +86,7 @@ describe('extglobs', function() {
   it('should work with globs', function() {
     var arr = ['123abc', 'ab', 'abab', 'abcdef', 'accdef', 'abcfefg', 'abef', 'abcfef', 'abd', 'acd'];
     match(arr, 'ab*(e|f)', ['ab', 'abef']);
-    match(arr, 'ab?*(e|f)', ['ab', 'abef']);
+    match(arr, 'ab?*(e|f)', ['abd', 'abef', 'abcfef']);
     match(arr, 'ab*d+(e|f)', ['abcdef']);
     match(arr, 'ab**(e|f)', ['ab', 'abab', 'abcdef', 'abcfefg', 'abcfef', 'abef', 'abd']);
     match(arr, 'ab*+(e|f)', ['abcdef', 'abcfef', 'abef']);
@@ -135,7 +133,7 @@ describe('extglobs', function() {
     match(['abd', 'acd', 'ac', 'ab'], 'a!(@(b|B))', ['acd', 'abd', 'ac']);
     match(['abd', 'acd'], 'a!(@(b|B))d', ['acd']);
     match(['abd', 'acd'], 'a[b*(foo|bar)]d', ['abd']);
-    // match(['abcx', 'abcz', 'bbc'], '[a*(]*z', ['abcz']);
+    match(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz', 'abcz']);
   });
 
   it('simple kleene star tests', function() {
@@ -143,7 +141,7 @@ describe('extglobs', function() {
     assert(isMatch('foo', '*(a|b\\[)|f*'));
   });
 
-  it('this doesn\'t work in bash either (per bash extglob.tests notes)', function() {
+  it('this doesn\'t work in bash either (per bash micromatch.tests notes)', function() {
     assert(!isMatch('*(a|b[)', '*(a|b\\[)'));
     assert(isMatch('*(a|b[)', '\\*\\(a\\|b\\[\\)'));
   });
@@ -151,46 +149,26 @@ describe('extglobs', function() {
   it('should support multiple exclusion patterns in one extglob:', function() {
     var arr = ['a.a', 'a.b', 'a.c', 'a.c.d', 'c.c', 'a.', 'd.d', 'e.e', 'f.f', 'a.abcd'];
     match(arr, '*.(a|b|@(ab|a*@(b))*(c)d)', ['a.a', 'a.b', 'a.abcd']);
-    match(arr, '!(*.a|*.b|*.c)', ['a.', 'd.d', 'e.e', 'f.f']);
+    match(arr, '!(*.a|*.b|*.c)', ['a.', 'a.c.d', 'd.d', 'e.e', 'f.f']);
     match(arr, '*!(.a|.b|.c)', arr);
     match(arr, '*.!(a|b|c)', ['a.c.d', 'a.', 'd.d', 'e.e', 'f.f']);
   });
 
   it('should correctly match empty parens', function() {
-    var arr = ['def', 'ef'];
-    match(arr, '()ef', ['ef']);
+    match(['def', 'ef'], '()ef', ['ef']);
   });
 
   it('should match escaped parens', function() {
     var arr = ['a(b', 'a\\(b', 'a((b', 'a((((b', 'ab'];
     match(arr, 'a(b', ['a(b']);
-    match(arr, 'a\\(b', ['a(b']);
+    match(arr, 'a\\(b', ['a(b', 'a\\(b']);
     match(arr, 'a(*b', ['a(b', 'a((b', 'a((((b']);
   });
 
   it('should match escaped backslashes', function() {
     match(['a(b', 'a\\(b', 'a((b', 'a((((b', 'ab'], 'a\\\\(b', ['a\\(b']);
     match(['a\\b', 'a/b', 'ab'], 'a/b', ['a/b']);
-    match(['a\\b', 'a/b', 'ab'], 'a\\\\b', ['a\\b']);
-  });
-
-  // these are not extglobs, and do not need to pass. these tests will be moved to `expand-brackets`
-  it('should match common regex patterns', function() {
-    var arr = ['a c', 'a1c', 'a123c', 'a.c', 'a.xy.zc', 'a.zc', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc'];
-
-    match(arr, 'ab*c', ['abbbbc', 'abbbc', 'abbc', 'abc']);
-    match(arr, 'ab+bc', ['abbbbc', 'abbbc', 'abbc']);
-    match(arr, 'ab?bc', ['abbc', 'abc']);
-    match(arr, '^abc$', ['abc']);
-    match(arr, 'a.c', ['a.c']);
-    match(arr, 'a.*c', ['a.c', 'a.xy.zc', 'a.zc']);
-    match(arr, 'a*c', ['a c', 'a.c', 'a1c', 'a123c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'axyzc', 'axy zc', 'axy.zc', 'a.xy.zc', 'a.zc']);
-    match(arr, 'a\\w+c', ['a1c', 'a123c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'axyzc'], 'Should match word characters');
-    match(arr, 'a\\W+c', ['a.c', 'a c'], 'Should match non-word characters');
-    match(arr, 'a\\d+c', ['a1c', 'a123c'], 'Should match numbers');
-    match(['foo@#$%123ASD #$$%^&', 'foo!@#$asdfl;', '123'], '\\d+', ['123']);
-    match(['a123c', 'abbbc'], 'a\\D+c', ['abbbc'], 'Should match non-numbers');
-    match(['foo', ' foo '], '(f|o)+\\b', ['foo'], 'Should match word boundaries');
+    match(['a\\z', 'a/z', 'az'], 'a\\z', ['a/z']);
   });
 });
 
@@ -240,9 +218,14 @@ describe('bash', function() {
   });
 
   it('should support exclusions', function() {
+    match(['foob', 'foobb', 'foo', 'bar', 'baz', 'foobar'], '!(foo)b*', ['bar', 'baz']);
+    // Bash 4.3 says this should match `foo` too. Probably a bug in Bash since this is correct.
+    match(['foo', 'bar', 'baz', 'foobar'], '*(!(foo))', ['bar', 'baz', 'foobar']);
+    // Bash 4.3 says this should match `foo` and `foobar` too, probably a bug in Bash since this is correct.
+    match(['foo', 'bar', 'baz', 'foobar'], '!(foo)*', ['bar', 'baz']);
+
     match(['moo.cow', 'moo', 'cow'], '!(*.*)', ['moo', 'cow']);
     match(['moo.cow', 'moo', 'cow'], '!(*.*).', []);
-    match(['foob', 'foobb'], '!(foo)b*', []);
     assert(!isMatch('f', '!(f)'));
     assert(!isMatch('f', '+(!(f))'));
     assert(!isMatch('f', '*(!(f))'));
@@ -328,5 +311,69 @@ describe('bash', function() {
     match(['xfoooofof'], '*(f*(o))', []);
     match(['zoot'], '@(!(z*)|*x)', []);
     match(['zoox'], '@(!(z*)|*x)', ['zoox']);
+  });
+
+  it('should support basic wildmatch features', function() {
+    assert(!isMatch('foo', '*f'));
+    assert(!isMatch('foo', '??'));
+    assert(!isMatch('foo', 'bar'));
+    assert(!isMatch('foobar', 'foo\\*bar'));
+    assert(!isMatch('abc', '\\a\\b\\c'));
+    assert(isMatch('', ''));
+    assert(isMatch('?a?b', '\\??\\?b'));
+    assert(isMatch('aaaaaaabababab', '*ab'));
+    assert(isMatch('\\x\\y\\z', '\\x\\y\\z'));
+    assert(isMatch('/x/y/z', '/x/y/z'));
+    assert(isMatch('f\\oo', 'f\\oo'));
+    assert(isMatch('foo', '*'));
+    assert(isMatch('foo', '*foo*'));
+    assert(isMatch('foo', '???'));
+    assert(isMatch('foo', 'f*'));
+    assert(isMatch('foo', 'foo'));
+    assert(isMatch('foo*', 'foo\\*', {unixify: false}));
+    assert(isMatch('foobar', '*ob*a*r*'));
+  });
+
+  it('Test recursion and the abort code', function() {
+    assert(isMatch('-adobe-courier-bold-o-normal--12-120-75-75-m-70-iso8859-1', '-*-*-*-*-*-*-12-*-*-*-m-*-*-*'));
+    assert(!isMatch('-adobe-courier-bold-o-normal--12-120-75-75-X-70-iso8859-1', '-*-*-*-*-*-*-12-*-*-*-m-*-*-*'));
+    assert(!isMatch('-adobe-courier-bold-o-normal--12-120-75-75-/-70-iso8859-1', '-*-*-*-*-*-*-12-*-*-*-m-*-*-*'));
+    assert(isMatch('XXX/adobe/courier/bold/o/normal//12/120/75/75/m/70/iso8859/1', 'XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*', {unixify: false}));
+    assert(!isMatch('XXX/adobe/courier/bold/o/normal//12/120/75/75/X/70/iso8859/1', 'XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*'));
+    assert(isMatch('abcd/abcdefg/abcdefghijk/abcdefghijklmnop.txt', '**/*a*b*g*n*t'));
+    assert(!isMatch('abcd/abcdefg/abcdefghijk/abcdefghijklmnop.txtz', '**/*a*b*g*n*t'));
+    assert(!isMatch('foo', '*/*/*'));
+    assert(!isMatch('foo/bar', '*/*/*'));
+    assert(isMatch('foo/bba/arr', '*/*/*'));
+    assert(!isMatch('foo/bb/aa/rr', '*/*/*'));
+    assert(isMatch('foo/bb/aa/rr', '**/**/**'));
+    assert(isMatch('abcXdefXghi', '*X*i'));
+    assert(!isMatch('ab/cXd/efXg/hi', '*X*i'));
+    assert(isMatch('ab/cXd/efXg/hi', '*/*X*/*/*i'));
+    assert(isMatch('ab/cXd/efXg/hi', '**/*X*/**/*i'));
+  });
+
+  it('Test pathName option', function() {
+    assert(!isMatch('ab/cXd/efXg/hi', '*Xg*i'));
+    assert(!isMatch('foo', '*/*/*'));
+    assert(!isMatch('foo', 'fo'));
+    assert(!isMatch('foo/bar', '*/*/*'));
+    assert(!isMatch('foo/bar', 'foo?bar'));
+    assert(!isMatch('foo/bb/aa/rr', '*/*/*'));
+    assert(!isMatch('foo/bba/arr', 'foo*'));
+    assert(!isMatch('foo/bba/arr', 'foo**'));
+    assert(!isMatch('foo/bba/arr', 'foo/*'));
+    assert(!isMatch('foo/bba/arr', 'foo/**arr'));
+    assert(!isMatch('foo/bba/arr', 'foo/**z'));
+    assert(!isMatch('foo/bba/arr', 'foo/*arr'));
+    assert(!isMatch('foo/bba/arr', 'foo/*z'));
+    assert(isMatch('ab/cXd/efXg/hi', '*/*X*/*/*i'));
+    assert(isMatch('abcXdefXghi', '*X*i'));
+    assert(isMatch('foo', 'foo'));
+    assert(isMatch('foo/bar', 'foo/*'));
+    assert(isMatch('foo/bar', 'foo/bar'));
+    assert(isMatch('foo/bar', 'foo[/]bar'));
+    assert(isMatch('foo/bba/arr', '*/*/*'));
+    assert(isMatch('foo/bba/arr', 'foo/**'));
   });
 });

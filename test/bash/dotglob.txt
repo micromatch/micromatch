@@ -1,0 +1,23 @@
+f a/b/.x            **/.x/**
+f .x                **/.x/**
+f .x/               **/.x/**
+f .x/a              **/.x/**
+f .x/a/b            **/.x/**
+f .x/.x             **/.x/**
+f a/.x              **/.x/**
+
+t a/b/.x/c          **/.x/**
+t a/b/.x/c/d        **/.x/**
+t a/b/.x/c/d/e      **/.x/**
+t a/b/.x/           **/.x/**
+t a/.x/b            **/.x/**
+t a/.x/b/.x/c       **/.x/**
+
+t .bashrc           ?bashrc
+t .b/               *.*
+t .bar.baz/         *.*
+t .bar              *.*
+f .bar              !.*.*
+
+t .bar.baz/         .*.*/
+t .bar.baz/         .*.*

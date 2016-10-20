@@ -1,168 +1,240 @@
 'use strict';
 
-var path = require('path');
-var util = require('util');
+/**
+ * Module dependencies
+ */
+
+var braces = require('braces');
+var toRegex = require('to-regex');
 var debug = require('debug')('micromatch');
+var extend = require('extend-shallow');
+
+/**
+ * Local dependencies
+ */
+
 var Micromatch = require('./lib/micromatch');
 var compilers = require('./lib/compilers');
 var parsers = require('./lib/parsers');
+var cache = require('./lib/cache');
 var utils = require('./lib/utils');
-var regexCache = {};
+var MAX_LENGTH = 1024 * 64;
 
 /**
- * Convert the given glob `pattern` into a regex-compatible string.
+ * The main function takes a list of strings and one or more
+ * glob patterns to use for matching.
  *
  * ```js
  * var micromatch = require('micromatch');
- * var str = micromatch('*.js');
- * console.log(str);
+ * console.log(micromatch(['a.js', 'a.txt'], ['*.js']));
+ * //=> [ 'a.js' ]
  * ```
- * @param {String} `str`
+ * @param {Array} `list`
+ * @param {String|Array} `patterns` Glob patterns
  * @param {Object} `options`
- * @return {String}
+ * @return {Array} Returns an array of matches
  * @api public
  */
 
-function micromatch(str, options) {
-  var matcher = new Micromatch(options);
-  var ast = matcher.parse(str, options);
-  return matcher.compile(ast, options);
-}
+function micromatch(list, patterns, options) {
+  debug('micromatch <%s>', patterns);
 
-/**
- * Takes an array of strings and a glob pattern and returns a new
- * array that contains only the strings that match the pattern.
- *
- * ```js
- * var nano = require('micromatch');
- * console.log(nano.match(['a.a', 'a.b', 'a.c'], '*.!(*a)'));
- * //=> ['a.b', 'a.c']
- * ```
- * @param {Array} `arr` Array of strings to match
- * @param {String} `pattern` Glob pattern
- * @param {Object} `options`
- * @return {Array}
- * @api public
- */
+  patterns = utils.arrayify(patterns);
+  list = utils.arrayify(list);
+  var len = patterns.length;
 
-micromatch.match = function(files, pattern, options) {
-  var opts = utils.extend({}, options);
-  var isMatch = micromatch.matcher(pattern, opts);
-  var unixify = utils.unixify(opts);
-  var matches = [];
-
-  files = utils.arrayify(files);
-  var len = files.length;
-  var idx = -1;
-
-  while (++idx < len) {
-    var file = unixify(files[idx]);
-    if (isMatch(file)) {
-      matches.push(file);
-    }
-  }
-
-  if (matches.length === 0) {
-    if (opts.failglob === true) {
-      throw new Error('no matches found for "' + pattern + '"');
-    }
-    if (opts.nonull === true || opts.nullglob === true) {
-      return [pattern.split('\\').join('')];
-    }
-  }
-
-  // if `ignore` was defined, diff ignored files
-  if (opts.ignore) {
-    var ignore = utils.arrayify(opts.ignore);
-    delete opts.ignore;
-    var ignored = micromatch.matchEach(matches, ignore, opts);
-    matches = utils.diff(matches, ignored);
-  }
-  return opts.nodupes ? utils.unique(matches) : matches;
-};
-
-/**
- * Takes an array of strings and a one or more glob patterns and returns a new
- * array with strings that match any of the given patterns.
- *
- * ```js
- * var nano = require('micromatch');
- * console.log(nano.matchEach(['a.a', 'a.b', 'a.c'], ['*.!(*a)']));
- * //=> ['a.b', 'a.c']
- * ```
- * @param {Array} `arr` Array of strings to match
- * @param {String} `pattern` Glob pattern
- * @param {Object} `options`
- * @return {Array}
- * @api public
- */
-
-micromatch.matchEach = function(files, patterns, options) {
-  if (!Array.isArray(files)) {
+  if (list.length === 0 || len === 0) {
     return [];
   }
 
-  if (!Array.isArray(patterns)) {
-    return micromatch.match.apply(micromatch, arguments);
+  if (len === 1) {
+    return micromatch.match(list, patterns[0], options);
   }
 
-  var opts = utils.extend({cache: true}, options);
+  var negated = false;
   var omit = [];
   var keep = [];
-
-  var len = patterns.length;
   var idx = -1;
 
   while (++idx < len) {
     var pattern = patterns[idx];
+
     if (typeof pattern === 'string' && pattern.charCodeAt(0) === 33 /* ! */) {
-      omit.push.apply(omit, micromatch.match(files, pattern.slice(1), opts));
+      omit.push.apply(omit, micromatch.match(list, pattern.slice(1), options));
+      negated = true;
     } else {
-      keep.push.apply(keep, micromatch.match(files, pattern, opts));
+      keep.push.apply(keep, micromatch.match(list, pattern, options));
     }
   }
-  return utils.diff(keep, omit);
+
+  // minimatch.match parity
+  if (negated && keep.length === 0) {
+    keep = list.map(utils.unixify(options));
+  }
+
+  var matches = utils.diff(keep, omit);
+  if (!options || options.nodupes !== false) {
+    return utils.unique(matches);
+  }
+
+  return matches;
+}
+
+/**
+ * Cache
+ */
+
+micromatch.cache = cache;
+micromatch.clearCache = function() {
+  micromatch.cache.__data__ = {};
 };
 
 /**
- * Returns true if a file path matches any of the
- * given patterns.
+ * Similar to the main function, but `pattern` must be a string.
  *
- * @param  {String} `fp` The filepath to test.
- * @param  {String|Array} `patterns` Glob patterns to use.
- * @param  {Object} `opts` Options to pass to the `matcher()` function.
- * @return {String}
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
+ * //=> ['a.a', 'a.aa']
+ * ```
+ * @param {Array} `list` Array of strings to match
+ * @param {String} `pattern` Glob pattern
+ * @param {Object} `options`
+ * @return {Array} Returns an array of matches
+ * @api public
  */
 
-micromatch.any = function(filepath, patterns, options) {
-  if (!Array.isArray(patterns) && typeof patterns !== 'string') {
-    throw new TypeError('expected patterns to be a string or array');
+micromatch.match = function(list, pattern, options) {
+  var unixify = utils.unixify(options);
+  var isMatch = micromatch.matcher(pattern, options);
+
+  list = utils.arrayify(list);
+  var len = list.length;
+  var idx = -1;
+  var matches = [];
+
+  while (++idx < len) {
+    var ele = list[idx];
+
+    if (ele === pattern) {
+      matches.push(unixify(ele));
+      continue;
+    }
+
+    var unix = unixify(ele);
+    if (unix === pattern || isMatch(unix)) {
+      matches.push(unix);
+    }
   }
 
+  // if no options were passed, uniquify results and return
+  if (typeof options === 'undefined') {
+    return utils.unique(matches);
+  }
+
+  if (matches.length === 0) {
+    if (options.failglob === true) {
+      throw new Error('no matches found for "' + pattern + '"');
+    }
+    if (options.nonull === true || options.nullglob === true) {
+      return [options.unescape ? utils.unescape(pattern) : pattern];
+    }
+  }
+
+  // if `opts.ignore` was defined, diff ignored list
+  if (options.ignore) {
+    matches = micromatch.not(matches, options.ignore, options);
+  }
+
+  return options.nodupes !== false ? utils.unique(matches) : matches;
+};
+
+/**
+ * Returns true if the specified `string` matches the given glob `pattern`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.isMatch('a.a', '*.a'));
+ * //=> true
+ * console.log(micromatch.isMatch('a.b', '*.a'));
+ * //=> false
+ * ```
+ * @param {String} `string` String to match
+ * @param {String} `pattern` Glob pattern
+ * @param {String} `options`
+ * @return {Boolean} Returns true if the string matches the glob pattern.
+ * @api public
+ */
+
+micromatch.isMatch = function(str, pattern, options) {
+  if (pattern === str) {
+    return true;
+  }
+
+  if (utils.isSimpleChar(pattern) || utils.isSlash(pattern)) {
+    return str === pattern;
+  }
+
+  return micromatch.matcher(pattern, options)(str);
+};
+
+/**
+ * Returns a list of strings that do _not_ match any of the given `patterns`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.not(['a.a', 'b.b', 'c.c'], '*.a'));
+ * //=> ['b.b', 'c.c']
+ * ```
+ * @param {Array} `list` Array of strings to match.
+ * @param {String} `pattern` One or more glob patterns.
+ * @param {Object} `options`
+ * @return {Array} Returns an array of strings that do not match the given patterns.
+ * @api public
+ */
+
+micromatch.not = function(list, patterns, options) {
+  var opts = extend({}, options);
+  var ignore = opts.ignore;
+  delete opts.ignore;
+
   var unixify = utils.unixify(opts);
-  var opts = utils.extend({}, options);
+  var unixified = list.map(function(fp) {
+    return unixify(fp, opts);
+  });
+
+  var matches = utils.diff(unixified, micromatch(unixified, patterns, opts));
+  if (ignore) {
+    matches = utils.diff(matches, micromatch(unixified, ignore));
+  }
+
+  return opts.nodupes !== false ? utils.unique(matches) : matches;
+};
+
+/**
+ * Returns true if the given `string` matches any of the given glob `patterns`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.any('a.a', ['b.*', '*.a']));
+ * //=> true
+ * console.log(micromatch.any('a.a', 'b.*'));
+ * //=> false
+ * ```
+ * @param  {String} `str` The string to test.
+ * @param  {String|Array} `patterns` Glob patterns to use.
+ * @param  {Object} `options` Options to pass to the `matcher()` function.
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+micromatch.any = function(str, patterns, options) {
+  var unixify = utils.unixify(options);
+  str = unixify(str);
 
   patterns = utils.arrayify(patterns);
-  filepath = unixify(filepath);
-  var len = patterns.length;
-
-  for (var i = 0; i < len; i++) {
-    var pattern = patterns[i];
-    if (!utils.isString(pattern)) {
-      continue;
-    }
-
-    if (!utils.isGlob(pattern)) {
-      if (filepath === pattern) {
-        return true;
-      }
-      if (opts.contains && filepath.indexOf(pattern) !== -1) {
-        return true;
-      }
-      continue;
-    }
-
-    if (micromatch.isMatch(filepath, pattern, opts)) {
+  for (var i = 0; i < patterns.length; i++) {
+    if (micromatch.isMatch(str, patterns[i], options)) {
       return true;
     }
   }
@@ -170,130 +242,37 @@ micromatch.any = function(filepath, patterns, options) {
 };
 
 /**
- * Returns true if the filepath matches the
- * given pattern.
+ * Returns true if the given `string` contains the given pattern. Similar to `.isMatch` but
+ * the pattern can match any part of the string.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.contains('aa/bb/cc', '*b'));
+ * //=> true
+ * console.log(micromatch.contains('aa/bb/cc', '*d'));
+ * //=> false
+ * ```
+ * @param {String} `str` The string to match.
+ * @param {String} `pattern` Glob pattern to use for matching.
+ * @param {Object} `options`
+ * @return {Boolean} Returns true if the patter matches any part of `str`.
+ * @api public
  */
 
-micromatch.contains = function(filepath, pattern, options) {
-  if (typeof filepath !== 'string') {
-    throw new TypeError('expected filepath to be a string');
-  }
-  if (typeof pattern !== 'string') {
-    throw new TypeError('expected pattern to be a string');
+micromatch.contains = function(str, pattern, options) {
+  if (pattern === str) {
+    return true;
   }
 
-  var opts = utils.extend({contains: pattern !== ''}, options);
+  if (utils.isSimpleChar(pattern)) {
+    return str === pattern;
+  }
+
+  var opts = extend({}, options, {contains: true});
   opts.strictClose = false;
   opts.strictOpen = false;
 
-  if (opts.contains && !utils.isGlob(pattern)) {
-    filepath = utils.unixify(opts)(filepath);
-    return filepath.indexOf(pattern) !== -1;
-  }
-  return micromatch.matcher(pattern, opts)(filepath);
-};
-
-/**
- * Returns true if the specified `string` matches the given
- * glob `pattern`.
- *
- * ```js
- * var nano = require('micromatch');
- *
- * console.log(nano.isMatch('a.a', '*.!(*a)'));
- * //=> false
- * console.log(nano.isMatch('a.b', '*.!(*a)'));
- * //=> true
- * ```
- * @param {String} `string` String to match
- * @param {String} `pattern` Glob pattern
- * @param {String} `options`
- * @return {Boolean}
- * @api public
- */
-
-micromatch.isMatch = function(filepath, pattern, options) {
-  if (pattern === '' || pattern === ' ') {
-    return filepath === pattern;
-  }
-
-  if (typeof pattern !== 'string') {
-    throw new TypeError('expected pattern to be a string');
-  }
-
-  var opts = utils.extend({}, options);
-  if (micromatch.matchBase(pattern, opts)) {
-    filepath = path.basename(filepath);
-
-  } else if (opts.extname === true) {
-    filepath = path.extname(filepath);
-
-  } else if (opts.dirname === true) {
-    filepath = path.dirname(filepath);
-  }
-
-  var re = micromatch.makeRe(pattern, utils.extend({prepend: false}, opts));
-  return re.test(filepath);
-};
-
-/**
- * Takes a glob pattern and returns a matcher function. The returned
- * function takes the string to match as its only argument.
- *
- * ```js
- * var nano = require('micromatch');
- * var isMatch = micromatch.matcher('*.!(*a)');
- *
- * console.log(isMatch('a.a'));
- * //=> false
- * console.log(isMatch('a.b'));
- * //=> true
- * ```
- * @param {String} `pattern` Glob pattern
- * @param {String} `options`
- * @return {Boolean}
- * @api public
- */
-
-micromatch.matcher = function(pattern, options) {
-  // pattern is a function
-  if (typeof pattern === 'function') {
-    return pattern;
-  }
-
-  var opts = utils.extend({}, options);
-  var unixify = utils.unixify(opts);
-
-  // pattern is a regex
-  if (pattern instanceof RegExp) {
-    return function(fp) {
-      return pattern.test(unixify(fp));
-    };
-  }
-
-  if (typeof pattern !== 'string') {
-    throw new TypeError('expected pattern to be a string, regex or function');
-  }
-
-  // pattern is an empty string, only match an empty string.
-  if (pattern === '') {
-    return function(fp) {
-      return fp === pattern;
-    }
-  }
-
-  // pattern is a glob string
-  var re = micromatch.makeRe(pattern, utils.extend({prepend: false}, opts));
-
-  // `matchBase` is defined
-  if (micromatch.matchBase(pattern, options)) {
-    return utils.matchBasename(re);
-  }
-
-  // `matchBase` is not defined
-  return function(fp) {
-    return re.test(unixify(fp));
-  };
+  return micromatch(str, pattern, opts).length > 0;
 };
 
 /**
@@ -304,64 +283,265 @@ micromatch.matcher = function(pattern, options) {
 
 micromatch.matchBase = function(pattern, options) {
   if (pattern && pattern.indexOf('/') !== -1 || !options) return false;
-  return options.basename === true
-    || options.matchBase === true;
+  return options.basename === true || options.matchBase === true;
 };
 
 /**
- * Create a regular expression from the given string `pattern`.
+ * Filter the keys of the given object with the given `glob` pattern
+ * and `options`. Does not attempt to match nested keys. If you need this feature,
+ * use [glob-object][] instead.
  *
  * ```js
  * var micromatch = require('micromatch');
- * var re = micromatch.makeRe('[[:alpha:]]');
- * console.log(re);
- * //=> /^(?:[a-zA-Z])$/
+ * var obj = { aa: 'a', ab: 'b', ac: 'c' };
+ * console.log(micromatch.matchKeys(obj, '*b'));
+ * //=> { ab: 'b' }
+ * ```
+ * @param  {Object} `object`
+ * @param  {Array|String} `patterns` One or more glob patterns.
+ * @return {Object} Returns an object with only keys that match the given patterns.
+ * @api public
+ */
+
+micromatch.matchKeys = function(obj, patterns, options) {
+  if (!utils.isObject(obj)) {
+    throw new TypeError('expected the first argument to be an object');
+  }
+  var keys = micromatch(Object.keys(obj), patterns, options);
+  return utils.pick(obj, keys);
+};
+
+/**
+ * Creates a matcher function from the given glob `pattern` and `options`. The returned
+ * function takes a string to match as its only argument.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * var isMatch = micromatch.matcher('*.!(*a)');
+ *
+ * console.log(isMatch('a.a'));
+ * //=> false
+ * console.log(isMatch('a.b'));
+ * //=> true
+ * ```
+ * @param {String} `pattern` Glob pattern
+ * @param {String} `options`
+ * @return {Function} Returns a matcher function.
+ * @api public
+ */
+
+micromatch.matcher = function(pattern, options) {
+  function matcher() {
+    var unixify = utils.unixify(options);
+
+    // if pattern is a regex
+    if (pattern instanceof RegExp) {
+      return function(str) {
+        return pattern.test(str) || pattern.test(unixify(str));
+      };
+    }
+
+    // if pattern is invalid
+    if (!utils.isString(pattern)) {
+      throw new TypeError('expected pattern to be a string or regex');
+    }
+
+    // if pattern is a non-glob string
+    if (!utils.hasSpecialChars(pattern)) {
+      if (options && options.nocase === true) {
+        pattern = pattern.toLowerCase();
+      }
+      return utils.matchPath(pattern, options);
+    }
+
+    // if pattern is a glob string
+    var re = micromatch.makeRe(pattern, options);
+
+    // if `options.matchBase` or `options.basename` is defined
+    if (micromatch.matchBase(pattern, options)) {
+      return utils.matchBasename(re, options);
+    }
+
+    // everything else...
+    return function(str) {
+      return re.test(str) || re.test(unixify(str));
+    };
+  }
+
+  return memoize('matcher', pattern, options, matcher);
+};
+
+/**
+ * Create a regular expression from the given glob `pattern`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.makeRe('*.js'));
+ * //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
  * ```
  * @param {String} `pattern` The pattern to convert to regex.
  * @param {Object} `options`
- * @return {RegExp}
+ * @return {RegExp} Returns a regex created from the given pattern.
  * @api public
  */
 
 micromatch.makeRe = function(pattern, options) {
-  if (!pattern) return /$^/;
-  var key = pattern;
-  var regex;
-
-  if (options) {
-    for (var prop in options) {
-      if (options.hasOwnProperty(prop)) {
-        key += ';' + prop + '=' + String(options[prop]);
-      }
-    }
+  if (pattern instanceof RegExp) {
+    return pattern;
   }
 
-  options = options || {};
-  if (pattern.charAt(0) === '^') {
-    pattern = pattern.slice(1);
-    options.strictOpen = true;
+  if (typeof pattern !== 'string') {
+    throw new TypeError('expected pattern to be a string');
   }
 
-  if (pattern[pattern.length - 1] === '$') {
-    pattern = pattern.slice(0, pattern.length -1);
-    options.strictClose = true;
+  if (pattern.length > MAX_LENGTH) {
+    throw new Error('expected pattern to be less than ' + MAX_LENGTH + ' characters');
   }
 
-  if (options.cache !== false && regexCache.hasOwnProperty(key)) {
-    return regexCache[key];
+  function makeRe() {
+    var opts = extend({strictErrors: false}, options);
+    if (opts.strictErrors === true) opts.strict = true;
+
+    var patterns = micromatch.create(pattern, opts).map(function(obj) {
+      return obj.output;
+    });
+    return toRegex(patterns.join('|'), opts);
   }
 
-  var mm = new Micromatch(options);
-  regex = regexCache[key] = mm.makeRe(pattern, options);
+  var regex = memoize('makeRe', pattern, options, makeRe);
+  if (regex.source.length > MAX_LENGTH) {
+    throw new SyntaxError('potentially malicious regex detected');
+  }
+
   return regex;
 };
 
 /**
- * Expose `Micromatch` constructor
+ * Expand the given brace `pattern`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.braces('foo/{a,b}/bar'));
+ * //=> ['foo/(a|b)/bar']
+ *
+ * console.log(micromatch.braces('foo/{a,b}/bar', {expand: true}));
+ * //=> ['foo/(a|b)/bar']
+ * ```
+ * @param {String} pattern
+ * @param {Object} options
+ * @return {Array}
+ * @api public
+ */
+
+micromatch.braces = function(pattern, options) {
+  return memoize('braces', pattern, options, function() {
+    if (options && options.nobrace === true) {
+      return [pattern];
+    }
+    if (!/\{.*\}/.test(pattern)) {
+      return [pattern];
+    }
+    return braces(pattern, options);
+  });
+};
+
+/**
+ * Parses the given glob `pattern` and returns an object with the compiled `output`
+ * and optional source `map`.
+ *
+ * ```js
+ * var micromatch = require('micromatch');
+ * console.log(micromatch.create('abc/*.js'));
+ * // { options: { source: 'string', sourcemap: true },
+ * //   state: {},
+ * //   compilers:
+ * //    { ... },
+ * //   output: '(\\.[\\\\\\/])?abc\\/(?!\\.)(?=.)[^\\/]*?\\.js',
+ * //   ast:
+ * //    { type: 'root',
+ * //      errors: [],
+ * //      nodes:
+ * //       [ ... ],
+ * //      dot: false,
+ * //      input: 'abc/*.js' },
+ * //   parsingErrors: [],
+ * //   map:
+ * //    { version: 3,
+ * //      sources: [ 'string' ],
+ * //      names: [],
+ * //      mappings: 'AAAA,GAAG,EAAC,kBAAC,EAAC,EAAE',
+ * //      sourcesContent: [ 'abc/*.js' ] },
+ * //   position: { line: 1, column: 28 },
+ * //   content: {},
+ * //   files: {},
+ * //   idx: 6 }
+ * ```
+ * @param {String} `pattern` Glob pattern
+ * @param {Object} `options`
+ * @return {Object} Returns an object with the parsed AST, compiled string and optional source map.
+ * @api public
+ */
+
+micromatch.create = function(pattern, options) {
+  return memoize('create', pattern, options, function() {
+    function compile(str, opts) {
+      var mm = new Micromatch(opts);
+      var ast = mm.parse(str, opts);
+      return mm.compile(ast, opts);
+    }
+
+    if (pattern.slice(0, 2) === './') {
+      pattern = pattern.slice(2);
+    }
+
+    pattern = utils.combineDuplicates(pattern, '\\*\\*\\/|\\/\\*\\*');
+    pattern = micromatch.braces(pattern, options);
+
+    if (Array.isArray(pattern)) {
+      var len = pattern.length;
+      var idx = -1;
+      var res = [];
+
+      while (++idx < len) {
+        res.push(compile(pattern[idx], options));
+      }
+      return res;
+    }
+
+    return compile(pattern, options);
+  });
+};
+
+/**
+ * Memoize a generated regex or function
+ */
+
+function memoize(type, pattern, options, fn) {
+  var key = utils.createKey(type + pattern, options);
+
+  if (cache.has(type, key)) {
+    return cache.get(type, key);
+  }
+
+  var val = fn(pattern, options);
+  if (options && options.cache === false) {
+    return val;
+  }
+
+  cache.set(type, key, val);
+  return val;
+}
+
+/**
+ * Expose parser, compiler and constructor on `micromatch`
+ */
+
+micromatch.compilers = compilers;
+micromatch.parsers = parsers;
+
+/**
+ * Expose `micromatch`
  * @type {Function}
  */
 
 module.exports = micromatch;
-module.exports.Micromatch = Micromatch;
-module.exports.compilers = compilers;
-module.exports.parsers = parsers;
