@@ -45,17 +45,10 @@ module.exports.braces = function() {
   return matcher.braces.apply(null, arguments);
 };
 
-function isMatch(fixture, pattern, expected, options) {
-  if (typeof expected !== 'boolean') {
-    var tmp = expected;
-    expected = options;
-    options = tmp;
-  }
+module.exports.create = function() {
+  return matcher.create.apply(null, arguments);
+};
 
-  var isMatch = matcher.isMatch(fixture, pattern, options);
-  if (expected === false) {
-    assert(!isMatch, 'should not match ' + pattern);
-  } else {
-    assert(isMatch, 'should match ' + pattern);
-  }
+module.exports.not = function() {
+  return matcher.not.apply(null, arguments);
 };

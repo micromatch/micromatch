@@ -1,7 +1,8 @@
 'use strict';
 
 var assert = require('assert');
-var mm = require('..');
+var mm = require('./support/match');
+
 
 describe('.isMatch():', function() {
   describe('error handling:', function() {

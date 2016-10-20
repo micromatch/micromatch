@@ -1,0 +1,13 @@
+f a/b.js   !**/*.md
+f a.js     !**/*.md
+f a/b.md   !**/*.md
+f a.md     !**/*.md
+
+f a/b.js    !*.md
+f a.js      !*.md
+f a/b.md    !*.md
+f a.md      !*.md
+
+f a.js      !**/*.md
+f b.md      !**/*.md
+f c.txt     !**/*.md

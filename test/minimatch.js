@@ -5,8 +5,6 @@ var patterns = require('./fixtures/patterns');
 
 describe('basic tests', function() {
   patterns.forEach(function(unit, i) {
-    // if (unit[0] !== '[\\\\]') return;
-
     it(i + ': ' + unit[0], function() {
       if (typeof unit === 'string') {
         console.log();

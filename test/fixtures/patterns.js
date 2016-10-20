@@ -1,8 +1,6 @@
 'use strict';
 
 /**
- * HEADS UP! Only tests for unsupported extglob features are commented out.
- *
  * The contents of this file was copied (and modified) from:
  * minimatch v3.0.3, ISC LICENSE, Copyright (c) Isaac Z. Schlueter and Contributors
  * https://github.com/isaacs/minimatch
