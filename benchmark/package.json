@@ -1,0 +1,20 @@
+{
+  "name": "extglob-benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "ansi-cyan": "^0.1.1",
+    "benchmarked": "^0.2.2",
+    "braces": "^1.8.5",
+    "is-object": "^1.0.1",
+    "is-primitive": "^2.0.0",
+    "minimatch": "^3.0.0",
+    "multimatch": "^2.1.0",
+    "write": "^0.3.2",
+    "yargs-parser": "^3.2.0"
+  }
+}
