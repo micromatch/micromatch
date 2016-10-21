@@ -8,7 +8,7 @@ var mm = require('./support/match');
 describe('options', function() {
   describe('options.ignore', function() {
     var negations = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c', 'a/d', 'a/e'];
-    var globs = ['a', 'a/a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/a/b', 'a/b', 'a/b/c', 'a/c', 'a/x', 'b', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'x/y', 'z/z', 'z/z/z'];
+    var globs = ['a', 'a/a', 'a/a/a', 'a/a/a/a', '.a', 'a/.a', '.a/a', '.a/a/a', 'a/a/.a', '.a/a/a/a', 'a/a/a/a/a', 'a/a/b', 'a/b', 'a/b/c', 'a/c', 'a/x', 'b', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'x/y', 'z/z', 'z/z/z'];
 
     it('should filter out ignored patterns', function() {
       var opts = {ignore: ['a/**']};
@@ -21,6 +21,16 @@ describe('options', function() {
       mm(globs, '*/*/*/*/*', [], opts);
       mm(globs, 'a/*', [], opts);
       mm(globs, '**/*/x', ['x/x/x'], opts);
+      mm(globs, '**/*/[b-z]', ['b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'x/x/x', 'x/y', 'z/z', 'z/z/z'], opts);
+
+      mm(globs, '*', ['a', '.a', 'b'], {ignore: 'a/**', dot: true});
+      mm(globs, '*', ['b', '.a'], {ignore: '**/a', dot: true});
+      mm(globs, '*/*', ['.a/a', 'x/y', 'z/z'], {ignore: 'a/**', dot: true});
+      mm(globs, '*/*/*', ['.a/a/a', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'z/z/z'], {ignore: 'a/**', dot: true});
+      mm(globs, '*/*/*/*', ['.a/a/a/a'], {ignore: 'a/**', dot: true});
+      mm(globs, '*/*/*/*/*', [], {ignore: 'a/**', dot: true});
+      mm(globs, 'a/*', [], {ignore: 'a/**', dot: true});
+      mm(globs, '**/*/x', ['x/x/x'], {ignore: 'a/**', dot: true});
 
       mm(negations, '!b/a', ['b/b', 'b/c'], opts);
       mm(negations, '!b/(a)', ['b/b', 'b/c'], opts);
@@ -141,7 +151,7 @@ describe('options', function() {
   describe('options.nonegate', function() {
     it('should support the `nonegate` option:', function() {
       mm(['a/a/a', 'a/b/a', 'b/b/a', 'c/c/a', 'c/c/b'], '!**/a', ['c/c/b']);
-      mm(['.dotfile.txt', 'a/b/.dotfile'], '!*.md', [], {nonegate: true});
+      mm(['a.md', '!a.md', 'a.txt'], '!*.md', ['!a.md'], {nonegate: true});
       mm(['!a/a/a', 'a/b/a', 'b/b/a', '!c/c/a'], '!**/a', ['!a/a/a', '!c/c/a'], {nonegate: true});
       mm(['!*.md', '.dotfile.txt', 'a/b/.dotfile'], '!*.md', ['!*.md'], {nonegate: true});
     });

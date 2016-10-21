@@ -2,7 +2,6 @@
 
 var path = require('path');
 var sep = path.sep;
-var assert = require('assert');
 var mm = require('./support/match');
 
 describe('.not method', function() {

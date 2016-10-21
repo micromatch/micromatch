@@ -44,6 +44,14 @@ describe('brackets', function() {
       mm(fixtures, 'a[a-z]+c', ['abbbbc', 'abbbc', 'abbc', 'abc', 'axyzc']);
     });
 
+    it('should match literal brackets', function() {
+      mm(['a [b]'], 'a \\[b\\]', ['a [b]']);
+      mm(['a [b] c'], 'a [b] c', ['a [b] c']);
+      mm(['a [b]'], 'a \\[b\\]*', ['a [b]']);
+      mm(['a [bc]'], 'a \\[bc\\]*', ['a [bc]']);
+      mm(['a [b]', 'a [b].js'], 'a \\[b\\].*', ['a [b].js']);
+    });
+
     it('should match character classes', function() {
       mm(['abc', 'abd'], 'a[bc]d', ['abd']);
     });

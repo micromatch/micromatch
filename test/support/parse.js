@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var util = require('util');
 var nm = require('../..');
 
 function parseFiles(pattern, options) {

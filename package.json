@@ -37,8 +37,7 @@
     "arr-union": "^3.1.0",
     "array-unique": "^0.3.2",
     "bash-match": "^0.2.0",
-    "braces": "^2.0.1",
-    "debug": "^2.2.0",
+    "braces": "^2.0.2",
     "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
     "extglob": "^1.0.0",
@@ -46,7 +45,7 @@
     "fragment-cache": "^0.2.0",
     "is-glob": "^3.1.0",
     "kind-of": "^3.0.4",
-    "nanomatch": "^0.3.0",
+    "nanomatch": "^0.3.1",
     "object.pick": "^1.1.2",
     "regex-not": "^1.0.0",
     "snapdragon": "^0.8.1",
@@ -61,6 +60,7 @@
     "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.1",
     "gulp-unused": "^0.2.0",
+    "is-windows": "^0.2.0",
     "minimatch": "^3.0.3",
     "mocha": "^3.1.2",
     "multimatch": "^2.1.0",
@@ -96,36 +96,38 @@
     "wildcard"
   ],
   "verb": {
-    "related": {
-      "list": [
-        "braces",
-        "expand-brackets",
-        "expand-range",
-        "extglob",
-        "fill-range",
-        "gulp-micromatch",
-        "is-glob",
-        "parse-glob"
-      ]
-    },
-    "reflinks": [
-      "braces",
-      "expand-brackets",
-      "extglob",
-      "minimatch",
-      "multimatch",
-      "verb"
-    ],
-    "toc": false,
-    "layout": false,
+    "toc": true,
+    "layout": "default",
     "tasks": [
       "readme"
     ],
     "plugins": [
       "gulp-format-md"
     ],
+    "helpers": [
+      "./benchmark/helper.js"
+    ],
+    "related": {
+      "list": [
+        "braces",
+        "expand-brackets",
+        "extglob",
+        "fill-range",
+        "nanomatch"
+      ]
+    },
     "lint": {
       "reflinks": true
-    }
+    },
+    "reflinks": [
+      "braces",
+      "expand-brackets",
+      "extglob",
+      "glob-object",
+      "minimatch",
+      "multimatch",
+      "verb",
+      "verb-generate-readme"
+    ]
   }
 }

@@ -3,7 +3,6 @@
 var assert = require('assert');
 var mm = require('./support/match');
 
-
 describe('.isMatch():', function() {
   describe('error handling:', function() {
     it('should throw on bad args', function() {

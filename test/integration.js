@@ -1,6 +1,5 @@
 'use strict';
 
-var assert = require('assert');
 var mm = require('./support/match');
 
 describe('globstars', function() {
