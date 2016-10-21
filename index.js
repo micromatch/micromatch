@@ -6,7 +6,6 @@
 
 var braces = require('braces');
 var toRegex = require('to-regex');
-var debug = require('debug')('micromatch');
 var extend = require('extend-shallow');
 
 /**
@@ -37,8 +36,6 @@ var MAX_LENGTH = 1024 * 64;
  */
 
 function micromatch(list, patterns, options) {
-  debug('micromatch <%s>', patterns);
-
   patterns = utils.arrayify(patterns);
   list = utils.arrayify(list);
   var len = patterns.length;
