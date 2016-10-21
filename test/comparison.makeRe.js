@@ -1,7 +1,7 @@
 'use strict';
 
-var assert = require('assert');
 var isWindows = require('is-windows');
+var assert = require('assert');
 var bash = require('bash-match');
 var mm = require('minimatch');
 var nm = require('..');
@@ -88,7 +88,7 @@ var patterns = [
 
 describe('.makeRe', function() {
   if (isWindows()) {
-    console.log('comparisons are done using bash, these tests cannot run on windows');
+    console.log('these tests use bash to test for bash parity. since bash does not work on most versions of windows, these tests are skipped on windows');
     return;
   }
 

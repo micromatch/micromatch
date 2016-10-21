@@ -9,3 +9,14 @@ node_js:
   - '5'
   - '0.12'
   - '0.10'
+# addons will be installed when running on linux
+addons:
+  apt:
+    packages:
+      - bash
+
+# when running on "osx" upgrade bash
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew uninstall --force bash; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install bash; fi

@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "arr-diff": "^3.0.0",
-    "arr-union": "^3.1.0",
     "array-unique": "^0.3.2",
     "bash-match": "^0.2.0",
     "braces": "^2.0.2",
@@ -43,7 +42,6 @@
     "extglob": "^1.0.0",
     "for-own": "^0.1.4",
     "fragment-cache": "^0.2.0",
-    "is-glob": "^3.1.0",
     "kind-of": "^3.0.4",
     "nanomatch": "^0.3.1",
     "object.pick": "^1.1.2",
