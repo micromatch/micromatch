@@ -13,11 +13,9 @@
 - [API](#api)
 - [Options](#options)
   * [options.dot](#optionsdot)
-  * [options.nodupes](#optionsnodupes)
   * [options.matchBase](#optionsmatchbase)
   * [options.nobrace](#optionsnobrace)
-  * [options.nobracket](#optionsnobracket)
-  * [options.noextglob](#optionsnoextglob)
+  * [options.nodupes](#optionsnodupes)
   * [options.nocase](#optionsnocase)
   * [options.nonegate](#optionsnonegate)
   * [options.nonull](#optionsnonull)
@@ -465,26 +463,6 @@ Type: `Boolean`
 
 Default: `false`
 
-### options.nodupes
-
-Remove duplicate elements from the result array.
-
-Type: `Boolean`
-
-Default: `undefined`
-
-**Example**
-
-Example of using the `unescape` and `nodupes` options together:
-
-```js
-mm.match(['abc', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true});
-//=> ['abc', 'abc']
-
-mm.match(['abc', '\\a\\b\\c'], '\\a\\b\\c', {unescape: true, nodupes: true});
-//=> ['abc']
-```
-
 ### options.matchBase
 
 Allow glob patterns without slashes to match a file path based on its basename. . Same behavior as [minimatch](https://github.com/isaacs/minimatch).
@@ -513,25 +491,25 @@ Default: `undefined`
 
 See [braces](https://github.com/jonschlinkert/braces) for more information about extended brace expansion.
 
-### options.nobracket
+### options.nodupes
 
-Disable expansion of POSIX bracket expressions.
-
-Type: `Boolean`
-
-Default: `undefined`
-
-See [expand-brackets](https://github.com/jonschlinkert/expand-brackets) for more information about extended bracket expressions.
-
-### options.noextglob
-
-Disable expansion of extglobs.
+Remove duplicate elements from the result array.
 
 Type: `Boolean`
 
 Default: `undefined`
 
-See [extglob](https://github.com/jonschlinkert/extglob) for more information about extended globs.
+**Example**
+
+Example of using the `unescape` and `nodupes` options together:
+
+```js
+mm.match(['a/b/c', 'a/b/c'], 'a/b/c');
+//=> ['a/b/c', 'a/b/c']
+
+mm.match(['a/b/c', 'a/b/c'], 'a/b/c', {nodupes: true});
+//=> ['abc']
+```
 
 ### options.nocase
 
@@ -663,6 +641,8 @@ multimatch █████████ (2,791 ops/sec)
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
+Please read the [contributing guide](.github/contributing.md) for avice on opening issues, pull requests, and coding standards.
+
 ### Contributors
 
 | **Commits** | **Contributor**<br/> | 
@@ -672,8 +652,8 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 | 3 | [paulmillr](https://github.com/paulmillr) |
 | 2 | [TrySound](https://github.com/TrySound) |
 | 2 | [doowb](https://github.com/doowb) |
-| 2 | [tunnckoCore](https://github.com/tunnckoCore) |
 | 2 | [MartinKolarik](https://github.com/MartinKolarik) |
+| 2 | [tunnckoCore](https://github.com/tunnckoCore) |
 | 1 | [amilajack](https://github.com/amilajack) |
 | 1 | [UltCombo](https://github.com/UltCombo) |
 | 1 | [tomByrer](https://github.com/tomByrer) |
