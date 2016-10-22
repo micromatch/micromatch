@@ -1,5 +1,6 @@
 'use strict';
 
+var isTravis = process.env.CI || process.env.TRAVIS;
 var isWindows = require('is-windows');
 var assert = require('assert');
 var bash = require('bash-match');
@@ -87,7 +88,7 @@ var patterns = [
 ];
 
 describe('.makeRe', function() {
-  if (isWindows()) {
+  if (isWindows() || isTravis) {
     console.log('these tests use bash to test for bash parity. since bash does not work on most versions of windows, these tests are skipped on windows');
     return;
   }
