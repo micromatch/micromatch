@@ -16,7 +16,9 @@ var fixtures = [
   'a.md',
   'a/b/c.md',
   'a/b/.c.md',
+  '!a/b/.c.md',
 
+  '!a.js',
   'z.js',
   'za.js',
   'a/b/c/z.js',
@@ -134,6 +136,20 @@ describe('.isMatch', function() {
         var mmRes = mm(fixture, pattern, {dot: true});
         var nmRes = nm.isMatch(fixture, pattern, {dot: true});
         var bRes = bash.isMatch(fixture, pattern, {dot: true});
+        var actual = nmRes === bRes || nmRes === mmRes;
+
+        // minimatch is wrong on these
+        if (actual !== nmRes && /^\?/.test(pattern)) {
+          actual = true;
+        }
+
+        assert(actual, fixture + ' ' + pattern);
+      });
+
+      it('should match ' + fixture + ' with ' + pattern + ' and {nonegate: true}', function() {
+        var mmRes = mm(fixture, pattern, {nonegate: true});
+        var nmRes = nm.isMatch(fixture, pattern, {nonegate: true});
+        var bRes = bash.isMatch(fixture, pattern, {nonegate: true});
         var actual = nmRes === bRes || nmRes === mmRes;
 
         // minimatch is wrong on these
