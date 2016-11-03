@@ -67,4 +67,10 @@ describe('qmarks and stars', function() {
     assert(!mm.isMatch('aaa.bbb', 'aaa?bbb'));
     assert(!mm.isMatch('aaa/.bbb', 'aaa/?bbb'));
   });
+
+  it('question marks should match characters preceding a dot', function() {
+    assert(mm.isMatch('a/bbb/abcd.md', 'a/*/ab??.md'));
+    assert(mm.isMatch('a/bbb/abcd.md', 'a/bbb/ab??.md'));
+    assert(mm.isMatch('a/bbb/abcd.md', 'a/bbb/ab???md'));
+  });
 });

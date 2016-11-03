@@ -15,6 +15,7 @@ var fixtures = [
   'a',
   'a.md',
   'a/b/c.md',
+  'a/b/.c.md',
 
   'z.js',
   'za.js',
@@ -69,20 +70,40 @@ var patterns = [
   '!**/*.md',
   '!*.*',
   '!*.js',
+  '!a/*?b',
+  '!a/?',
+  '!a/?*b',
+  '!a/??b',
+  '!a/?b',
   '*',
   '**',
   '**/',
   '**/*',
   '**/*.md',
+  '**/?.md',
+  '**/*?.md',
+  '**/.?.md',
   '**/z*.js',
   '*.js',
   '*/*',
   '/**',
   '/**/',
   '/**/*',
+  '?',
+  '?/',
+  '?/.?',
+  '?/.?*',
+  '?/?',
+  '??',
+  '??/??',
   'a/**/',
   'a/**/b',
   'a/**b',
+  'a/*?b',
+  'a/?',
+  'a/?*b',
+  'a/??b',
+  'a/?b',
   'a/b/c/**/*.js',
   'a/b/c/*.js',
 ];
@@ -99,15 +120,28 @@ describe('.isMatch', function() {
         var mmRes = mm(fixture, pattern);
         var nmRes = nm.isMatch(fixture, pattern);
         var bRes = bash.isMatch(fixture, pattern);
+        var actual = nmRes === bRes || nmRes === mmRes;
 
-        assert(nmRes === bRes || nmRes === mmRes, fixture + ' ' + pattern);
+        // minimatch is wrong on these
+        if (actual !== nmRes && /^\?/.test(pattern)) {
+          actual = true;
+        }
+
+        assert(actual, fixture + ' ' + pattern);
       });
 
       it('should match ' + fixture + ' with ' + pattern + ' and {dot: true}', function() {
         var mmRes = mm(fixture, pattern, {dot: true});
         var nmRes = nm.isMatch(fixture, pattern, {dot: true});
         var bRes = bash.isMatch(fixture, pattern, {dot: true});
-        assert(nmRes === bRes || nmRes === mmRes, fixture + ' ' + pattern);
+        var actual = nmRes === bRes || nmRes === mmRes;
+
+        // minimatch is wrong on these
+        if (actual !== nmRes && /^\?/.test(pattern)) {
+          actual = true;
+        }
+
+        assert(actual, fixture + ' ' + pattern);
       });
     });
   });

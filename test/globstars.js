@@ -5,12 +5,12 @@ var nm = require('./support/match');
 
 describe('globstars', function() {
   it('should support globstars (**)', function() {
-    var fixtures = ['.a/a', 'a/a', 'a/.a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z', 'a/../a', 'ab/../ac', '../a', 'a', '../../b', '../c', '../c/d'];
+    var fixtures = ['.a/a', 'a/a', 'aa/a', 'aaa/a', 'aab/a', 'a/.a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z', 'a/../a', 'ab/../ac', '../a', 'a', '../../b', '../c', '../c/d'];
 
-    nm(fixtures, '**', ['a', 'a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
-    nm(fixtures, '**/**', ['a', 'a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
+    nm(fixtures, '**', ['a', 'a/a', 'aa/a', 'aaa/a', 'aab/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
+    nm(fixtures, '**/**', ['a', 'a/a', 'aa/a', 'aaa/a', 'aab/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
     nm(fixtures, '**/', []);
-    nm(fixtures, '**/**/*', ['a', 'a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
+    nm(fixtures, '**/**/*', ['a', 'a/a', 'aa/a', 'aaa/a', 'aab/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z']);
     nm(fixtures, '**/**/x', ['a/x']);
     nm(fixtures, '**/x', ['a/x']);
     nm(fixtures, '**/x/*', ['a/x/y']);
