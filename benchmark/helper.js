@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var size = require('window-size');
 var repeat = require('repeat-string');
 
 function bench() {
@@ -70,7 +69,7 @@ function values(obj) {
 }
 
 function bar(tok, longest, diff) {
-  return repeat('█', (tok.num / longest) * (size.width - diff));
+  return repeat('█', (tok.num / longest) * 70);
 }
 
 function format(name, tok, max, diff) {
