@@ -120,10 +120,32 @@ describe('options', function() {
     });
 
     it('should remove duplicate elements from the result array:', function() {
+      var fixtures = [
+        '.editorconfig',
+        '.git',
+        '.gitignore',
+        '.nyc_output',
+        '.travis.yml',
+        '.verb.md',
+        'CHANGELOG.md',
+        'CONTRIBUTING.md',
+        'LICENSE',
+        'coverage',
+        'example.js',
+        'example.md',
+        'example.css',
+        'index.js',
+        'node_modules',
+        'package.json',
+        'test.js',
+        'utils.js'
+      ];
+
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c'], {});
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['/a/b/c'], {});
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c'], {nodupes: true});
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['/a/b/c'], {nodupes: true});
+      mm(fixtures, ['example.*', '*.js'], ['example.js', 'example.md', 'example.css', 'index.js', 'test.js', 'utils.js'], {nodupes: true});
     });
 
     it('should not remove duplicates', function() {
