@@ -621,7 +621,7 @@ micromatch.compile = function(ast, options) {
 };
 
 /**
- * Memoize a generated regex or function. A unique key
+ * Memoize a generated regex or function. A unique key is generated
  * from the `type` (usually method name), the `pattern`, and
  * user-defined options.
  */
