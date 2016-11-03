@@ -77,7 +77,7 @@ Micromatch is [safer](https://github.com/jonschlinkert/braces#braces-is-safe), [
 Moreover, micromatch has:
 
 * Better support for the Bash 4.3 specification than minimatch and multimatch
-* More than 3,600 [unit tests](./test), with thousands more patterns tested (minimatch and multimatch fail many of the tests)
+* More than 7,200 [unit tests](./test), with thousands more patterns tested (minimatch and multimatch fail many of the tests)
 * Better windows support than minimatch and multimatch
 
 ### Features
@@ -573,67 +573,67 @@ Run the [benchmarks](./benchmark):
 node benchmark
 ```
 
-As of October 21, 2016 (longer bars are better):
+As of November 03, 2016 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
-micromatch ██████████████████████████████████ (395 ops/sec) 
-minimatch  █ (13.75 ops/sec) 
-multimatch █ (13.90 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (395 ops/sec) 
+minimatch  ██ (13.75 ops/sec) 
+multimatch ██ (13.90 ops/sec) 
 
 # braces-multiple
-micromatch ██████████████████████████████████ (35,630 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (35,630 ops/sec) 
 minimatch   (1.58 ops/sec) 
 multimatch  (1.47 ops/sec) 
 
 # braces-range
-micromatch ██████████████████████████████████ (192,168 ops/sec) 
-minimatch  █ (8,167 ops/sec) 
-multimatch █ (8,227 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (192,168 ops/sec) 
+minimatch  ██ (8,167 ops/sec) 
+multimatch ██ (8,227 ops/sec) 
 
 # braces-set
-micromatch ██████████████████████████████████ (24,648 ops/sec) 
-minimatch  ██ (1,960 ops/sec) 
-multimatch ██ (1,841 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (24,648 ops/sec) 
+minimatch  █████ (1,960 ops/sec) 
+multimatch █████ (1,841 ops/sec) 
 
 # globstar-large-list
-micromatch ██████████████████████████████████ (396 ops/sec) 
-minimatch  ██ (25.49 ops/sec) 
-multimatch ██ (25.61 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (396 ops/sec) 
+minimatch  ████ (25.49 ops/sec) 
+multimatch ████ (25.61 ops/sec) 
 
 # globstar-long-list
-micromatch ██████████████████████████████████ (3,337 ops/sec) 
-minimatch  █████ (504 ops/sec) 
-multimatch █████ (493 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (3,337 ops/sec) 
+minimatch  ██████████ (504 ops/sec) 
+multimatch ██████████ (493 ops/sec) 
 
 # globstar-short-list
-micromatch ██████████████████████████████████ (465,408 ops/sec) 
-minimatch  ██ (32,763 ops/sec) 
-multimatch ██ (28,196 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (465,408 ops/sec) 
+minimatch  ████ (32,763 ops/sec) 
+multimatch ████ (28,196 ops/sec) 
 
 # no-glob
-micromatch ██████████████████████████████████ (642,909 ops/sec) 
-minimatch  █ (33,682 ops/sec) 
-multimatch █ (29,675 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (642,909 ops/sec) 
+minimatch  ███ (33,682 ops/sec) 
+multimatch ███ (29,675 ops/sec) 
 
 # star-basename
-micromatch ██████████████████████████████████ (11,012 ops/sec) 
-minimatch  █████████ (3,076 ops/sec) 
-multimatch █████████ (3,001 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (11,012 ops/sec) 
+minimatch  ███████████████████ (3,076 ops/sec) 
+multimatch ███████████████████ (3,001 ops/sec) 
 
 # star
-micromatch ██████████████████████████████████ (9,786 ops/sec) 
-minimatch  ██████████ (2,976 ops/sec) 
-multimatch █████████ (2,791 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (9,786 ops/sec) 
+minimatch  █████████████████████ (2,976 ops/sec) 
+multimatch ███████████████████ (2,791 ops/sec) 
 ```
 
 ## About
 
 ### Related projects
 
-* [braces](https://www.npmjs.com/package/braces): Fastest brace expansion for node.js, with the most complete support for the Bash 4.3 braces… [more](https://github.com/jonschlinkert/braces) | [homepage](https://github.com/jonschlinkert/braces "Fastest brace expansion for node.js, with the most complete support for the Bash 4.3 braces specification.")
+* [braces](https://www.npmjs.com/package/braces): Fast, comprehensive, bash-like brace expansion implemented in JavaScript. Complete support for the Bash 4.3 braces… [more](https://github.com/jonschlinkert/braces) | [homepage](https://github.com/jonschlinkert/braces "Fast, comprehensive, bash-like brace expansion implemented in JavaScript. Complete support for the Bash 4.3 braces specification, without sacrificing speed.")
 * [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
-* [extglob](https://www.npmjs.com/package/extglob): Convert extended globs to regex-compatible strings. Add (almost) the expressive power of regular expressions to… [more](https://github.com/jonschlinkert/extglob) | [homepage](https://github.com/jonschlinkert/extglob "Convert extended globs to regex-compatible strings. Add (almost) the expressive power of regular expressions to glob patterns.")
+* [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/jonschlinkert/extglob) | [homepage](https://github.com/jonschlinkert/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
 * [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
 * [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/jonschlinkert/nanomatch) | [homepage](https://github.com/jonschlinkert/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
 
@@ -652,8 +652,8 @@ Please read the [contributing guide](.github/contributing.md) for avice on openi
 | 3 | [paulmillr](https://github.com/paulmillr) |
 | 2 | [TrySound](https://github.com/TrySound) |
 | 2 | [doowb](https://github.com/doowb) |
-| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
 | 2 | [tunnckoCore](https://github.com/tunnckoCore) |
+| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
 | 1 | [amilajack](https://github.com/amilajack) |
 | 1 | [UltCombo](https://github.com/UltCombo) |
 | 1 | [tomByrer](https://github.com/tomByrer) |
@@ -690,4 +690,4 @@ Released under the [MIT license](https://github.com/jonschlinkert/micromatch/blo
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on October 21, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on November 03, 2016._
