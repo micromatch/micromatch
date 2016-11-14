@@ -32,6 +32,10 @@ describe('options', function() {
       mm(globs, 'a/*', [], {ignore: 'a/**', dot: true});
       mm(globs, '**/*/x', ['x/x/x'], {ignore: 'a/**', dot: true});
 
+      // see https://github.com/jonschlinkert/micromatch/issues/79
+      mm(['foo.js', 'a/foo.js'], '**/foo.js', ['foo.js', 'a/foo.js']);
+      mm(['foo.js', 'a/foo.js'], '**/foo.js', ['foo.js', 'a/foo.js'], {dot: true});
+
       mm(negations, '!b/a', ['b/b', 'b/c'], opts);
       mm(negations, '!b/(a)', ['b/b', 'b/c'], opts);
       mm(negations, '!(b/(a))', ['b/b', 'b/c'], opts);
