@@ -10,17 +10,22 @@
   * [Features](#features)
 - [Switching from minimatch](#switching-from-minimatch)
 - [Switching from multimatch](#switching-from-multimatch)
-- [API](#api)
 - [Options](#options)
+  * [options.basename](#optionsbasename)
+  * [options.cache](#optionscache)
   * [options.dot](#optionsdot)
+  * [options.failglob](#optionsfailglob)
+  * [options.ignore](#optionsignore)
   * [options.matchBase](#optionsmatchbase)
   * [options.nobrace](#optionsnobrace)
-  * [options.nodupes](#optionsnodupes)
   * [options.nocase](#optionsnocase)
+  * [options.nodupes](#optionsnodupes)
   * [options.nonegate](#optionsnonegate)
   * [options.nonull](#optionsnonull)
-  * [options.unixify](#optionsunixify)
-  * [options.cache](#optionscache)
+  * [options.nullglob](#optionsnullglob)
+  * [options.snapdragon](#optionssnapdragon)
+  * [options.unescape](#optionsunescape)
+- [API](#api)
 - [Notes](#notes)
 - [Benchmarks](#benchmarks)
 - [About](#about)
@@ -124,6 +129,150 @@ mm(['foo', 'bar', 'baz'], ['f*', '*z']);
 //=> ['foo', 'baz']
 ```
 
+## Options
+
+* [options.basename](#options-basename)
+* [options.cache](#options-cache)
+* [options.dot](#options-dot)
+* [options.failglob](#options-failglob)
+* [options.ignore](#options-ignore)
+* [options.matchBase](#options-matchBase)
+* [options.nobrace](#options-nobrace)
+* [options.nocase](#options-nocase)
+* [options.nodupes](#options-nodupes)
+* [options.nonull](#options-nonull)
+* [options.nullglob](#options-nullglob)
+* [options.snapdragon](#options-snapdragon)
+* [options.unescape](#options-unescape)
+
+### options.basename
+
+Allow glob patterns without slashes to match a file path based on its basename. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `matchBase`.
+
+Type: `Boolean`
+
+Default: `false`
+
+**Example**
+
+```js
+mm(['a/b.js', 'a/c.md'], '*.js');
+//=> []
+
+mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
+//=> ['a/b.js']
+```
+
+### options.cache
+
+Disable regex and function memoization.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+### options.dot
+
+Match dotfiles. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `dot`.
+
+Type: `Boolean`
+
+Default: `false`
+
+### options.failglob
+
+Similar to the `--failglob` behavior in Bash, throws an error when no matches are found.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+### options.ignore
+
+String or array of glob patterns to match files to ignore.
+
+Type: `String|Array`
+
+Default: `undefined`
+
+### options.matchBase
+
+Alias for [options.basename](#options-basename).
+
+### options.nobrace
+
+Disable expansion of brace patterns. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `nobrace`.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+See [braces](https://github.com/jonschlinkert/braces) for more information about extended brace expansion.
+
+### options.nocase
+
+Use a case-insensitive regex for matching files. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
+
+Type: `Boolean`
+
+Default: `undefined`
+
+### options.nodupes
+
+Remove duplicate elements from the result array.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+**Example**
+
+Example of using the `unescape` and `nodupes` options together:
+
+```js
+mm.match(['a/b/c', 'a/b/c'], 'a/b/c');
+//=> ['a/b/c', 'a/b/c']
+
+mm.match(['a/b/c', 'a/b/c'], 'a/b/c', {nodupes: true});
+//=> ['abc']
+```
+
+### options.nonegate
+
+Disallow negation (`!`) patterns, and treat leading `!` as a literal character to match.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+### options.nonull
+
+Alias for [options.nullglob](#options-nullglob).
+
+### options.nullglob
+
+If `true`, when no matches are found the actual (arrayified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `nonull`.
+
+Type: `Boolean`
+
+Default: `undefined`
+
+### options.snapdragon
+
+Pass your own instance of [snapdragon](https://github.com/jonschlinkert/snapdragon), to customize parsers or compilers.
+
+Type: `Object`
+
+Default: `undefined`
+
+### options.unescape
+
+Remove backslashes from glob patterns.
+
+Type: `Boolean`
+
+Default: `undefined`
+
 ## API
 
 ### [micromatch](index.js#L39)
@@ -147,7 +296,7 @@ console.log(mm(['a.js', 'a.txt'], ['*.js']));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Array}**: Returns an array of matches
 
-### [.match](index.js#L107)
+### [.match](index.js#L98)
 
 Similar to the main function, but `pattern` must be a string.
 
@@ -168,7 +317,7 @@ console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Array}**: Returns an array of matches
 
-### [.isMatch](index.js#L171)
+### [.isMatch](index.js#L162)
 
 Returns true if the specified `string` matches the given glob `pattern`.
 
@@ -191,7 +340,7 @@ console.log(mm.isMatch('a.b', '*.a'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Boolean}**: Returns true if the string matches the glob pattern.
 
-### [.not](index.js#L201)
+### [.not](index.js#L192)
 
 Returns a list of strings that _DO NOT MATCH_ any of the given `patterns`.
 
@@ -212,7 +361,7 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Array}**: Returns an array of strings that **do not match** the given patterns.
 
-### [.any](index.js#L238)
+### [.any](index.js#L229)
 
 Returns true if the given `string` matches any of the given glob `patterns`.
 
@@ -235,7 +384,7 @@ console.log(mm.any('a.a', 'b.*'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Boolean}**: Returns true if any patterns match `str`
 
-### [.contains](index.js#L268)
+### [.contains](index.js#L259)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -258,7 +407,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Boolean}**: Returns true if the patter matches any part of `str`.
 
-### [.matchKeys](index.js#L317)
+### [.matchKeys](index.js#L308)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -280,7 +429,7 @@ console.log(mm.matchKeys(obj, '*b'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed
 * `returns` **{Object}**: Returns an object with only keys that match the given patterns.
 
-### [.matcher](index.js#L346)
+### [.matcher](index.js#L337)
 
 Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
@@ -303,7 +452,7 @@ console.log(isMatch('a.b'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed.
 * `returns` **{Function}**: Returns a matcher function.
 
-### [.makeRe](index.js#L403)
+### [.makeRe](index.js#L394)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -323,18 +472,18 @@ console.log(mm.makeRe('*.js'));
 * `options` **{Object}**: Any [options](#options) to change how matches are performed.
 * `returns` **{RegExp}**: Returns a regex created from the given pattern.
 
-### [.braces](index.js#L446)
+### [.braces](index.js#L437)
 
 Expand the given brace `pattern`.
 
 **Example**
 
 ```js
-var micromatch = require('micromatch');
-console.log(micromatch.braces('foo/{a,b}/bar'));
+var mm = require('micromatch');
+console.log(mm.braces('foo/{a,b}/bar'));
 //=> ['foo/(a|b)/bar']
 
-console.log(micromatch.braces('foo/{a,b}/bar', {expand: true}));
+console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
 //=> ['foo/(a|b)/bar']
 ```
 
@@ -344,7 +493,7 @@ console.log(micromatch.braces('foo/{a,b}/bar', {expand: true}));
 * `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces](https://github.com/jonschlinkert/braces) library for all available options.
 * `returns` **{Array}**
 
-### [.create](index.js#L499)
+### [.create](index.js#L490)
 
 Parses the given glob `pattern` and returns an object with the compiled `output` and optional source `map`.
 
@@ -386,7 +535,7 @@ console.log(mm.create('abc/*.js'));
 * `options` **{Object}**: Any [options](#options) to change how parsing and compiling is performed.
 * `returns` **{Object}**: Returns an object with the parsed AST, compiled string and optional source map.
 
-### [.parse](index.js#L556)
+### [.parse](index.js#L547)
 
 Parse the given `str` with the given `options`.
 
@@ -419,18 +568,28 @@ console.log(ast);
 * `options` **{Object}**
 * `returns` **{Object}**: Returns an AST
 
-### [.compile](index.js#L609)
+### [.clearCache](index.js#L579)
+
+Clear the regex cache.
+
+**Example**
+
+```js
+mm.clearCache();
+```
+
+### [.compile](index.js#L613)
 
 Compile the given `ast` or string with the given `options`.
 
 **Example**
 
 ```js
-var micromatch = require('micromatch');
+var mm = require('micromatch');
 mm.compile(ast[, options]);
 
-var ast = micromatch.parse('a/{b,c}/d');
-console.log(micromatch.compile(ast));
+var ast = mm.parse('a/{b,c}/d');
+console.log(mm.compile(ast));
 // { options: { source: 'string' },
 //   state: {},
 //   compilers:
@@ -452,104 +611,6 @@ console.log(micromatch.compile(ast));
 * `ast` **{Object|String}**
 * `options` **{Object}**
 * `returns` **{Object}**: Returns an object that has an `output` property with the compiled string.
-
-## Options
-
-### options.dot
-
-Match dotfiles. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
-
-Type: `Boolean`
-
-Default: `false`
-
-### options.matchBase
-
-Allow glob patterns without slashes to match a file path based on its basename. . Same behavior as [minimatch](https://github.com/isaacs/minimatch).
-
-Type: `Boolean`
-
-Default: `false`
-
-**Example**
-
-```js
-mm(['a/b.js', 'a/c.md'], '*.js');
-//=> []
-
-mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
-//=> ['a/b.js']
-```
-
-### options.nobrace
-
-Disable expansion of brace patterns. Same behavior as [minimatch](https://github.com/isaacs/minimatch) `nobrace`.
-
-Type: `Boolean`
-
-Default: `undefined`
-
-See [braces](https://github.com/jonschlinkert/braces) for more information about extended brace expansion.
-
-### options.nodupes
-
-Remove duplicate elements from the result array.
-
-Type: `Boolean`
-
-Default: `undefined`
-
-**Example**
-
-Example of using the `unescape` and `nodupes` options together:
-
-```js
-mm.match(['a/b/c', 'a/b/c'], 'a/b/c');
-//=> ['a/b/c', 'a/b/c']
-
-mm.match(['a/b/c', 'a/b/c'], 'a/b/c', {nodupes: true});
-//=> ['abc']
-```
-
-### options.nocase
-
-Use a case-insensitive regex for matching files. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
-
-Type: `Boolean`
-
-Default: `undefined`
-
-### options.nonegate
-
-Disallow negation (`!`) patterns, and treat leading `!` as a literal character to match.
-
-Type: `Boolean`
-
-Default: `undefined`
-
-### options.nonull
-
-If `true`, when no matches are found the actual (arrayified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
-
-Type: `Boolean`
-
-Default: `undefined`
-
-### options.unixify
-
-Normalize slashes in file paths and glob patterns to forward slashes.
-
-Type: `Boolean`
-
-Default: `undefined` on non-windows, `true` on windows.
-
-### options.cache
-
-Disable memoization of matching functions and generated regex.
-
-Type: `Boolean`
-
-Default: `undefined`
 
 ## Notes
 
@@ -573,58 +634,58 @@ Run the [benchmarks](./benchmark):
 node benchmark
 ```
 
-As of November 03, 2016 (longer bars are better):
+As of November 24, 2016 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
-micromatch ██████████████████████████████████████████████████████████████████████ (395 ops/sec) 
-minimatch  ██ (13.75 ops/sec) 
-multimatch ██ (13.90 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (413 ops/sec) 
+minimatch  ██ (13.20 ops/sec) 
+multimatch ██ (12.47 ops/sec) 
 
 # braces-multiple
-micromatch ██████████████████████████████████████████████████████████████████████ (35,630 ops/sec) 
-minimatch   (1.58 ops/sec) 
-multimatch  (1.47 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (36,121 ops/sec) 
+minimatch   (1.59 ops/sec) 
+multimatch  (1.46 ops/sec) 
 
 # braces-range
-micromatch ██████████████████████████████████████████████████████████████████████ (192,168 ops/sec) 
-minimatch  ██ (8,167 ops/sec) 
-multimatch ██ (8,227 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (210,437 ops/sec) 
+minimatch  ██ (8,559 ops/sec) 
+multimatch ██ (8,342 ops/sec) 
 
 # braces-set
-micromatch ██████████████████████████████████████████████████████████████████████ (24,648 ops/sec) 
-minimatch  █████ (1,960 ops/sec) 
-multimatch █████ (1,841 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (25,350 ops/sec) 
+minimatch  █████ (2,067 ops/sec) 
+multimatch █████ (1,815 ops/sec) 
 
 # globstar-large-list
-micromatch ██████████████████████████████████████████████████████████████████████ (396 ops/sec) 
-minimatch  ████ (25.49 ops/sec) 
-multimatch ████ (25.61 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (399 ops/sec) 
+minimatch  ████ (23.99 ops/sec) 
+multimatch ████ (25.91 ops/sec) 
 
 # globstar-long-list
-micromatch ██████████████████████████████████████████████████████████████████████ (3,337 ops/sec) 
-minimatch  ██████████ (504 ops/sec) 
-multimatch ██████████ (493 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (3,639 ops/sec) 
+minimatch  █████████ (504 ops/sec) 
+multimatch ██████████ (539 ops/sec) 
 
 # globstar-short-list
-micromatch ██████████████████████████████████████████████████████████████████████ (465,408 ops/sec) 
-minimatch  ████ (32,763 ops/sec) 
-multimatch ████ (28,196 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (436,248 ops/sec) 
+minimatch  ████ (30,473 ops/sec) 
+multimatch ████ (26,826 ops/sec) 
 
 # no-glob
-micromatch ██████████████████████████████████████████████████████████████████████ (642,909 ops/sec) 
-minimatch  ███ (33,682 ops/sec) 
-multimatch ███ (29,675 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (625,755 ops/sec) 
+minimatch  ████ (39,617 ops/sec) 
+multimatch ███ (33,846 ops/sec) 
 
 # star-basename
-micromatch ██████████████████████████████████████████████████████████████████████ (11,012 ops/sec) 
-minimatch  ███████████████████ (3,076 ops/sec) 
-multimatch ███████████████████ (3,001 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (11,281 ops/sec) 
+minimatch  ██████████████████ (3,028 ops/sec) 
+multimatch █████████████████████ (3,395 ops/sec) 
 
 # star
-micromatch ██████████████████████████████████████████████████████████████████████ (9,786 ops/sec) 
-minimatch  █████████████████████ (2,976 ops/sec) 
-multimatch ███████████████████ (2,791 ops/sec) 
+micromatch ██████████████████████████████████████████████████████████████████████ (9,578 ops/sec) 
+minimatch  ████████████████████ (2,865 ops/sec) 
+multimatch ████████████████████ (2,873 ops/sec) 
 ```
 
 ## About
@@ -652,8 +713,8 @@ Please read the [contributing guide](.github/contributing.md) for avice on openi
 | 3 | [paulmillr](https://github.com/paulmillr) |
 | 2 | [TrySound](https://github.com/TrySound) |
 | 2 | [doowb](https://github.com/doowb) |
-| 2 | [tunnckoCore](https://github.com/tunnckoCore) |
 | 2 | [MartinKolarik](https://github.com/MartinKolarik) |
+| 2 | [tunnckoCore](https://github.com/tunnckoCore) |
 | 1 | [amilajack](https://github.com/amilajack) |
 | 1 | [UltCombo](https://github.com/UltCombo) |
 | 1 | [tomByrer](https://github.com/tomByrer) |
@@ -690,4 +751,4 @@ Released under the [MIT license](https://github.com/jonschlinkert/micromatch/blo
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on November 03, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on November 24, 2016._
