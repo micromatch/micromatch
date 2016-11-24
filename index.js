@@ -79,15 +79,6 @@ function micromatch(list, patterns, options) {
 }
 
 /**
- * Cache
- */
-
-micromatch.cache = cache;
-micromatch.clearCache = function() {
-  micromatch.cache.__data__ = {};
-};
-
-/**
  * Similar to the main function, but `pattern` must be a string.
  *
  * ```js
@@ -430,11 +421,11 @@ micromatch.makeRe = function(pattern, options) {
  * Expand the given brace `pattern`.
  *
  * ```js
- * var micromatch = require('micromatch');
- * console.log(micromatch.braces('foo/{a,b}/bar'));
+ * var mm = require('micromatch');
+ * console.log(mm.braces('foo/{a,b}/bar'));
  * //=> ['foo/(a|b)/bar']
  *
- * console.log(micromatch.braces('foo/{a,b}/bar', {expand: true}));
+ * console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
  * //=> ['foo/(a|b)/bar']
  * ```
  * @param {String} `pattern` String with brace pattern to expand.
@@ -577,14 +568,27 @@ micromatch.parse = function(pattern, options) {
 };
 
 /**
+ * Clear the regex cache.
+ *
+ * ```js
+ * mm.clearCache();
+ * ```
+ * @api public
+ */
+
+micromatch.clearCache = function() {
+  micromatch.cache.__data__ = {};
+};
+
+/**
  * Compile the given `ast` or string with the given `options`.
  *
  * ```js
- * var micromatch = require('micromatch');
+ * var mm = require('micromatch');
  * mm.compile(ast[, options]);
  *
- * var ast = micromatch.parse('a/{b,c}/d');
- * console.log(micromatch.compile(ast));
+ * var ast = mm.parse('a/{b,c}/d');
+ * console.log(mm.compile(ast));
  * // { options: { source: 'string' },
  * //   state: {},
  * //   compilers:
@@ -646,6 +650,7 @@ function memoize(type, pattern, options, fn) {
 
 micromatch.compilers = compilers;
 micromatch.parsers = parsers;
+micromatch.cache = cache;
 
 /**
  * Expose `micromatch`
