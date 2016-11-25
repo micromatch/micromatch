@@ -4,6 +4,7 @@ var assert = require('assert');
 var utils = require('../../lib/utils');
 var matcher = require('./matcher');
 var compare = require('./compare');
+var mm = require('../..');
 
 module.exports = function(fixtures, patterns, expected, options) {
   if (!Array.isArray(expected)) {
@@ -31,6 +32,29 @@ module.exports.match = function(fixtures, pattern, expected, options) {
   actual.sort(compare);
 
   assert.deepEqual(actual, expected, pattern);
+};
+
+module.exports.matcher = function(fixtures, patterns, expected, options) {
+  if (!Array.isArray(expected)) {
+    var tmp = expected;
+    expected = options;
+    options = tmp;
+  }
+
+  var fn = matcher.matcher(patterns, options);
+  fixtures = utils.arrayify(fixtures);
+
+  var actual = [];
+  fixtures.forEach(function(file) {
+    if (fn(file)) {
+      actual.push(file);
+    }
+  });
+
+  expected.sort(compare);
+  actual.sort(compare);
+
+  assert.deepEqual(actual, expected, patterns);
 };
 
 module.exports.isMatch = function() {

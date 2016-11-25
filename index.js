@@ -107,14 +107,14 @@ micromatch.match = function(list, pattern, options) {
   while (++idx < len) {
     var ele = list[idx];
 
-    if (ele === pattern) {
-      matches.push(unixify(ele));
+    var unix = unixify(ele);
+    if (ele === pattern || unix === pattern) {
+      matches.push(unix);
       continue;
     }
 
-    var unix = unixify(ele);
-    if (unix === pattern || isMatch(unix)) {
-      matches.push(unix);
+    if (isMatch(ele)) {
+      matches.push(ele);
     }
   }
 
@@ -334,8 +334,12 @@ micromatch.matchKeys = function(obj, patterns, options) {
  * @api public
  */
 
-micromatch.matcher = function(pattern, options) {
-  function matcher() {
+micromatch.matcher = function matcher(pattern, options) {
+  if (Array.isArray(pattern)) {
+    return utils.compose(pattern, options, matcher);
+  }
+
+  function fn() {
     var unixify = utils.unixify(options);
 
     // if pattern is a regex
@@ -372,7 +376,7 @@ micromatch.matcher = function(pattern, options) {
     };
   }
 
-  return memoize('matcher', pattern, options, matcher);
+  return memoize('matcher', pattern, options, fn);
 };
 
 /**
