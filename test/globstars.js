@@ -104,12 +104,4 @@ describe('globstars', function() {
     mm(fixtures, '\\*\\**.md', ['**a.md', '**.md']);
     mm(fixtures, '\\*\\*.md', ['**.md']);
   });
-
-  // related to https://github.com/isaacs/minimatch/issues/67
-  it('should work consistently with `makeRe` and matcher functions', function() {
-    var re = mm.makeRe('node_modules/foobar/**/*.bar');
-    assert(re.test('node_modules/foobar/foo.bar'));
-    assert(mm.isMatch('node_modules/foobar/foo.bar', 'node_modules/foobar/**/*.bar'));
-    mm(['node_modules/foobar/foo.bar'], 'node_modules/foobar/**/*.bar', ['node_modules/foobar/foo.bar']);
-  });
 });

@@ -43,8 +43,8 @@ describe('minimatch issues (as of 12/7/2016)', function() {
     assert(mm.isMatch('./foo/bar.js', '**/foo/**'));
     assert(mm.isMatch('./foo/bar.txt', 'foo/**/*.txt'));
     assert(mm.makeRe('./foo/**/*.txt' ).test( 'foo/bar.txt'));
-    assert(!mm.isMatch('./n/!(axios)/**', 'n/axios/a.js'));
-    assert(!mm.makeRe('./n/!(axios)/**').test('n/axios/a.js'));
+    assert(!mm.isMatch('./foo/!(bar)/**', 'foo/bar/a.js'));
+    assert(!mm.makeRe('./foo/!(bar)/**').test('foo/bar/a.js'));
   });
 
   it('https://github.com/isaacs/minimatch/issues/50', function() {
@@ -53,7 +53,17 @@ describe('minimatch issues (as of 12/7/2016)', function() {
     assert(mm.isMatch('foo/bar-[ABC].txt', 'foo/**/*-\\[abc\\].txt', {nocase: true}));
   });
 
+  it('https://github.com/isaacs/minimatch/issues/67 (should work consistently with `makeRe` and matcher functions)', function() {
+    var re = mm.makeRe('node_modules/foobar/**/*.bar');
+    assert(re.test('node_modules/foobar/foo.bar'));
+    assert(mm.isMatch('node_modules/foobar/foo.bar', 'node_modules/foobar/**/*.bar'));
+    mm(['node_modules/foobar/foo.bar'], 'node_modules/foobar/**/*.bar', ['node_modules/foobar/foo.bar']);
+  });
+
   it('https://github.com/isaacs/minimatch/issues/75', function() {
+    assert(mm.isMatch('foo/baz.qux.js', 'foo/@(baz.qux).js'));
+    assert(mm.isMatch('foo/baz.qux.js', 'foo/+(baz.qux).js'));
+    assert(mm.isMatch('foo/baz.qux.js', 'foo/*(baz.qux).js'));
     assert(!mm.isMatch('foo/baz.qux.js', 'foo/!(baz.qux).js'));
     assert(!mm.isMatch('foo/bar/baz.qux.js', 'foo/*/!(baz.qux).js'));
     assert(!mm.isMatch('foo/bar/bazqux.js', '**/!(bazqux).js'));
@@ -79,8 +89,8 @@ describe('minimatch issues (as of 12/7/2016)', function() {
   });
 
   it('https://github.com/isaacs/minimatch/issues/83', function() {
-    assert(!mm.makeRe('n/!(axios)/**').test('n/axios/a.js'));
-    assert(!mm.isMatch('n/!(axios)/**', 'n/axios/a.js'));
+    assert(!mm.makeRe('foo/!(bar)/**').test('foo/bar/a.js'));
+    assert(!mm.isMatch('foo/!(bar)/**', 'foo/bar/a.js'));
   });
 });
 
