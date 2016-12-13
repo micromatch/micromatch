@@ -35,14 +35,14 @@
   "dependencies": {
     "arr-diff": "^3.0.0",
     "array-unique": "^0.3.2",
-    "braces": "^2.0.2",
+    "braces": "^2.0.3",
     "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
-    "extglob": "^1.0.0",
+    "extglob": "^1.1.0",
     "for-own": "^0.1.4",
     "fragment-cache": "^0.2.0",
-    "kind-of": "^3.0.4",
-    "nanomatch": "^0.3.4",
+    "kind-of": "^3.1.0",
+    "nanomatch": "^1.0.0",
     "object.pick": "^1.2.0",
     "regex-not": "^1.0.0",
     "snapdragon": "^0.8.1",
@@ -118,12 +118,11 @@
       "reflinks": true
     },
     "reflinks": [
-      "braces",
-      "expand-brackets",
       "extglob",
       "glob-object",
       "minimatch",
       "multimatch",
+      "snapdragon",
       "verb",
       "verb-generate-readme"
     ]
