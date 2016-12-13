@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+var util = require('util');
 var braces = require('braces');
 var toRegex = require('to-regex');
 var extend = require('extend-shallow');
@@ -67,7 +68,11 @@ function micromatch(list, patterns, options) {
 
   // minimatch.match parity
   if (negated && keep.length === 0) {
-    keep = list.map(utils.unixify(options));
+    if (options && options.unixify === false) {
+      keep = list.slice();
+    } else {
+      keep = list.map(utils.unixify(options));
+    }
   }
 
   var matches = utils.diff(keep, omit);
@@ -96,8 +101,12 @@ function micromatch(list, patterns, options) {
  */
 
 micromatch.match = function(list, pattern, options) {
+  if (Array.isArray(pattern)) {
+    throw new TypeError('expected pattern to be a string');
+  }
+
   var unixify = utils.unixify(options);
-  var isMatch = memoize('isMatch', pattern, options, micromatch.matcher);
+  var isMatch = memoize('match', pattern, options, micromatch.matcher);
 
   list = utils.arrayify(list);
   var len = list.length;
@@ -106,15 +115,10 @@ micromatch.match = function(list, pattern, options) {
 
   while (++idx < len) {
     var ele = list[idx];
-
     var unix = unixify(ele);
-    if (ele === pattern || unix === pattern) {
-      matches.push(unix);
-      continue;
-    }
 
-    if (isMatch(ele)) {
-      matches.push(ele);
+    if (ele === pattern || unix === pattern || isMatch(unix)) {
+      matches.push((options && options.unixify === false) ? ele : unix);
     }
   }
 
@@ -160,6 +164,10 @@ micromatch.match = function(list, pattern, options) {
  */
 
 micromatch.isMatch = function(str, pattern, options) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string: "' + util.inspect(str) + '"');
+  }
+
   if (pattern === str) {
     return true;
   }
@@ -195,7 +203,7 @@ micromatch.not = function(list, patterns, options) {
   delete opts.ignore;
 
   var unixify = utils.unixify(opts);
-  var unixified = list.map(function(fp) {
+  var unixified = utils.arrayify(list).map(function(fp) {
     return unixify(fp, opts);
   });
 
@@ -219,17 +227,30 @@ micromatch.not = function(list, patterns, options) {
  * console.log(mm.any('a.a', 'b.*'));
  * //=> false
  * ```
- * @param  {String} `str` The string to test.
+ * @param  {String|Array} `list` The string or array of strings to test. Returns as soon as the first match is found.
  * @param {String|Array} `patterns` One or more glob patterns to use for matching.
  * @param {Object} `options` Any [options](#options) to change how matches are performed
  * @return {Boolean} Returns true if any patterns match `str`
  * @api public
  */
 
-micromatch.any = function(str, patterns, options) {
-  patterns = utils.arrayify(patterns);
-  for (var i = 0; i < patterns.length; i++) {
-    if (micromatch.isMatch(str, patterns[i], options)) {
+micromatch.any = function(list, patterns, options) {
+  var unixify = utils.unixify(options);
+  var isMatch = memoize('any', patterns, options, micromatch.matcher);
+
+  list = utils.arrayify(list);
+  var len = list.length;
+  var idx = -1;
+
+  while (++idx < len) {
+    var ele = list[idx];
+    if (ele === './' || ele === '') continue;
+    var unix = unixify(ele);
+
+    if (isMatch(unix)) {
+      if (options && options.ignore && micromatch.not(ele, options.ignored)) {
+        continue;
+      }
       return true;
     }
   }
@@ -339,44 +360,45 @@ micromatch.matcher = function matcher(pattern, options) {
     return utils.compose(pattern, options, matcher);
   }
 
-  function fn() {
+  // if pattern is a regex
+  if (pattern instanceof RegExp) {
+    return test(pattern);
+  }
+
+  // if pattern is invalid
+  if (!utils.isString(pattern)) {
+    throw new TypeError('expected pattern to be a string or regex');
+  }
+
+  // if pattern is a non-glob string
+  if (!utils.hasSpecialChars(pattern)) {
+    if (options && options.nocase === true) {
+      pattern = pattern.toLowerCase();
+    }
+    return utils.matchPath(pattern, options);
+  }
+
+  // if pattern is a glob string
+  var re = micromatch.makeRe(pattern, options);
+
+  // if `options.matchBase` or `options.basename` is defined
+  if (micromatch.matchBase(pattern, options)) {
+    return utils.matchBasename(re, options);
+  }
+
+  function test(regex) {
     var unixify = utils.unixify(options);
 
-    // if pattern is a regex
-    if (pattern instanceof RegExp) {
-      return function(str) {
-        return pattern.test(str) || pattern.test(unixify(str));
-      };
-    }
-
-    // if pattern is invalid
-    if (!utils.isString(pattern)) {
-      throw new TypeError('expected pattern to be a string or regex');
-    }
-
-    // if pattern is a non-glob string
-    if (!utils.hasSpecialChars(pattern)) {
-      if (options && options.nocase === true) {
-        pattern = pattern.toLowerCase();
-      }
-      return utils.matchPath(pattern, options);
-    }
-
-    // if pattern is a glob string
-    var re = micromatch.makeRe(pattern, options);
-
-    // if `options.matchBase` or `options.basename` is defined
-    if (micromatch.matchBase(pattern, options)) {
-      return utils.matchBasename(re, options);
-    }
-
-    // everything else...
     return function(str) {
-      return re.test(str) || re.test(unixify(str));
+      var ele = unixify(str);
+      if (str === pattern || ele === pattern || regex.test(ele)) {
+        return true;
+      }
+      return false;
     };
   }
 
-  return memoize('matcher', pattern, options, fn);
+  return test(re);
 };
 
 /**
@@ -572,19 +594,6 @@ micromatch.parse = function(pattern, options) {
 };
 
 /**
- * Clear the regex cache.
- *
- * ```js
- * mm.clearCache();
- * ```
- * @api public
- */
-
-micromatch.clearCache = function() {
-  micromatch.cache.__data__ = {};
-};
-
-/**
  * Compile the given `ast` or string with the given `options`.
  *
  * ```js
@@ -626,6 +635,19 @@ micromatch.compile = function(ast, options) {
   }
 
   return memoize('compile', ast.input, options, compile);
+};
+
+/**
+ * Clear the regex cache.
+ *
+ * ```js
+ * mm.clearCache();
+ * ```
+ * @api public
+ */
+
+micromatch.clearCache = function() {
+  micromatch.cache.__data__ = {};
 };
 
 /**
