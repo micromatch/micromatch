@@ -1,5 +1,3 @@
-'use strict';
-
 var micromatch = require('../../..');
 
 module.exports = function(file, pattern) {
