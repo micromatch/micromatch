@@ -6,6 +6,7 @@
 test/actual
 actual
 coverage
+.nyc*
 
 # npm
 node_modules
@@ -18,3 +19,4 @@ vendor
 temp
 tmp
 TODO.md
+yarn.lock
