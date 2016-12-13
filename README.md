@@ -10,6 +10,7 @@
   * [Features](#features)
 - [Switching from minimatch](#switching-from-minimatch)
 - [Switching from multimatch](#switching-from-multimatch)
+- [API](#api)
 - [Options](#options)
   * [options.basename](#optionsbasename)
   * [options.cache](#optionscache)
@@ -25,9 +26,17 @@
   * [options.nullglob](#optionsnullglob)
   * [options.snapdragon](#optionssnapdragon)
   * [options.unescape](#optionsunescape)
-- [API](#api)
+  * [options.unixify](#optionsunixify)
+- [Extended globbing](#extended-globbing)
+  * [extglobs](#extglobs)
+  * [braces](#braces)
+  * [regex character classes](#regex-character-classes)
+  * [regex groups](#regex-groups)
+  * [POSIX bracket expressions](#posix-bracket-expressions)
 - [Notes](#notes)
 - [Benchmarks](#benchmarks)
+  * [Running benchmarks](#running-benchmarks)
+  * [Latest results](#latest-results)
 - [About](#about)
   * [Related projects](#related-projects)
   * [Contributing](#contributing)
@@ -67,7 +76,7 @@ Use [.isMatch](#ismatch) to get true/false:
 console.log(mm.isMatch('foo', 'f*'));  // true
 ```
 
-**Switching from [minimatch](#switching-from-minimatch) and [multimatch](#switching-from-minimatch) is easy**:
+**Switching from [minimatch](#switching-from-minimatch) and [multimatch](#switching-from-multimatch) is easy**:
 
 * [mm()](#usage) is the same as [multimatch()](https://github.com/sindresorhus/multimatch)
 * [mm.match()](#match) is the same as [minimatch.match()](https://github.com/isaacs/minimatch)
@@ -82,7 +91,7 @@ Micromatch is [safer](https://github.com/jonschlinkert/braces#braces-is-safe), [
 Moreover, micromatch has:
 
 * Better support for the Bash 4.3 specification than minimatch and multimatch
-* More than 7,200 [unit tests](./test), with thousands more patterns tested (minimatch and multimatch fail many of the tests)
+* More than 16,000 [unit tests](./test), with thousands more patterns tested (minimatch and multimatch fail many of the tests)
 * Better windows support than minimatch and multimatch
 
 ### Features
@@ -129,6 +138,345 @@ mm(['foo', 'bar', 'baz'], ['f*', '*z']);
 //=> ['foo', 'baz']
 ```
 
+## API
+
+### [micromatch](index.js#L40)
+
+The main function takes a list of strings and one or more glob patterns to use for matching.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm(list, patterns[, options]);
+
+console.log(mm(['a.js', 'a.txt'], ['*.js']));
+//=> [ 'a.js' ]
+```
+
+**Params**
+
+* `list` **{Array}**: A list of strings to match
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Array}**: Returns an array of matches
+
+### [.match](index.js#L103)
+
+Similar to the main function, but `pattern` must be a string.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.match(list, pattern[, options]);
+
+console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
+//=> ['a.a', 'a.aa']
+```
+
+**Params**
+
+* `list` **{Array}**: Array of strings to match
+* `pattern` **{String}**: Glob pattern to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Array}**: Returns an array of matches
+
+### [.isMatch](index.js#L166)
+
+Returns true if the specified `string` matches the given glob `pattern`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.isMatch(string, pattern[, options]);
+
+console.log(mm.isMatch('a.a', '*.a'));
+//=> true
+console.log(mm.isMatch('a.b', '*.a'));
+//=> false
+```
+
+**Params**
+
+* `string` **{String}**: String to match
+* `pattern` **{String}**: Glob pattern to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Boolean}**: Returns true if the string matches the glob pattern.
+
+### [.not](index.js#L200)
+
+Returns a list of strings that _DO NOT MATCH_ any of the given `patterns`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.not(list, patterns[, options]);
+
+console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
+//=> ['b.b', 'c.c']
+```
+
+**Params**
+
+* `list` **{Array}**: Array of strings to match.
+* `patterns` **{String|Array}**: One or more glob pattern to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Array}**: Returns an array of strings that **do not match** the given patterns.
+
+### [.any](index.js#L237)
+
+Returns true if the given `string` matches any of the given glob `patterns`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.any(string, patterns[, options]);
+
+console.log(mm.any('a.a', ['b.*', '*.a']));
+//=> true
+console.log(mm.any('a.a', 'b.*'));
+//=> false
+```
+
+**Params**
+
+* `list` **{String|Array}**: The string or array of strings to test. Returns as soon as the first match is found.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Boolean}**: Returns true if any patterns match `str`
+
+### [.contains](index.js#L280)
+
+Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.contains(string, pattern[, options]);
+
+console.log(mm.contains('aa/bb/cc', '*b'));
+//=> true
+console.log(mm.contains('aa/bb/cc', '*d'));
+//=> false
+```
+
+**Params**
+
+* `str` **{String}**: The string to match.
+* `pattern` **{String}**: Glob pattern to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Boolean}**: Returns true if the patter matches any part of `str`.
+
+### [.matchKeys](index.js#L329)
+
+Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.matchKeys(object, patterns[, options]);
+
+var obj = { aa: 'a', ab: 'b', ac: 'c' };
+console.log(mm.matchKeys(obj, '*b'));
+//=> { ab: 'b' }
+```
+
+**Params**
+
+* `object` **{Object}**: The object with keys to filter.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed
+* `returns` **{Object}**: Returns an object with only keys that match the given patterns.
+
+### [.matcher](index.js#L358)
+
+Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.matcher(pattern[, options]);
+
+var isMatch = mm.matcher('*.!(*a)');
+console.log(isMatch('a.a'));
+//=> false
+console.log(isMatch('a.b'));
+//=> true
+```
+
+**Params**
+
+* `pattern` **{String}**: Glob pattern
+* `options` **{Object}**: Any [options](#options) to change how matches are performed.
+* `returns` **{Function}**: Returns a matcher function.
+
+### [.makeRe](index.js#L420)
+
+Create a regular expression from the given glob `pattern`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.makeRe(pattern[, options]);
+
+console.log(mm.makeRe('*.js'));
+//=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
+```
+
+**Params**
+
+* `pattern` **{String}**: A glob pattern to convert to regex.
+* `options` **{Object}**: Any [options](#options) to change how matches are performed.
+* `returns` **{RegExp}**: Returns a regex created from the given pattern.
+
+### [.braces](index.js#L463)
+
+Expand the given brace `pattern`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+console.log(mm.braces('foo/{a,b}/bar'));
+//=> ['foo/(a|b)/bar']
+
+console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
+//=> ['foo/(a|b)/bar']
+```
+
+**Params**
+
+* `pattern` **{String}**: String with brace pattern to expand.
+* `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces](https://github.com/jonschlinkert/braces) library for all available options.
+* `returns` **{Array}**
+
+### [.create](index.js#L516)
+
+Parses the given glob `pattern` and returns an object with the compiled `output` and optional source `map`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.create(pattern[, options]);
+
+console.log(mm.create('abc/*.js'));
+// { options: { source: 'string', sourcemap: true },
+//   state: {},
+//   compilers:
+//    { ... },
+//   output: '(\\.[\\\\\\/])?abc\\/(?!\\.)(?=.)[^\\/]*?\\.js',
+//   ast:
+//    { type: 'root',
+//      errors: [],
+//      nodes:
+//       [ ... ],
+//      dot: false,
+//      input: 'abc/*.js' },
+//   parsingErrors: [],
+//   map:
+//    { version: 3,
+//      sources: [ 'string' ],
+//      names: [],
+//      mappings: 'AAAA,GAAG,EAAC,kBAAC,EAAC,EAAE',
+//      sourcesContent: [ 'abc/*.js' ] },
+//   position: { line: 1, column: 28 },
+//   content: {},
+//   files: {},
+//   idx: 6 }
+```
+
+**Params**
+
+* `pattern` **{String}**: Glob pattern to parse and compile.
+* `options` **{Object}**: Any [options](#options) to change how parsing and compiling is performed.
+* `returns` **{Object}**: Returns an object with the parsed AST, compiled string and optional source map.
+
+### [.parse](index.js#L573)
+
+Parse the given `str` with the given `options`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.parse(pattern[, options]);
+
+var ast = mm.parse('a/{b,c}/d');
+console.log(ast);
+// { type: 'root',
+//   errors: [],
+//   input: 'a/{b,c}/d',
+//   nodes:
+//    [ { type: 'bos', val: '' },
+//      { type: 'text', val: 'a/' },
+//      { type: 'brace',
+//        nodes:
+//         [ { type: 'brace.open', val: '{' },
+//           { type: 'text', val: 'b,c' },
+//           { type: 'brace.close', val: '}' } ] },
+//      { type: 'text', val: '/d' },
+//      { type: 'eos', val: '' } ] }
+```
+
+**Params**
+
+* `str` **{String}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns an AST
+
+### [.compile](index.js#L626)
+
+Compile the given `ast` or string with the given `options`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.compile(ast[, options]);
+
+var ast = mm.parse('a/{b,c}/d');
+console.log(mm.compile(ast));
+// { options: { source: 'string' },
+//   state: {},
+//   compilers:
+//    { eos: [Function],
+//      noop: [Function],
+//      bos: [Function],
+//      brace: [Function],
+//      'brace.open': [Function],
+//      text: [Function],
+//      'brace.close': [Function] },
+//   output: [ 'a/(b|c)/d' ],
+//   ast:
+//    { ... },
+//   parsingErrors: [] }
+```
+
+**Params**
+
+* `ast` **{Object|String}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns an object that has an `output` property with the compiled string.
+
+### [.clearCache](index.js#L649)
+
+Clear the regex cache.
+
+**Example**
+
+```js
+mm.clearCache();
+```
+
 ## Options
 
 * [options.basename](#options-basename)
@@ -144,6 +492,7 @@ mm(['foo', 'bar', 'baz'], ['f*', '*z']);
 * [options.nullglob](#options-nullglob)
 * [options.snapdragon](#options-snapdragon)
 * [options.unescape](#options-unescape)
+* [options.unixify](#options-unixify)
 
 ### options.basename
 
@@ -267,374 +616,140 @@ Default: `undefined`
 
 ### options.unescape
 
-Remove backslashes from glob patterns.
+Remove backslashes from returned matches.
 
 Type: `Boolean`
 
 Default: `undefined`
 
-## API
-
-### [micromatch](index.js#L39)
-
-The main function takes a list of strings and one or more glob patterns to use for matching.
-
 **Example**
 
-```js
-var mm = require('micromatch');
-mm(list, patterns[, options]);
+In this example we want to match a literal `*`:
 
-console.log(mm(['a.js', 'a.txt'], ['*.js']));
-//=> [ 'a.js' ]
+```js
+mm.match(['abc', 'a\\*c'], 'a\\*c');
+//=> ['a\\*c']
+
+mm.match(['abc', 'a\\*c'], 'a\\*c', {unescape: true});
+//=> ['a*c']
 ```
 
-**Params**
+### options.unixify
 
-* `list` **{Array}**: A list of strings to match
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Array}**: Returns an array of matches
+Convert path separators on returned files to posix/unix-style forward slashes.
 
-### [.match](index.js#L98)
+Type: `Boolean`
 
-Similar to the main function, but `pattern` must be a string.
+Default: `true`
 
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.match(list, pattern[, options]);
+mm.match(['a\\b\\c'], 'a/**');
+//=> ['a/b/c']
 
-console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
-//=> ['a.a', 'a.aa']
+mm.match(['a\\b\\c'], {unixify: false});
+//=> ['a\\b\\c']
 ```
 
-**Params**
+## Extended globbing
 
-* `list` **{Array}**: Array of strings to match
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Array}**: Returns an array of matches
+Micromatch also supports extended globbing features.
 
-### [.isMatch](index.js#L162)
+### extglobs
 
-Returns true if the specified `string` matches the given glob `pattern`.
+Extended globbing, as described by the bash man page:
 
-**Example**
+| **pattern** | **regex equivalent** | **description** | 
+| --- | --- | --- |
+| `?(pattern-list)` | `(... | ...)?` | Matches zero or one occurrence of the given patterns |
+| `*(pattern-list)` | `(... | ...)*` | Matches zero or more occurrences of the given patterns |
+| `+(pattern-list)` | `(... | ...)+` | Matches one or more occurrences of the given patterns |
+| `@(pattern-list)` | `(... | ...)` <sup>*</sup> | Matches one of the given patterns |
+| `!(pattern-list)` | N/A | Matches anything except one of the given patterns |
 
-```js
-var mm = require('micromatch');
-mm.isMatch(string, pattern[, options]);
+<sup><strong>*</strong></sup> `@` isn't a RegEx character.
 
-console.log(mm.isMatch('a.a', '*.a'));
-//=> true
-console.log(mm.isMatch('a.b', '*.a'));
-//=> false
-```
+Powered by [extglob](https://github.com/jonschlinkert/extglob). Visit that library for the full range of options or to report extglob related issues.
 
-**Params**
+See [extglob](https://github.com/jonschlinkert/extglob) for more information about extended globs.
 
-* `string` **{String}**: String to match
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Boolean}**: Returns true if the string matches the glob pattern.
+### braces
 
-### [.not](index.js#L192)
+**Expanded braces**
 
-Returns a list of strings that _DO NOT MATCH_ any of the given `patterns`.
+Braces are expanded when ``
 
-**Example**
+* range expansion: `a{1..3}b/*.js` expands to: `['a1b/*.js', 'a2b/*.js', 'a3b/*.js']`
+* nesting: `a{c,{d,e}}b/*.js` expands to: `['acb/*.js', 'adb/*.js', 'aeb/*.js']`
 
-```js
-var mm = require('micromatch');
-mm.not(list, patterns[, options]);
+**Optimized braces (not expanded)**
 
-console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
-//=> ['b.b', 'c.c']
-```
+By default, brace patterns work the same way regex logical `OR` operators. For example, `(a|b)` will achieve the same result as `{a,b}`.
 
-**Params**
+Visit [braces](https://github.com/jonschlinkert/braces) to ask questions and create an issue related to brace-expansion, or to see the full range of features and options related to brace expansion.
 
-* `list` **{Array}**: Array of strings to match.
-* `patterns` **{String|Array}**: One or more glob pattern to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Array}**: Returns an array of strings that **do not match** the given patterns.
+### regex character classes
 
-### [.any](index.js#L229)
+Given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
-Returns true if the given `string` matches any of the given glob `patterns`.
+* `[ac].js`: matches both `a` and `c`, returning `['a.js', 'c.js']`
+* `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
+* `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
+* `a/[A-Z].js`: matches and uppercase letter, returning `['a/E.md']`
 
-**Example**
+Learn about [regex character classes](http://www.regular-expressions.info/charclass.html).
 
-```js
-var mm = require('micromatch');
-mm.any(string, patterns[, options]);
+### regex groups
 
-console.log(mm.any('a.a', ['b.*', '*.a']));
-//=> true
-console.log(mm.any('a.a', 'b.*'));
-//=> false
-```
+Given `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
-**Params**
+* `(a|c).js`: would match either `a` or `c`, returning `['a.js', 'c.js']`
+* `(b|d).js`: would match either `b` or `d`, returning `['b.js', 'd.js']`
+* `(b|[A-Z]).js`: would match either `b` or an uppercase letter, returning `['b.js', 'E.js']`
 
-* `str` **{String}**: The string to test.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
+As with regex, parenthese can be nested, so patterns like `((a|b)|c)/b` will work. But it might be easier to achieve your goal using brace expansion.
 
-### [.contains](index.js#L259)
-
-Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
+### POSIX bracket expressions
 
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.contains(string, pattern[, options]);
-
-console.log(mm.contains('aa/bb/cc', '*b'));
-//=> true
-console.log(mm.contains('aa/bb/cc', '*d'));
-//=> false
-```
-
-**Params**
-
-* `str` **{String}**: The string to match.
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Boolean}**: Returns true if the patter matches any part of `str`.
-
-### [.matchKeys](index.js#L308)
-
-Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.matchKeys(object, patterns[, options]);
-
-var obj = { aa: 'a', ab: 'b', ac: 'c' };
-console.log(mm.matchKeys(obj, '*b'));
-//=> { ab: 'b' }
-```
-
-**Params**
-
-* `object` **{Object}**: The object with keys to filter.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed
-* `returns` **{Object}**: Returns an object with only keys that match the given patterns.
-
-### [.matcher](index.js#L337)
-
-Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.matcher(pattern[, options]);
-
-var isMatch = mm.matcher('*.!(*a)');
-console.log(isMatch('a.a'));
-//=> false
-console.log(isMatch('a.b'));
+mm.isMatch('a1', '[[:alpha:][:digit:]]');
 //=> true
 ```
 
-**Params**
+See [expand-brackets](https://github.com/jonschlinkert/expand-brackets) for more information about bracket expressions.
 
-* `pattern` **{String}**: Glob pattern
-* `options` **{Object}**: Any [options](#options) to change how matches are performed.
-* `returns` **{Function}**: Returns a matcher function.
-
-### [.makeRe](index.js#L394)
-
-Create a regular expression from the given glob `pattern`.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.makeRe(pattern[, options]);
-
-console.log(mm.makeRe('*.js'));
-//=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
-```
-
-**Params**
-
-* `pattern` **{String}**: A glob pattern to convert to regex.
-* `options` **{Object}**: Any [options](#options) to change how matches are performed.
-* `returns` **{RegExp}**: Returns a regex created from the given pattern.
-
-### [.braces](index.js#L437)
-
-Expand the given brace `pattern`.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-console.log(mm.braces('foo/{a,b}/bar'));
-//=> ['foo/(a|b)/bar']
-
-console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
-//=> ['foo/(a|b)/bar']
-```
-
-**Params**
-
-* `pattern` **{String}**: String with brace pattern to expand.
-* `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces](https://github.com/jonschlinkert/braces) library for all available options.
-* `returns` **{Array}**
-
-### [.create](index.js#L490)
-
-Parses the given glob `pattern` and returns an object with the compiled `output` and optional source `map`.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.create(pattern[, options]);
-
-console.log(mm.create('abc/*.js'));
-// { options: { source: 'string', sourcemap: true },
-//   state: {},
-//   compilers:
-//    { ... },
-//   output: '(\\.[\\\\\\/])?abc\\/(?!\\.)(?=.)[^\\/]*?\\.js',
-//   ast:
-//    { type: 'root',
-//      errors: [],
-//      nodes:
-//       [ ... ],
-//      dot: false,
-//      input: 'abc/*.js' },
-//   parsingErrors: [],
-//   map:
-//    { version: 3,
-//      sources: [ 'string' ],
-//      names: [],
-//      mappings: 'AAAA,GAAG,EAAC,kBAAC,EAAC,EAAE',
-//      sourcesContent: [ 'abc/*.js' ] },
-//   position: { line: 1, column: 28 },
-//   content: {},
-//   files: {},
-//   idx: 6 }
-```
-
-**Params**
-
-* `pattern` **{String}**: Glob pattern to parse and compile.
-* `options` **{Object}**: Any [options](#options) to change how parsing and compiling is performed.
-* `returns` **{Object}**: Returns an object with the parsed AST, compiled string and optional source map.
-
-### [.parse](index.js#L547)
-
-Parse the given `str` with the given `options`.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.parse(pattern[, options]);
-
-var ast = mm.parse('a/{b,c}/d');
-console.log(ast);
-// { type: 'root',
-//   errors: [],
-//   input: 'a/{b,c}/d',
-//   nodes:
-//    [ { type: 'bos', val: '' },
-//      { type: 'text', val: 'a/' },
-//      { type: 'brace',
-//        nodes:
-//         [ { type: 'brace.open', val: '{' },
-//           { type: 'text', val: 'b,c' },
-//           { type: 'brace.close', val: '}' } ] },
-//      { type: 'text', val: '/d' },
-//      { type: 'eos', val: '' } ] }
-```
-
-**Params**
-
-* `str` **{String}**
-* `options` **{Object}**
-* `returns` **{Object}**: Returns an AST
-
-### [.clearCache](index.js#L579)
-
-Clear the regex cache.
-
-**Example**
-
-```js
-mm.clearCache();
-```
-
-### [.compile](index.js#L613)
-
-Compile the given `ast` or string with the given `options`.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.compile(ast[, options]);
-
-var ast = mm.parse('a/{b,c}/d');
-console.log(mm.compile(ast));
-// { options: { source: 'string' },
-//   state: {},
-//   compilers:
-//    { eos: [Function],
-//      noop: [Function],
-//      bos: [Function],
-//      brace: [Function],
-//      'brace.open': [Function],
-//      text: [Function],
-//      'brace.close': [Function] },
-//   output: [ 'a/(b|c)/d' ],
-//   ast:
-//    { ... },
-//   parsingErrors: [] }
-```
-
-**Params**
-
-* `ast` **{Object|String}**
-* `options` **{Object}**
-* `returns` **{Object}**: Returns an object that has an `output` property with the compiled string.
+***
 
 ## Notes
 
 **Bash 4.3 parity**
 
-Whenever possible parsing behavior for patterns is based on globbing specifications in Bash 4.3. Patterns that aren't described by Bash follow wildmatch spec (used by git).
+Whenever possible parsing behavior for patterns is based on globbing specifications in Bash 4.3, which is mostly also constistent with minimatch. Patterns that aren't described in enough detail by the Bash spec follow wildmatch spec (used by git).
 
 **Escaping**
 
-Backslashes are exclusively and explicitly reserved for escaping characters in a glob pattern, even on windows. This is also the case in minimatch and node-glob, although some users are [confused about how this works](https://github.com/isaacs/node-glob/issues/212).
+Backslashes are exclusively and explicitly reserved for escaping characters in a glob pattern, even on windows. This is the convention in all globbing libs, including minimatch and node-glob, although some users are [confused about how this works](https://github.com/isaacs/node-glob/issues/212).
 
-To be clear, _a glob pattern is not a filepath_. When you pass something like `path.join('foo', '*')` to micromatch, you are creating a filepath and expecting for it to work as a glob pattern. The problem is that on windows the node.js `path` module converts `/` to `\\` and/or uses `\\` as the path separator when joining paths. But since `\\` is an escape character in globs, this means that on windows `path.join('foo', '*')` results in `foo\\*` which tells micromatch that `*` is escaped.
+To be clear, _a glob pattern is not a filepath_, it's a [regular language](https://en.wikipedia.org/wiki/Regular_language) that is converted to a JavaScript regular expression. When you pass something like `path.join('foo', '*')` to micromatch, you are creating a filepath and expecting it to still work as a glob pattern. This causes problems on windows, since the node.js `path` module converts `/` to `\\` and/or uses `\\` as the path separator when joining paths. Since `\\` is an escape character in globs, on windows `path.join('foo', '*')` would result in `foo\\*`, which tells micromatch to match `*` as a literal character.
 
-Thus you'll need to either do the joining manually or find a lib on npm that does this.
+To get around this, you can either do the joining manually or find a lib on npm that does this.
 
 ## Benchmarks
 
-Run the [benchmarks](./benchmark):
+### Running benchmarks
+
+Install dev dependencies:
 
 ```bash
-node benchmark
+npm i -d && npm benchmark
 ```
 
-As of November 24, 2016 (longer bars are better):
+### Latest results
+
+As of December 12, 2016 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
@@ -707,7 +822,7 @@ Please read the [contributing guide](.github/contributing.md) for avice on openi
 ### Contributors
 
 | **Commits** | **Contributor**<br/> | 
-| --- | --- |
+| --- | --- | --- | --- | --- |
 | 345 | [jonschlinkert](https://github.com/jonschlinkert) |
 | 12 | [es128](https://github.com/es128) |
 | 3 | [paulmillr](https://github.com/paulmillr) |
@@ -751,4 +866,4 @@ Released under the [MIT license](https://github.com/jonschlinkert/micromatch/blo
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on November 24, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.2.0, on December 12, 2016._
