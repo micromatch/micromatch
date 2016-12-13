@@ -10,7 +10,7 @@ var mm = require('./support/match');
  */
 
 // from the Bash 4.3 specification/unit tests
-var fixtures = ['a', 'b', 'c', 'd', 'abc', 'abd', 'abe', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'Beware', 'bdir/', '*', '\\*'];
+var fixtures = ['*', '\\*', 'a', 'abc', 'abd', 'abe', 'b', 'bb', 'bcd', 'bdir/', 'Beware', 'c', 'ca', 'cb', 'd', 'dd', 'de'];
 
 describe('bash options and features:', function() {
   describe('failglob:', function() {
@@ -34,6 +34,9 @@ describe('bash options and features:', function() {
 
     it('should use quoted characters as literals:', function() {
       mm(fixtures, '\\*', {nonull: true}, ['*', '\\*']);
+      mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
+      mm(fixtures, '\\*', {nonull: true, unescape: true, unixify: false}, ['*', '\\*']);
+
       mm(fixtures, '\\^', {nonull: true}, ['\\^']);
       mm(fixtures, '\\^', []);
 
@@ -43,7 +46,9 @@ describe('bash options and features:', function() {
 
       mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a\\*', '*', '\\*']);
       mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*']);
+      mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true, unixify: false}, ['a*', '*', '\\*']);
       mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*']);
+      mm(fixtures, ['a\\*', '\\*'], {unescape: true, unixify: false}, ['*', '\\*']);
       mm(fixtures, ['a\\*', '\\*'], ['*', '\\*']);
 
       mm(fixtures, ['a\\*'], {nonull: true}, ['a\\*']);
@@ -72,15 +77,17 @@ describe('bash options and features:', function() {
     it('should support character classes', function() {
       var f = fixtures.slice();
       f.push('baz', 'bzz', 'BZZ', 'beware', 'BewAre');
-      mm(f, '[a-y]*[^c]', ['abd', 'abe', 'baz', 'beware', 'bzz', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
       mm(f, 'a*[^c]', ['abd', 'abe']);
       mm(['a-b', 'aXb'], 'a[X-]b', ['a-b', 'aXb']);
+      mm(f, '[a-y]*[^c]', ['*', 'a', 'b', 'd', 'abd', 'abe', 'baz', 'beware', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
+      mm(f, '[a-y]*[^c]', {bash: true}, ['abd', 'abe', 'baz', 'beware', 'bzz', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
       mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
       mm(['a*b/ooo'], 'a\\*b/*', ['a*b/ooo']);
       mm(['a*b/ooo'], 'a\\*?/*', ['a*b/ooo']);
       mm(f, 'a[b]c', ['abc']);
       mm(f, 'a["b"]c', ['abc']);
       mm(f, 'a[\\\\b]c', ['abc']);
+      mm(f, 'a[\\b]c', []);
       mm(f, 'a[b-d]c', ['abc']);
       mm(f, 'a?c', ['abc']);
       mm(['a-b'], 'a[]-]b', ['a-b']);

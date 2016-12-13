@@ -6,6 +6,13 @@ var sep = path.sep;
 var mm = require('./support/match');
 
 describe('options', function() {
+  beforeEach(function() {
+    path.sep = '\\';
+  });
+  afterEach(function() {
+    path.sep = sep;
+  });
+
   describe('options.ignore', function() {
     var negations = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c', 'a/d', 'a/e'];
     var globs = ['a', 'a/a', 'a/a/a', 'a/a/a/a', '.a', 'a/.a', '.a/a', '.a/a/a', 'a/a/.a', '.a/a/a/a', 'a/a/a/a/a', 'a/a/b', 'a/b', 'a/b/c', 'a/c', 'a/x', 'b', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'x/y', 'z/z', 'z/z/z'];
@@ -145,16 +152,17 @@ describe('options', function() {
         'utils.js'
       ];
 
-      mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c'], {});
-      mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['/a/b/c'], {});
-      mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c'], {nodupes: true});
-      mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['/a/b/c'], {nodupes: true});
-      mm(fixtures, ['example.*', '*.js'], ['example.js', 'example.md', 'example.css', 'index.js', 'test.js', 'utils.js'], {nodupes: true});
+      mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c', '\\a\\b\\c'], {unixify: false});
+      mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['\\a\\b\\c'], {unixify: false});
+      mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c', '\\a\\b\\c'], {unixify: false, nodupes: true});
+      mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['\\a\\b\\c'], {unixify: false, nodupes: true});
+      mm(fixtures, ['example.*', '*.js'], ['example.js', 'example.md', 'example.css', 'index.js', 'test.js', 'utils.js'], {unixify: false, nodupes: true});
     });
 
     it('should not remove duplicates', function() {
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', ['/a/b/c', '/a/b/c'], {nodupes: false});
       mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['/a/b/c'], {nodupes: false});
+      mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', ['\\a\\b\\c'], {unixify: false, nodupes: false});
     });
   });
 
@@ -162,8 +170,9 @@ describe('options', function() {
     it('should remove backslashes in glob patterns:', function() {
       var fixtures = ['abc', '/a/b/c', '\\a\\b\\c'];
       mm(fixtures, '\\a\\b\\c', ['/a/b/c']);
-      mm(fixtures, '\\a\\b\\c', {unescape: true}, ['/a/b/c']);
-      mm(fixtures, '\\a\\b\\c', {unescape: true, nodupes: false}, ['/a/b/c']);
+      mm(fixtures, '\\a\\b\\c', {nodupes: false}, ['/a/b/c']);
+      mm(fixtures, '\\a\\b\\c', {nodupes: false, unescape: false}, ['/a/b/c']);
+      mm(fixtures, '\\a\\b\\c', {unescape: true, nodupes: false, unixify: false}, ['\\a\\b\\c']);
     });
   });
 
@@ -185,11 +194,46 @@ describe('options', function() {
 
   describe('options.unixify', function() {
     it('should unixify file paths', function() {
-      mm(['a\\b\\c.md'], '**/*.md', ['a/b/c.md'], {unixify: true});
+      mm(['a\\b\\c.md'], '**/*.md', ['a/b/c.md']);
+      mm(['a\\b\\c.md'], '**/*.md', ['a\\b\\c.md'], {unixify: false});
     });
 
     it('should unixify absolute paths', function() {
-      mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', ['E:/a/b/c.md'], {unixify: true});
+      mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', ['E:/a/b/c.md']);
+      mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', ['E:\\a\\b\\c.md'], {unixify: false});
+    });
+
+    it('should strip leading `./`', function() {
+      var fixtures = ['a', './a', 'b', 'a/a', './a/b', 'a/c', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a', 'x/y', './z/z'];
+      mm(fixtures, '*', ['a', 'b']);
+      mm(fixtures, '**/a/**', ['a/a', 'a/c', 'a/b', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a']);
+      mm(fixtures, '*/*', ['a/a', 'a/b', 'a/c', 'a/x', 'x/y', 'z/z']);
+      mm(fixtures, '*/*/*', ['a/a/a', 'a/a/b']);
+      mm(fixtures, '*/*/*/*', ['a/a/a/a']);
+      mm(fixtures, '*/*/*/*/*', ['a/a/a/a/a']);
+      mm(fixtures, './*', ['a', 'b']);
+      mm(fixtures, './**/a/**', ['a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a']);
+      mm(fixtures, './a/*/a', ['a/a/a']);
+      mm(fixtures, 'a/*', ['a/a', 'a/b', 'a/c', 'a/x']);
+      mm(fixtures, 'a/*/*', ['a/a/a', 'a/a/b']);
+      mm(fixtures, 'a/*/*/*', ['a/a/a/a']);
+      mm(fixtures, 'a/*/*/*/*', ['a/a/a/a/a']);
+      mm(fixtures, 'a/*/a', ['a/a/a']);
+
+      mm(fixtures, '*', {unixify: false}, ['a', './a', 'b']);
+      mm(fixtures, '**/a/**', {unixify: false}, ['a/a', 'a/c', './a/b', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a']);
+      mm(fixtures, '*/*', {unixify: false}, ['a/a', './a/b', 'a/c', './a/x', 'x/y', './z/z']);
+      mm(fixtures, '*/*/*', {unixify: false}, ['./a/a/a', 'a/a/b']);
+      mm(fixtures, '*/*/*/*', {unixify: false}, ['./a/a/a/a']);
+      mm(fixtures, '*/*/*/*/*', {unixify: false}, ['./a/a/a/a/a']);
+      mm(fixtures, './*', {unixify: false}, ['a', './a', 'b']);
+      mm(fixtures, './**/a/**', {unixify: false}, ['a/a', './a/b', 'a/c', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a']);
+      mm(fixtures, './a/*/a', {unixify: false}, ['./a/a/a']);
+      mm(fixtures, 'a/*', {unixify: false}, ['a/a', './a/b', 'a/c', './a/x']);
+      mm(fixtures, 'a/*/*', {unixify: false}, ['./a/a/a', 'a/a/b']);
+      mm(fixtures, 'a/*/*/*', {unixify: false}, ['./a/a/a/a']);
+      mm(fixtures, 'a/*/*/*/*', {unixify: false}, ['./a/a/a/a/a']);
+      mm(fixtures, 'a/*/a', {unixify: false}, ['./a/a/a']);
     });
   });
 
@@ -205,7 +249,9 @@ describe('options', function() {
         // https://github.com/isaacs/minimatch/issues/30
         mm(['foo/bar.js'], '**/foo/**', ['foo/bar.js']);
         mm(['./foo/bar.js'], './**/foo/**', ['foo/bar.js']);
+        mm(['./foo/bar.js'], './**/foo/**', ['./foo/bar.js'], {unixify: false});
         mm(['./foo/bar.js'], '**/foo/**', ['foo/bar.js']);
+        mm(['./foo/bar.js'], '**/foo/**', ['./foo/bar.js'], {unixify: false});
       });
 
       it('should match dotfiles when a leading dot is defined in the path:', function() {
@@ -249,7 +295,7 @@ describe('options', function() {
         mm(['.a', '.b', 'c', 'c.md'], '!.*', ['c', 'c.md']);
         mm(['.a', '.b', 'c', 'c.md'], '!(.*)', ['c', 'c.md']);
         mm(['.a', '.b', 'c', 'c.md'], '!(.*)*', ['c', 'c.md']);
-        mm(['.a', '.b', 'c', 'c.md'], '!*.*', ['c']);
+        mm(['.a', '.b', 'c', 'c.md'], '!*.*', ['.a', '.b', 'c']);
       });
 
       it('should match dotfiles when `options.dot` is true:', function() {
@@ -277,10 +323,12 @@ describe('options', function() {
   describe('windows', function() {
     it('should unixify file paths', function() {
       mm(['a\\b\\c.md'], '**/*.md', ['a/b/c.md']);
+      mm(['a\\b\\c.md'], '**/*.md', {unixify: false}, ['a\\b\\c.md']);
     });
 
     it('should unixify absolute paths', function() {
       mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', ['E:/a/b/c.md']);
+      mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', ['E:\\a\\b\\c.md'], {unixify: false});
     });
   });
 
@@ -288,16 +336,25 @@ describe('options', function() {
     it('should normalize leading `./`', function() {
       var fixtures = ['a.md', 'a/b/c.md', 'a/b/d.md', './a/b/c.md', './b/c.md', '.\\a\\b\\c.md'];
       mm(fixtures, '**/*.md', ['a.md', 'a/b/c.md', 'a/b/d.md', 'b/c.md']);
+      mm(fixtures, '**/*.md', ['a.md', 'a/b/c.md', './a/b/c.md', '.\\a\\b\\c.md', 'a/b/d.md', './b/c.md'], {unixify: false});
     });
 
     it('should match leading `./`', function() {
       var fixtures = ['a.md', 'a/b.md', './a.md', './a/b.md', 'a/b/c.md', './a/b/c.md', '.\\a\\b\\c.md', 'a\\b\\c.md'];
       mm(fixtures, '**/*.md', ['a.md', 'a/b.md', 'a/b/c.md']);
+      mm(fixtures, '**/*.md', ['a.md', './a.md', 'a/b.md', './a/b.md', 'a/b/c.md', 'a\\b\\c.md', './a/b/c.md', '.\\a\\b\\c.md'], {unixify: false});
       mm(fixtures, '*.md', ['a.md']);
+      mm(fixtures, '*.md', ['a.md', './a.md'], {unixify: false}, {unixify: false});
+      mm(fixtures, '*.md', ['a.md']);
+      mm(fixtures, '*/*.md', ['a/b.md', './a/b.md'], {unixify: false});
       mm(fixtures, '*/*.md', ['a/b.md']);
+      mm(fixtures, './**/*.md', ['a.md', 'a/b.md', 'a/b/c.md', 'a\\b\\c.md', './a.md', './a/b.md', './a/b/c.md', '.\\a\\b\\c.md'], {unixify: false});
       mm(fixtures, './**/*.md', ['a.md', 'a/b.md', 'a/b/c.md']);
+      mm(fixtures, './*.md', ['a.md', './a.md'], {unixify: false});
       mm(fixtures, './*.md', ['a.md']);
+      mm(fixtures, './*/*.md', ['a/b.md', './a/b.md'], {unixify: false});
       mm(fixtures, './*/*.md', ['a/b.md']);
+      mm(['./a'], 'a', ['./a'], {unixify: false});
       mm(['./a'], 'a', ['a']);
     });
   });

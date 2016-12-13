@@ -1,21 +1,20 @@
 'use strict';
 
+var path = require('path');
 var assert = require('assert');
 var mm = require('./support/match');
+var sep = path.sep;
 
 /**
  * These tests were converted directly from bash 4.3 and 4.4 unit tests.
  */
 
 describe('extglobs', function() {
-  it('should throw on imbalanced sets when `options.strictErrors` is true', function() {
-    assert.throws(function() {
-      mm.isMatch('a((b', 'a(b', {strictErrors: true});
-    }, 'row:1 col:2 missing opening parens: "a(b"');
-
-    assert.throws(function() {
-      mm.isMatch('a((b', 'a(*b', {strictErrors: true});
-    }, 'row:1 col:2 missing opening parens: "a(*b"');
+  beforeEach(function() {
+    path.sep = '\\';
+  });
+  afterEach(function() {
+    path.sep = sep;
   });
 
   it('should match extglobs ending with statechar', function() {
@@ -51,6 +50,8 @@ describe('extglobs', function() {
     var arr = ['a', 'b', 'aa', 'ab', 'bb', 'ac', 'aaa', 'aab', 'abb', 'ccc'];
     mm(arr, '!(a)*', ['b', 'bb', 'ccc']);
     mm(arr, 'a!(b)*', ['a', 'aa', 'aaa', 'aab', 'ac']);
+    mm(['foo'], '!(foo)', []);
+    mm(['foo.js'], '!(foo).js', []);
   });
 
   it('should support qmark matching', function() {
@@ -116,7 +117,7 @@ describe('extglobs', function() {
     mm(['abd', 'acd', 'ac', 'ab'], 'a!(@(b|B))', ['acd', 'abd', 'ac']);
     mm(['abd', 'acd'], 'a!(@(b|B))d', ['acd']);
     mm(['abd', 'acd'], 'a[b*(foo|bar)]d', ['abd']);
-    mm(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz', 'abcz']);
+    mm(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz']);
   });
 
   it('simple kleene star tests', function() {
@@ -141,17 +142,20 @@ describe('extglobs', function() {
     mm(['def', 'ef'], '()ef', ['ef']);
   });
 
-  it('should match escaped parens', function() {
+  it('should match parens', function() {
     var arr = ['a(b', 'a\\(b', 'a((b', 'a((((b', 'ab'];
     mm(arr, 'a(b', ['a(b']);
-    mm(arr, 'a\\(b', ['a(b', 'a\\(b']);
     mm(arr, 'a(*b', ['a(b', 'a((b', 'a((((b']);
+    mm(['a(b', 'a((b', 'a((((b', 'ab'], 'a\\(b', ['a(b']);
+    mm(['a(b', 'a((b', 'a((((b', 'ab'], 'a(b', ['a(b']);
   });
 
   it('should match escaped backslashes', function() {
-    mm(['a(b', 'a\\(b', 'a((b', 'a((((b', 'ab'], 'a\\\\(b', ['a\\(b']);
-    mm(['a\\b', 'a/b', 'ab'], 'a/b', ['a/b']);
-    mm(['a\\z', 'a/z', 'az'], 'a\\z', ['a/z']);
+    mm(['a\\b', 'a/b', 'ab'], 'a\\b', ['a\\b'], {unixify: false});
+    mm(['a\\\\z', 'a\\z', 'a\\z', 'az'], 'a\\\\z', ['a\\\\z'], {unixify: false});
+
+    mm(['a\\b', 'a/b', 'ab'], 'a\\b', ['a/b']);
+    mm(['a\\\\z', 'a\\z', 'a\\z', 'az'], 'a\\\\z', ['a/z']);
   });
 });
 

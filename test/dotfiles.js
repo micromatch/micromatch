@@ -41,6 +41,7 @@ describe('dotfiles', function() {
       mm('.dot', '.d?t', ['.dot']);
 
       assert(!mm.isMatch('.bar.baz', '.*.*/'));
+      assert(!mm.isMatch('/.dot', '*/[.]dot'));
       assert(mm.isMatch('.bar.baz/', '.*.*'));
       assert(mm.isMatch('.bar.baz', '.*.*'));
       assert(mm.isMatch('.bar.baz', '.*.baz'));
@@ -52,7 +53,6 @@ describe('dotfiles', function() {
       assert(mm.isMatch('/.dot', '**/.[d]ot'));
       assert(mm.isMatch('/.dot', '**/.dot*'));
       assert(mm.isMatch('/.dot', '**/[.]dot'));
-      assert(mm.isMatch('/.dot', '*/[.]dot'));
       assert(mm.isMatch('/.dot', '/[.]dot'));
       assert(mm.isMatch('a/.dot', '**/.[d]ot'));
       assert(mm.isMatch('a/.dot', '*/.[d]ot'));
@@ -115,6 +115,12 @@ describe('dotfiles', function() {
       assert(mm.isMatch('a/b/.dot', '[.]dot', {dot: true, matchBase: true}));
       assert(mm.isMatch('a/b/.dot', '[.]dot', {dot: false, matchBase: true}));
       assert(mm.isMatch('a/b/.dot', '?dot', {dot: true, matchBase: true}));
+    });
+
+    it('should work when the path has leading `./`', function() {
+      assert(!mm.isMatch('./b/.c', '**'));
+      assert(mm.isMatch('./b/.c', '**', {dot: true}));
+      assert(mm.isMatch('./b/.c', '**', {dot: true, matchBase: true}));
     });
 
     it('should not match dotfiles when `options.dot` is false', function() {

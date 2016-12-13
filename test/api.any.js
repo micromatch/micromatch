@@ -7,12 +7,16 @@ var mm = require('..');
 describe('.any()', function() {
   describe('empty patterns', function() {
     it('should correctly handle empty patterns', function() {
-      assert(!mm.any('ab', ''));
-      assert(!mm.any('a', ''));
+      assert(!mm.any('', ''));
+      assert(!mm.any('', ['']));
       assert(!mm.any('.', ''));
-      assert(!mm.any('ab', ['']));
-      assert(!mm.any('a', ['']));
       assert(!mm.any('.', ['']));
+      assert(!mm.any('./', ''));
+      assert(!mm.any('./', ['']));
+      assert(!mm.any('a', ''));
+      assert(!mm.any('a', ['']));
+      assert(!mm.any('ab', ''));
+      assert(!mm.any('ab', ['']));
     });
   });
 
@@ -20,56 +24,65 @@ describe('.any()', function() {
     it('should match literal paths', function() {
       assert(!mm.any('aaa', 'aa'));
       assert(mm.any('aaa', 'aaa'));
+      assert(mm.any('aaa', ['aa', 'aaa']));
       assert(mm.any('aaa/bbb', 'aaa/bbb'));
       assert(mm.any('aaa/bbb', 'aaa[/]bbb'));
+      assert(mm.any('aaa/bbb', ['aaa\\bbb', 'aaa/bbb']));
+      assert(mm.any('aaa\\bbb', ['aaa\\bbb', 'aaa/bbb']));
     });
   });
 
   describe('stars (single pattern)', function() {
-    it('should return true when full file paths are matched:', function() {
-      assert(mm.any('a/b/c/xyz.md', 'a/b/c/*.md'));
-      assert(mm.any('a/bb/c/xyz.md', 'a/*/c/*.md'));
-      assert(mm.any('a/bbbb/c/xyz.md', 'a/*/c/*.md'));
-      assert(mm.any('a/bb.bb/c/xyz.md', 'a/*/c/*.md'));
-      assert(mm.any('a/bb.bb/aa/bb/aa/c/xyz.md', 'a/**/c/*.md'));
-      assert(mm.any('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md'));
+    it('should return true when one of the given patterns matches the string', function() {
+      assert(!mm.any('/ab', '*/*'));
       assert(!mm.any('a/.b', 'a/'));
       assert(!mm.any('a/b/c/d/e/z/c.md', 'b/c/d/e'));
       assert(!mm.any('a/b/z/.a', 'b/z'));
-      assert(mm.any('a/.b', 'a/.*'));
-      assert(mm.any('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md'));
-      assert(mm.any('a/b/c/d/e/z/c.md', 'a/**/z/*.md'));
-      assert(mm.any('a/b/z/.a', 'a/*/z/.a'));
       assert(mm.any('.', '.'));
-      assert(mm.any('/ab', '*/*'));
       assert(mm.any('/ab', '/*'));
       assert(mm.any('/ab', '/??'));
       assert(mm.any('/ab', '/?b'));
       assert(mm.any('/cd', '/*'));
       assert(mm.any('a', 'a'));
-      assert(mm.any('ab', './*'));
-      assert(mm.any('ab/', './*/'));
+      assert(mm.any('a/.b', 'a/.*'));
       assert(mm.any('a/b', '?/?'));
+      assert(mm.any('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md'));
+      assert(mm.any('a/b/c/d/e/z/c.md', 'a/**/z/*.md'));
+      assert(mm.any('a/b/c/xyz.md', 'a/b/c/*.md'));
+      assert(mm.any('a/b/c/xyz.md', ['foo', 'a/b/c/*.md']));
+      assert(mm.any('a/b/z/.a', 'a/*/z/.a'));
+      assert(mm.any('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md'));
+      assert(mm.any('a/bb.bb/aa/bb/aa/c/xyz.md', 'a/**/c/*.md'));
+      assert(mm.any('a/bb.bb/c/xyz.md', 'a/*/c/*.md'));
+      assert(mm.any('a/bb/c/xyz.md', 'a/*/c/*.md'));
+      assert(mm.any('a/bbbb/c/xyz.md', 'a/*/c/*.md'));
+      assert(mm.any('aaa', ['foo', '*']));
       assert(mm.any('ab', '*'));
+      assert(mm.any('ab', './*'));
       assert(mm.any('ab', 'ab'));
+      assert(mm.any('ab/', './*/'));
     });
 
     it('should return false when the path does not match the pattern', function() {
       assert(!mm.any('/ab', '*/'));
+      assert(!mm.any('/ab', '*/*'));
       assert(!mm.any('/ab', '*/a'));
       assert(!mm.any('/ab', '/'));
       assert(!mm.any('/ab', '/?'));
       assert(!mm.any('/ab', '/a'));
       assert(!mm.any('/ab', '?/?'));
       assert(!mm.any('/ab', 'a/*'));
+      assert(!mm.any('a/.b', 'a/'));
       assert(!mm.any('a/b/c', 'a/*'));
       assert(!mm.any('a/b/c', 'a/b'));
+      assert(!mm.any('a/b/c/d/e/z/c.md', 'b/c/d/e'));
+      assert(!mm.any('a/b/z/.a', 'b/z'));
       assert(!mm.any('ab', '*/*'));
-      assert(!mm.any('ab/', '*/*'));
       assert(!mm.any('ab', '/a'));
       assert(!mm.any('ab', 'a'));
       assert(!mm.any('ab', 'b'));
       assert(!mm.any('ab', 'c'));
+      assert(!mm.any('ab/', '*/*'));
       assert(!mm.any('abcd', 'ab'));
       assert(!mm.any('abcd', 'bc'));
       assert(!mm.any('abcd', 'c'));
@@ -102,13 +115,13 @@ describe('.any()', function() {
     });
 
     it('should return false when full file paths are not matched:', function() {
-      assert(!mm.any('a/b/z/.a', 'b/a'));
       assert(!mm.any('a/.b', 'a/**/z/*.md'));
+      assert(!mm.any('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md'));
+      assert(!mm.any('a/b/c/xyz.md', 'a/b/**/c{d,e}/**/xyz.md'));
+      assert(!mm.any('a/b/d/xyz.md', 'a/b/**/c{d,e}/**/xyz.md'));
       assert(!mm.any('a/b/z/.a', 'a/**/z/*.a'));
       assert(!mm.any('a/b/z/.a', 'a/*/z/*.a'));
-      assert(!mm.any('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md'));
-      assert(!mm.any('a/b/d/xyz.md', 'a/b/**/c{d,e}/**/xyz.md'));
-      assert(!mm.any('a/b/c/xyz.md', 'a/b/**/c{d,e}/**/xyz.md'));
+      assert(!mm.any('a/b/z/.a', 'b/a'));
     });
   });
 
@@ -116,11 +129,11 @@ describe('.any()', function() {
     it('should return true when any of the patterns match', function() {
       assert(mm.any('.', ['.', 'foo']));
       assert(mm.any('a', ['a', 'foo']));
-      assert(mm.any('ab', ['ab', 'foo']));
-      assert(mm.any('ab', ['./*', 'foo', 'bar']));
       assert(mm.any('ab', ['*', 'foo', 'bar']));
       assert(mm.any('ab', ['*b', 'foo', 'bar']));
+      assert(mm.any('ab', ['./*', 'foo', 'bar']));
       assert(mm.any('ab', ['a*', 'foo', 'bar']));
+      assert(mm.any('ab', ['ab', 'foo']));
     });
 
     it('should return false when none of the patterns match', function() {

@@ -22,7 +22,7 @@ describe('brackets', function() {
       assert.equal(create('[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:xdigit:]]'), '[a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9\\x21-\\x7Ea-z\\x20-\\x7E \\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~ \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[^[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:lower:][:space:][:upper:][:xdigit:]]'), '[^a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9a-z \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[a-c[:digit:]x-z]'), '[a-c0-9x-z]');
-      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?\\/?', []);
+      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?(\\/|$)', []);
     });
   });
 
@@ -232,9 +232,16 @@ describe('brackets', function() {
       assert(!mm.isMatch('?*+', '[[:punct:]]'));
     });
 
-    it('should only match zero or more characters', function() {
+    it('should only match one or more characters', function() {
       assert(mm.isMatch('?*+', '[[:punct:]]*'));
-      assert(mm.isMatch('', '[[:punct:]]*'));
+      assert(mm.isMatch('*', '[[:punct:]]*'));
+      assert(mm.isMatch('+', '[[:punct:]]*'));
+      assert(mm.isMatch('?', '[[:punct:]]*'));
+      assert(mm.isMatch('?abc', '[[:punct:]]*'));
+      assert(mm.isMatch('*abc', '[[:punct:]]*'));
+      assert(mm.isMatch('+abc', '[[:punct:]]*'));
+      assert(!mm.isMatch('abc+abc', '[[:punct:]]*'));
+      assert(!mm.isMatch('', '[[:punct:]]*'));
     });
 
     it('invalid character class expressions are just characters to be matched', function() {

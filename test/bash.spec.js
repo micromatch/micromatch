@@ -4,29 +4,32 @@ var path = require('path');
 var assert = require('assert');
 var forOwn = require('for-own');
 var parse = require('./support/parse');
-var nm = require('./support/matcher');
-var fixtures = parse('*.txt', {cwd: path.join(__dirname, 'fixtures')});
+var mm = require('./support/matcher');
 
-forOwn(fixtures, function(lines, filename) {
-  describe(filename + ':', function() {
-    lines.forEach(function(line) {
-      if (typeof line === 'string') {
-        console.log(line);
-        return;
-      }
+describe('bash.spec', function() {
+  var fixtures = parse('*.txt', {cwd: path.join(__dirname, 'fixtures')});
 
-      var fixture = line[0];
-      var pattern = line[1];
-      var expected = line[2];
+  forOwn(fixtures, function(lines, filename) {
+    describe(filename + ':', function() {
+      lines.forEach(function(line) {
+        if (typeof line === 'string') {
+          console.log(line);
+          return;
+        }
 
-      var title = '"' + fixture
-        + '" should' + (expected ? '' : ' not')
-        + ' match "' + pattern + '"';
+        var fixture = line[0];
+        var pattern = line[1];
+        var expected = line[2];
 
-      it(title, function() {
-        var msg = fixture + (expected ? ' === ' : ' !== ') + pattern;
-        // assert.equal(nm.isMatch(fixture, pattern), nm.mm.isMatch(fixture, pattern), msg);
-        assert.equal(nm.isMatch(fixture, pattern), expected, msg);
+        var title = '"' + fixture
+          + '" should' + (expected ? '' : ' not')
+          + ' match "' + pattern + '"';
+
+        it(title, function() {
+          var msg = fixture + (expected ? ' === ' : ' !== ') + pattern;
+          // assert.equal(mm.isMatch(fixture, pattern), mm.mm.isMatch(fixture, pattern), msg);
+          assert.equal(mm.isMatch(fixture, pattern), expected, msg);
+        });
       });
     });
   });

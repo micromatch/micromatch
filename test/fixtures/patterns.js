@@ -8,6 +8,7 @@
 
 var fixtures = ['a', 'b', 'c', 'd', 'abc', 'abd', 'abe', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/', 'bdir/cfile'];
 
+// pattern | expected | options | fixtures
 module.exports = [
   'http://www.bashcookbook.com/bashinfo/source/bash-1.14.7/tests/glob-test',
   ['a*', ['a', 'abc', 'abd', 'abe']],
@@ -40,7 +41,7 @@ module.exports = [
 
   'character classes',
   ['[a-c]b*', ['abc', 'abd', 'abe', 'bb', 'cb']],
-  ['[a-y]*[^c]', ['abd', 'abe', 'bb', 'bcd', 'bdir/', 'ca', 'cb', 'dd', 'de']],
+  ['[a-y]*[^c]', ['abd', 'abe', 'bb', 'bcd', 'bdir/', 'ca', 'cb', 'dd', 'de'], {bash: true}],
   ['a*[^c]', ['abd', 'abe']],
   function() {
     fixtures.push('a-b', 'aXb');
@@ -133,7 +134,7 @@ module.exports = [
 
   'braces: onestar/twostar',
   ['{/*,*}', [], {null: true}, ['/asdf/asdf/asdf']],
-  // ['{/?,*}', ['/a', 'bb'], {null: true}, ['/a', '/b/b', '/a/b/c', 'bb']],
+  ['{/?,*}', ['/a', 'bb'], {null: true}, ['/a', '/b/b', '/a/b/c', 'bb']],
 
   'dots should not match unless requested',
   ['**', ['a/b'], {}, ['a/b', 'a/.d', '.a/.d']],
@@ -158,50 +159,57 @@ module.exports = [
     [ '.a/.d', 'a/.d', 'a/b']
   ],
 
-  // // 'paren sets cannot contain slashes',
-  // // ['*(a/b)', ['*(a/b)'], {nonull: true}, ['a/b']],
+  // '~~paren sets cannot contain slashes~~',
+  // 'paren sets _can_ contain slashes',
+  ['*(a/b)', ['a/b'], {}, ['a/b']],
 
-  // // brace sets trump all else.
-  // //
-  // // invalid glob pattern.  fails on bash4 and bsdglob.
-  // // however, in this implementation, it's easier just
-  // // to do the intuitive thing, and let brace-expansion
-  // // actually come before parsing any extglob patterns,
-  // // like the documentation seems to say.
-  // //
-  // // XXX: if anyone complains about this, either fix it
-  // // or tell them to grow up and stop complaining.
-  // //
-  // // bash/bsdglob says this:
-  // // , ["*(a|{b),c)}", ["*(a|{b),c)}"], {}, ["a", "ab", "ac", "ad"]]
-  // // but we do this instead:
-  // // ['*(a|{b),c)}', ['a', 'ab', 'ac'], {}, ['a', 'ab', 'ac', 'ad']],
+  // brace sets trump all else.
+  //
+  // invalid glob pattern.  fails on bash4 and bsdglob.
+  // however, in this implementation, it's easier just
+  // to do the intuitive thing, and let brace-expansion
+  // actually come before parsing any extglob patterns,
+  // like the documentation seems to say.
+  //
+  // XXX: if anyone complains about this, either fix it
+  // or tell them to grow up and stop complaining.
+  //
+  // bash/bsdglob says this:
+  // ["*(a|{b),c)}", ["*(a|{b),c)}"], {}, ["a", "ab", "ac", "ad"]],
+  // but we do this instead:
+  ['*(a|{b),c)}', ['a', 'ab', 'ac'], {expand: true}, ['a', 'ab', 'ac', 'ad']],
 
   // test partial parsing in the presence of comment/negation chars
   ['[!a*', ['[!ab'], {}, ['[!ab', '[ab']],
 
-//   // crazy nested {,,} and *(||) tests.
-//   function() {
-//     fixtures = [
-//       'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
-//       'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
-//       'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'
-//     ];
-//   },
-//   ['*(a|{b,c})', ['a', 'b', 'c', 'ab', 'ac']],
-//   ['{a,*(b|c,d)}', ['a', '(b|c', '*(b|c', 'd)']],
-//   // a
-//   // *(b|c)
-//   // *(b|d)
-//   ['{a,*(b|{c,d})}', ['a', 'b', 'bc', 'cb', 'c', 'd']],
-//   ['*(a|{b|c,c})', ['a', 'b', 'c', 'ab', 'ac', 'bc', 'cb']],
+  // like: {a,b|c\\,d\\\|e} except it's unclosed, so it has to be escaped.
+  // [
+  //   '+(a|*\\|c\\\\|d\\\\\\|e\\\\\\\\|f\\\\\\\\\\|g',
+  //   ['+(a|b\\|c\\\\|d\\\\|e\\\\\\\\|f\\\\\\\\|g'],
+  //   {},
+  //   ['+(a|b\\|c\\\\|d\\\\|e\\\\\\\\|f\\\\\\\\|g', 'a', 'b\\c']
+  // ],
 
-//   // test various flag settings.
-//   [
-//     '*(a|{b|c,c})',
-//     ['x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'],
-//     { noext: true }
-//   ],
+  // crazy nested {,,} and *(||) tests.
+  function () {
+    fixtures = [
+      'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
+      'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
+      'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'
+    ]
+  },
+  ['*(a|{b,c})', ['a', 'b', 'c', 'ab', 'ac'], {expand: true}],
+  // ['{a,*(b|c,d)}', ['a', '(b|c', '*(b|c', 'd)'], {expand: true}], //<= minimatch (wrong)
+  ['{a,*(b|c,d)}', ['a', 'b', 'bc,d', 'c,db', 'c,d'], {expand: true}],
+
+  // a
+  // *(b|c)
+  // *(b|d)
+  ['{a,*(b|{c,d})}', ['a', 'b', 'bc', 'cb', 'c', 'd'], {expand: true}],
+  ['*(a|{b|c,c})', ['a', 'b', 'c', 'ab', 'ac', 'bc', 'cb']],
+  ['*(a|{b|c,c})', ['a', 'b', 'c', 'ab', 'ac', 'bc', 'cb'], {expand: true}],
+
+  // test various flag settings.
 
   ['a?b', ['acb', 'acb/'], {}, ['x/y/acb', 'acb', 'acb/', 'acb/d/e']],
   ['a?b', ['x/y/acb', 'acb/', 'acb'], {matchBase: true}, ['x/y/acb', 'acb', 'acb/', 'acb/d/e']],

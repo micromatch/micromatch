@@ -1,5 +1,6 @@
 'use strict';
 
+var mi = require('minimatch');
 var mm = require('./support/match');
 
 describe('negation', function() {

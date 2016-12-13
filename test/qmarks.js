@@ -5,14 +5,20 @@ var mm = require('./support/match');
 
 describe('qmarks and stars', function() {
   it('should correctly handle question marks in globs', function() {
-    mm(['?'], '?', ['?']);
+    mm(['?', '??', '???'], '?', ['?']);
+    mm(['?', '??', '???'], '??', ['??']);
+    mm(['?', '??', '???'], '???', ['???']);
+    mm(['/a/', '/a/b/', '/a/b/c/', '/a/b/c/d/'], '??', []);
+    mm(['/a/', '/a/b/', '/a/b/c/', '/a/b/c/d/'], '??', {dot: true}, []);
+    mm(['x/y/acb', 'acb', 'acb/', 'acb/d/e'], 'a?b', ['acb', 'acb/']);
     mm(['aaa', 'aac', 'abc'], 'a?c', ['abc', 'aac']);
     mm(['aaa', 'aac', 'abc'], 'a*?c', ['aac', 'abc']);
     mm(['a', 'aa', 'ab', 'ab?', 'ac', 'ac?', 'abcd', 'abbb'], 'ab?', ['ab?']);
     mm(['abc', 'abb', 'acc'], 'a**?c', ['abc', 'acc']);
     mm(['abc'], 'a*****?c', ['abc']);
-    mm(['abc', 'zzz', 'bbb'], '?*****??', ['abc', 'zzz', 'bbb']);
-    mm(['abc', 'zzz', 'bbb'], '*****??', ['abc', 'zzz', 'bbb']);
+    mm(['a', 'aa', 'abc', 'zzz', 'bbb', 'aaaa'], '*****?', ['a', 'aa', 'abc', 'zzz', 'bbb', 'aaaa']);
+    mm(['a', 'aa', 'abc', 'zzz', 'bbb', 'aaaa'], '*****??', ['aa', 'abc', 'zzz', 'bbb', 'aaaa']);
+    mm(['a', 'aa', 'abc', 'zzz', 'bbb', 'aaaa'], '?*****??', ['abc', 'zzz', 'bbb', 'aaaa']);
     mm(['abc', 'abb', 'zzz'], '?*****?c', ['abc']);
     mm(['abc', 'bbb', 'zzz'], '?***?****c', ['abc']);
     mm(['abc', 'bbb', 'zzz'], '?***?****?', ['abc', 'bbb', 'zzz']);
@@ -63,9 +69,18 @@ describe('qmarks and stars', function() {
     assert(!mm.isMatch('aaa\\\\bbb', 'aaa?bbb'));
   });
 
-  it('question marks should not match dots', function() {
-    assert(!mm.isMatch('aaa.bbb', 'aaa?bbb'));
+  it('question marks should match arbitrary dots', function() {
+    assert(mm.isMatch('aaa.bbb', 'aaa?bbb'));
+  });
+
+  it('question marks should not match leading dots', function() {
+    assert(!mm.isMatch('.aaa/bbb', '?aaa/bbb'));
     assert(!mm.isMatch('aaa/.bbb', 'aaa/?bbb'));
+  });
+
+  it('question marks should match leading dots when options.dot is true', function() {
+    assert(mm.isMatch('aaa/.bbb', 'aaa/?bbb', {dot: true}));
+    assert(mm.isMatch('.aaa/bbb', '?aaa/bbb', {dot: true}));
   });
 
   it('question marks should match characters preceding a dot', function() {

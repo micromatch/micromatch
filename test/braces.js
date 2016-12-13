@@ -7,12 +7,31 @@
 
 'use strict';
 
+var assert = require('assert');
 var extend = require('extend-shallow');
 var mm = require('..');
 
 function optimize(pattern, options) {
   return mm.braces(pattern, extend({optimize: true}, options));
 }
+
+describe('expanded', function() {
+  it('should handle extglobs in braces', function() {
+    var fixtures = [
+      'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
+      'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
+      'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'
+    ];
+
+    assert.deepEqual(mm(fixtures, ['a', '*(b|c,d)'], {expand: true}), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
+    assert.deepEqual(mm(fixtures, '{a,*(b|c,d)}', {expand: true}), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
+
+    var expected = ['a', 'b', 'c', 'ab', 'ac', 'bc', 'cb'];
+    assert.deepEqual(mm(fixtures, '*(a|b|c)'), expected);
+    assert.deepEqual(mm(fixtures, '*(a|{b|c,c})'), expected);
+    assert.deepEqual(mm(fixtures, '*(a|{b|c,c})', {expand: true}), expected);
+  });
+});
 
 describe('optimized', function() {
   describe('sets', function() {

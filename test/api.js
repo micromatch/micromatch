@@ -73,6 +73,14 @@ describe('micromatch', function() {
       mm(fixtures, ['a*.txt'], ['a.txt']);
       mm(fixtures, ['*.txt'], ['a.txt']);
     });
+
+    it('should match literal brackets', function() {
+      mm(['a [b]'], 'a \\[b\\]', ['a [b]']);
+      mm(['a [b] c'], 'a [b] c', ['a [b] c']);
+      mm(['a [b]'], 'a \\[b\\]*', ['a [b]']);
+      mm(['a [bc]'], 'a \\[bc\\]*', ['a [bc]']);
+      mm(['a [b]', 'a [b].js'], 'a \\[b\\].*', ['a [b].js']);
+    });
   });
 
   describe('windows paths', function() {
@@ -87,24 +95,32 @@ describe('micromatch', function() {
       var fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       mm(fixtures, '(a/b)', ['a/b']);
       mm(fixtures, 'a/b', ['a/b']);
+      mm(fixtures, '(a/b)', ['a\\b'], {unixify: false});
+      mm(fixtures, 'a/b', ['a\\b'], {unixify: false});
     });
 
     it('should return an array of matches for an array of literal strings', function() {
       var fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       mm(fixtures, ['(a/b)', 'a/c'], ['a/b', 'a/c']);
       mm(fixtures, ['a/b', 'b/b'], ['a/b', 'b/b']);
+      mm(fixtures, ['(a/b)', 'a/c'], ['a\\b', 'a\\c'], {unixify: false});
+      mm(fixtures, ['a/b', 'b/b'], ['a\\b', 'b\\b'], {unixify: false});
     });
 
     it('should support regex logical or', function() {
       var fixtures = ['a\\a', 'a\\b', 'a\\c'];
       mm(fixtures, ['a/(a|c)'], ['a/a', 'a/c']);
       mm(fixtures, ['a/(a|b|c)', 'a/b'], ['a/a', 'a/b', 'a/c']);
+      mm(fixtures, ['a/(a|c)'], ['a\\a', 'a\\c'], {unixify: false});
+      mm(fixtures, ['a/(a|b|c)', 'a/b'], ['a\\a', 'a\\b', 'a\\c'], {unixify: false});
     });
 
     it('should support regex ranges', function() {
       var fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x\\y', 'a\\x'];
       mm(fixtures, 'a/[b-c]', ['a/b', 'a/c']);
       mm(fixtures, 'a/[a-z]', ['a/a', 'a/b', 'a/c', 'a/x']);
+      mm(fixtures, 'a/[b-c]', ['a\\b', 'a\\c'], {unixify: false});
+      mm(fixtures, 'a/[a-z]', ['a\\a', 'a\\b', 'a\\c', 'a\\x'], {unixify: false});
     });
 
     it('should support single globs (*)', function() {
@@ -120,6 +136,17 @@ describe('micromatch', function() {
       mm(fixtures, ['a/*/*/*/*'], ['a/a/a/a/a']);
       mm(fixtures, ['a/*/a'], ['a/a/a']);
       mm(fixtures, ['a/*/b'], ['a/a/b']);
+
+      mm(fixtures, ['*/*'], ['a\\a', 'a\\b', 'a\\c', 'a\\x', 'x\\y', 'z\\z'], {unixify: false});
+      mm(fixtures, ['*/*/*'], ['a\\a\\a', 'a\\a\\b'], {unixify: false});
+      mm(fixtures, ['*/*/*/*'], ['a\\a\\a\\a'], {unixify: false});
+      mm(fixtures, ['*/*/*/*/*'], ['a\\a\\a\\a\\a'], {unixify: false});
+      mm(fixtures, ['a/*'], ['a\\a', 'a\\b', 'a\\c', 'a\\x'], {unixify: false});
+      mm(fixtures, ['a/*/*'], ['a\\a\\a', 'a\\a\\b'], {unixify: false});
+      mm(fixtures, ['a/*/*/*'], ['a\\a\\a\\a'], {unixify: false});
+      mm(fixtures, ['a/*/*/*/*'], ['a\\a\\a\\a\\a'], {unixify: false});
+      mm(fixtures, ['a/*/a'], ['a\\a\\a'], {unixify: false});
+      mm(fixtures, ['a/*/b'], ['a\\a\\b'], {unixify: false});
     });
 
     it('should support globstars (**)', function() {
@@ -128,10 +155,17 @@ describe('micromatch', function() {
       mm(fixtures, ['a/**'], expected);
       mm(fixtures, ['a/**/*'], expected);
       mm(fixtures, ['a/**/**/*'], expected);
+
+      mm(fixtures, ['a/**'], fixtures, {unixify: false});
+      mm(fixtures, ['a/**/*'], fixtures, {unixify: false});
+      mm(fixtures, ['a/**/**/*'], fixtures, {unixify: false});
     });
 
     it('should work with file extensions', function() {
       var fixtures = ['a.txt', 'a\\b.txt', 'a\\x\\y.txt', 'a\\x\\y\\z'];
+      mm(fixtures, ['a/**/*.txt'], ['a\\b.txt', 'a\\x\\y.txt'], {unixify: false});
+      mm(fixtures, ['a/*/*.txt'], ['a\\x\\y.txt'], {unixify: false});
+      mm(fixtures, ['a/*.txt'], ['a\\b.txt'], {unixify: false});
       mm(fixtures, ['a/**/*.txt'], ['a/b.txt', 'a/x/y.txt']);
       mm(fixtures, ['a/*/*.txt'], ['a/x/y.txt']);
       mm(fixtures, ['a/*.txt'], ['a/b.txt']);
@@ -148,6 +182,14 @@ describe('micromatch', function() {
       mm(fixtures, ['!a/b', '!a/c'], ['a', 'a/a', 'b/a', 'b/b', 'b/c']);
       mm(fixtures, ['!a/(b)'], ['a', 'a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
       mm(fixtures, ['!(a/b)'], ['a', 'a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
+
+      mm(fixtures, ['!a/b'], ['a', 'a\\a', 'a\\c', 'b\\a', 'b\\b', 'b\\c'], {unixify: false});
+      mm(fixtures, ['*/*', '!a/b', '!*/c'], ['a\\a', 'b\\a', 'b\\b'], {unixify: false});
+      mm(fixtures, ['!*/c'], ['a', 'a\\a', 'a\\b', 'b\\a', 'b\\b'], {unixify: false});
+      mm(fixtures, ['!a/b', '!*/c'], ['a', 'a\\a', 'b\\a', 'b\\b'], {unixify: false});
+      mm(fixtures, ['!a/b', '!a/c'], ['a', 'a\\a', 'b\\a', 'b\\b', 'b\\c'], {unixify: false});
+      mm(fixtures, ['!a/(b)'], ['a', 'a\\a', 'a\\c', 'b\\a', 'b\\b', 'b\\c'], {unixify: false});
+      mm(fixtures, ['!(a/b)'], ['a', 'a\\a', 'a\\c', 'b\\a', 'b\\b', 'b\\c'], {unixify: false});
     });
   });
 });

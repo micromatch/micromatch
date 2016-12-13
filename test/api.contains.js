@@ -189,18 +189,34 @@ describe('.contains()', function() {
     });
 
     it('should match with common glob patterns', function() {
-      assert(mm.contains('a\\b\\c', 'a/*'));
-      assert(mm.contains('\\ab', '/a'));
-      assert(mm.contains('\\ab', '/*'));
-      assert(mm.contains('\\cd', '/*'));
-      assert(mm.contains('\\ab', '*/a'));
       assert(mm.contains('\\ab', '*/'));
       assert(mm.contains('\\ab', '*/*'));
+      assert(mm.contains('\\ab', '*/[a-z]*'));
+      assert(mm.contains('\\ab', '*/*[a-z]'));
+      assert(mm.contains('\\ab', '*/a'));
       assert(mm.contains('\\ab', '/'));
+      assert(mm.contains('\\ab', '/*'));
+      assert(mm.contains('\\ab', '/?'));
       assert(mm.contains('\\ab', '/??'));
       assert(mm.contains('\\ab', '/?b'));
-      assert(mm.contains('\\ab', '/?'));
+      assert(mm.contains('\\ab', '/a'));
+      assert(mm.contains('\\cd', '/*'));
       assert(mm.contains('a\\b', '?/?'));
+      assert(mm.contains('a\\b\\c', 'a/*'));
+
+      assert(mm.contains('\\ab', '*/', {unixify: false}));
+      assert(mm.contains('\\ab', '*/*', {unixify: false}));
+      assert(mm.contains('\\ab', '*/[a-z]*', {unixify: false}));
+      assert(mm.contains('\\ab', '*/a', {unixify: false}));
+      assert(mm.contains('\\ab', '/', {unixify: false}));
+      assert(mm.contains('\\ab', '/*', {unixify: false}));
+      assert(mm.contains('\\ab', '/?', {unixify: false}));
+      assert(mm.contains('\\ab', '/??', {unixify: false}));
+      assert(mm.contains('\\ab', '/?b', {unixify: false}));
+      assert(mm.contains('\\ab', '/a', {unixify: false}));
+      assert(mm.contains('\\cd', '/*', {unixify: false}));
+      assert(mm.contains('a\\b', '?/?', {unixify: false}));
+      assert(mm.contains('a\\b\\c', 'a/*', {unixify: false}));
     });
 
     it('should match files that contain the given extension:', function() {

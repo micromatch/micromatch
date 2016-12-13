@@ -4,7 +4,7 @@ var mm = require('./support/match');
 
 describe('stars', function() {
   it('should match one directory level with a single star (*)', function() {
-    var fixtures = ['a', 'b', 'a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a', 'x/y', 'z/z'];
+    var fixtures = ['/a', '/b', 'a', 'b', 'a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a', 'x/y', 'z/z'];
     mm(fixtures, '*', ['a', 'b']);
     mm(fixtures, '*/*', ['a/a', 'a/b', 'a/c', 'a/x', 'x/y', 'z/z']);
     mm(fixtures, '*/*/*', ['a/a/a', 'a/a/b']);
@@ -59,18 +59,32 @@ describe('stars', function() {
   it('should match leading `./`', function() {
     var fixtures = ['a', './a', 'b', 'a/a', './a/b', 'a/c', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a', 'x/y', './z/z'];
     mm(fixtures, '*', ['a', 'b']);
+    mm(fixtures, '*', ['a', './a', 'b'], {unixify: false});
     mm(fixtures, '**/a/**', ['a/a', 'a/c', 'a/b', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a']);
+    mm(fixtures, '**/a/**', ['a/a', 'a/c', './a/b', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a'], {unixify: false});
     mm(fixtures, '*/*', ['a/a', 'a/b', 'a/c', 'a/x', 'x/y', 'z/z']);
+    mm(fixtures, '*/*', ['a/a', './a/b', 'a/c', './a/x', 'x/y', './z/z'], {unixify: false});
     mm(fixtures, '*/*/*', ['a/a/a', 'a/a/b']);
-    mm(fixtures, '*/*/*/*', ['a/a/a/a']);
-    mm(fixtures, '*/*/*/*/*', ['a/a/a/a/a']);
-    mm(fixtures, './*', ['a', 'b']);
-    mm(fixtures, './**/a/**', ['a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a']);
+    mm(fixtures, '*/*/*', ['./a/a/a', 'a/a/b'], {unixify: false});
     mm(fixtures, './a/*/a', ['a/a/a']);
+    mm(fixtures, './a/*/a', ['./a/a/a'], {unixify: false});
+    mm(fixtures, '*/*/*/*', ['a/a/a/a']);
+    mm(fixtures, '*/*/*/*', ['./a/a/a/a'], {unixify: false});
+    mm(fixtures, '*/*/*/*/*', ['a/a/a/a/a']);
+    mm(fixtures, '*/*/*/*/*', ['./a/a/a/a/a'], {unixify: false});
+    mm(fixtures, './*', ['a', 'b']);
+    mm(fixtures, './*', ['a', './a', 'b'], {unixify: false});
+    mm(fixtures, './**/a/**', ['a/a', 'a/c', 'a/b', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a']);
+    mm(fixtures, './**/a/**', ['a/a', 'a/c', './a/b', './a/x', './a/a/a', 'a/a/b', './a/a/a/a', './a/a/a/a/a'], {unixify: false});
     mm(fixtures, 'a/*', ['a/a', 'a/b', 'a/c', 'a/x']);
+    mm(fixtures, 'a/*', ['a/a', './a/b', 'a/c', './a/x'], {unixify: false});
     mm(fixtures, 'a/*/*', ['a/a/a', 'a/a/b']);
+    mm(fixtures, 'a/*/*', ['./a/a/a', 'a/a/b'], {unixify: false});
     mm(fixtures, 'a/*/*/*', ['a/a/a/a']);
+    mm(fixtures, 'a/*/*/*', ['./a/a/a/a'], {unixify: false});
     mm(fixtures, 'a/*/*/*/*', ['a/a/a/a/a']);
+    mm(fixtures, 'a/*/*/*/*', ['./a/a/a/a/a'], {unixify: false});
     mm(fixtures, 'a/*/a', ['a/a/a']);
+    mm(fixtures, 'a/*/a', ['./a/a/a'], {unixify: false});
   });
 });

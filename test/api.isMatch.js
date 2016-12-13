@@ -8,7 +8,7 @@ describe('.isMatch():', function() {
     it('should throw on bad args', function() {
       assert.throws(function() {
         mm.isMatch({});
-      }, /expected pattern to be a string or regex/);
+      }, /expected a string: "{}"/);
     });
   });
 

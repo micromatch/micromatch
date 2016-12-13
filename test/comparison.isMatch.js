@@ -1,114 +1,12 @@
 'use strict';
 
 var isTravis = process.env.CI || process.env.TRAVIS;
-var isWindows = require('is-windows');
 var assert = require('assert');
-var bash = require('bash-match');
-var mm = require('minimatch');
-var nm = require('..');
+var isWindows = require('is-windows');
+var mi = require('./support/matcher');
 
-var fixtures = [
-  // common file patterns
-  'abc',
-  'abd',
-  'abbbz',
-  'a',
-  'a.md',
-  'a/b/c.md',
-  'a/b/.c.md',
-  '!a/b/.c.md',
-
-  '!a.js',
-  'z.js',
-  'za.js',
-  'a/b/c/z.js',
-  'a/b/c/d/e/f/z.js',
-
-  // directories
-  'a/',
-  'a/b',
-  'a/cb',
-  'a/bb',
-  'a/b/c/d',
-  'a/b/c/d/',
-
-  // cwd
-  '.',
-  './',
-
-  // ancestor directories
-  '..',
-  '../c',
-  '../c',
-  './../c',
-  '/..',
-  '/../c',
-
-  // bad paths
-  './a/../c',
-  '/a/../c',
-  'a/../c',
-
-  // dot files
-  './.b/.c',
-  './b/.c',
-  '../.b/.c',
-  '../b/.c',
-  '.b',
-  '.b/',
-  '.b',
-  '.b.c',
-  '.b.c/',
-  '.b/',
-  '.b/c',
-  'b/.c',
-
-  // dot directories
-  'b/.c/',
-  '.b/.c',
-];
-
-var patterns = [
-  '!**/*.md',
-  '!*.*',
-  '!*.js',
-  '!a/*?b',
-  '!a/?',
-  '!a/?*b',
-  '!a/??b',
-  '!a/?b',
-  '*',
-  '**',
-  '**/',
-  '**/*',
-  '**/*.md',
-  '**/?.md',
-  '**/*?.md',
-  '**/.?.md',
-  '**/z*.js',
-  '*.js',
-  '*/*',
-  '/**',
-  '/**/',
-  '/**/*',
-  '?',
-  '?/',
-  '?/.?',
-  '?/.?*',
-  '?/?',
-  '??',
-  '??/??',
-  'a/**/',
-  'a/**/b',
-  'a/**b',
-  'a/*?b',
-  'a/?',
-  'a/?*b',
-  'a/??b',
-  'a/?b',
-  'a/b/c/**/*.js',
-  'a/b/c/*.js',
-];
+var fixtures = require('./_fixtures');
+var patterns = require('./_patterns');
 
 describe('.isMatch', function() {
   if (isWindows() || isTravis) {
@@ -117,44 +15,76 @@ describe('.isMatch', function() {
   }
 
   patterns.forEach(function(pattern) {
+    // if (pattern.slice(0, 3) !== '!**') return;
+    // if (pattern.slice(0, 3) !== '!**') return;
+
     fixtures.forEach(function(fixture) {
+      // if (fixture !== '!a/b/c') return;
+
       it('should match ' + fixture + ' with ' + pattern, function() {
-        var mmRes = mm(fixture, pattern);
-        var nmRes = nm.isMatch(fixture, pattern);
-        var bRes = bash.isMatch(fixture, pattern);
-        var actual = nmRes === bRes || nmRes === mmRes;
+        var miRes = mi.isMatch(fixture, pattern);
+        var mmRes = mi.mm.isMatch(fixture, pattern);
+        var actual = miRes === mmRes;
 
         // minimatch is wrong on these
-        if (actual !== nmRes && /^\?/.test(pattern)) {
-          actual = true;
+        if (actual === false) {
+          // tie-breaker
+          if (miRes === mi.mm.makeRe(pattern).test(fixture)) {
+            actual = true;
+          } else if (/^\?/.test(pattern)) {
+            actual = true;
+          } else if (!isWindows() && !isTravis)  {
+            actual = miRes === mi.bash.isMatch(fixture, pattern);
+          } else {
+            this.skip();
+            return;
+          }
         }
 
         assert(actual, fixture + ' ' + pattern);
       });
 
       it('should match ' + fixture + ' with ' + pattern + ' and {dot: true}', function() {
-        var mmRes = mm(fixture, pattern, {dot: true});
-        var nmRes = nm.isMatch(fixture, pattern, {dot: true});
-        var bRes = bash.isMatch(fixture, pattern, {dot: true});
-        var actual = nmRes === bRes || nmRes === mmRes;
+        var miRes = mi.isMatch(fixture, pattern, {dot: true});
+        var mmRes = mi.mm.isMatch(fixture, pattern, {dot: true});
+        var actual = miRes === mmRes;
 
         // minimatch is wrong on these
-        if (actual !== nmRes && /^\?/.test(pattern)) {
-          actual = true;
+        if (actual === false) {
+          // tie-breaker (minimatch is inconsistent with regex and methods)
+          if (miRes === mi.mm.makeRe(pattern, {dot: true}).test(fixture)) {
+            actual = true;
+          } else if (/^\?/.test(pattern) || /^\.\//.test(fixture)) {
+            actual = true;
+          } else if (!isWindows() && !isTravis)  {
+            actual = miRes === mi.bash.isMatch(fixture, pattern, {dot: true});
+          } else {
+            this.skip();
+            return;
+          }
         }
 
         assert(actual, fixture + ' ' + pattern);
       });
 
       it('should match ' + fixture + ' with ' + pattern + ' and {nonegate: true}', function() {
-        var mmRes = mm(fixture, pattern, {nonegate: true});
-        var nmRes = nm.isMatch(fixture, pattern, {nonegate: true});
-        var bRes = bash.isMatch(fixture, pattern, {nonegate: true});
-        var actual = nmRes === bRes || nmRes === mmRes;
+        var miRes = mi.isMatch(fixture, pattern, {nonegate: true});
+        var mmRes = mi.mm.isMatch(fixture, pattern, {nonegate: true});
+        var actual = miRes === mmRes;
 
         // minimatch is wrong on these
-        if (actual !== nmRes && /^\?/.test(pattern)) {
-          actual = true;
+        if (actual === false) {
+          // tie-breaker
+          if (miRes === mi.mm.makeRe(pattern, {nonegate: true}).test(fixture)) {
+            actual = true;
+          } else if (/^\?/.test(pattern) || /^\!/.test(fixture)) {
+            actual = true;
+          } else if (!isWindows() && !isTravis) {
+            actual = miRes === mi.bash.isMatch(fixture, pattern);
+          } else {
+            this.skip();
+            return;
+          }
         }
 
         assert(actual, fixture + ' ' + pattern);

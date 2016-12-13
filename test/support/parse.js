@@ -3,13 +3,17 @@
 var fs = require('fs');
 var path = require('path');
 var extend = require('extend-shallow');
-var nm = require('../..');
+var mm = require('../..');
+
+/**
+ * Parse bash test files
+ */
 
 function parseFiles(pattern, options) {
   var opts = extend({cwd: process.cwd()}, options);
   var cwd = opts.cwd;
 
-  var files = nm(fs.readdirSync(cwd), pattern);
+  var files = mm(fs.readdirSync(cwd), pattern);
   var tests = {};
 
   for (var i = 0; i < files.length; i++) {
