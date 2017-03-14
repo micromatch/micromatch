@@ -5,16 +5,16 @@
   "homepage": "https://github.com/jonschlinkert/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
-    "Amila Welihinda <amilajack@gmail.com> (http://amilawelihinda.com)",
+    "Amila Welihinda <amilajack@gmail.com> (amilajack.com)",
     "Bogdan Chadkin <trysound@yandex.ru> (https://github.com/TrySound)",
-    "Brian Woodward <brian.woodward@gmail.com> (https://github.com/doowb)",
-    "Charlike Mike Reagent (http://www.tunnckocore.tk)",
+    "Brian Woodward <brian.woodward@gmail.com> (https://twitter.com/doowb)",
+    "Charlike Mike Reagent (https://i.am.charlike.online)",
     "Elan Shanker (https://github.com/es128)",
     "Fabrício Matté (http://ultcombo.js.org)",
     "Jon Schlinkert <jon.schlinkert@sellside.com> (http://twitter.com/jonschlinkert)",
     "Martin Kolárik <martin@kolarik.sk> (http://kolarik.sk)",
     "Paul Miller <paul+gh@paulmillr.com> (paulmillr.com)",
-    "Tom Byrer (https://github.com/tomByrer)"
+    "Tom Byrer <tomByrer@gmail.com> (https://github.com/tomByrer)"
   ],
   "repository": "jonschlinkert/micromatch",
   "bugs": {
@@ -39,30 +39,35 @@
     "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
     "extglob": "^1.1.0",
-    "for-own": "^0.1.4",
     "fragment-cache": "^0.2.0",
     "kind-of": "^3.1.0",
-    "nanomatch": "^1.0.0",
+    "nanomatch": "^1.0.1",
     "object.pick": "^1.2.0",
     "regex-not": "^1.0.0",
     "snapdragon": "^0.8.1",
     "to-regex": "^3.0.1"
   },
   "devDependencies": {
+    "ansi-cyan": "^0.1.1",
     "bash-match": "^0.2.0",
-    "export-files": "^2.1.1",
+    "benchmarked": "^0.2.5",
+    "for-own": "^1.0.0",
     "fs-exists-sync": "^0.1.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "gulp-format-md": "^0.1.11",
     "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.1",
-    "gulp-unused": "^0.2.0",
-    "is-windows": "^0.2.0",
+    "gulp-mocha": "^4.1.0",
+    "gulp-unused": "^0.2.1",
+    "is-object": "^1.0.1",
+    "is-primitive": "^2.0.0",
+    "is-windows": "^1.0.0",
     "minimatch": "^3.0.3",
-    "mocha": "^3.1.2",
+    "mocha": "^3.2.0",
     "multimatch": "^2.1.0",
-    "yargs-parser": "^4.0.2"
+    "repeat-string": "^1.6.1",
+    "write": "^0.3.2",
+    "yargs-parser": "^5.0.0"
   },
   "keywords": [
     "bash",
@@ -93,6 +98,13 @@
     "shell",
     "wildcard"
   ],
+  "lintDeps": {
+    "devDependencies": {
+      "files": [
+        "test/{reference,support}/*.js"
+      ]
+    }
+  },
   "verb": {
     "toc": true,
     "layout": "default",
