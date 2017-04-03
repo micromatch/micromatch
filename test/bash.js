@@ -2,6 +2,7 @@
 
 require('mocha');
 var assert = require('assert');
+var isWindows = require('is-windows');
 var mm = require('./support/match');
 
 /**
@@ -33,34 +34,65 @@ describe('bash options and features:', function() {
     });
 
     it('should use quoted characters as literals:', function() {
-      mm(fixtures, '\\*', {nonull: true}, ['*', '\\*']);
-      mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
-      mm(fixtures, '\\*', {nonull: true, unescape: true, unixify: false}, ['*', '\\*']);
+      if (isWindows()) {
+        mm(fixtures, '\\*', {nonull: true}, ['*', '/*']);
+        mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
+        mm(fixtures, '\\*', {nonull: true, unescape: true, unixify: false}, ['*', '/*']);
 
-      mm(fixtures, '\\^', {nonull: true}, ['\\^']);
-      mm(fixtures, '\\^', []);
+        mm(fixtures, '\\^', {nonull: true}, ['/^']);
+        mm(fixtures, '\\^', []);
 
-      mm(fixtures, 'a\\*', {nonull: true}, ['a\\*']);
-      mm(fixtures, 'a\\*', ['a*'], {nonull: true, unescape: true});
-      mm(fixtures, 'a\\*', []);
+        mm(fixtures, 'a\\*', {nonull: true}, ['a/*']);
+        mm(fixtures, 'a\\*', ['a*'], {nonull: true, unescape: true});
+        mm(fixtures, 'a\\*', []);
 
-      mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a\\*', '*', '\\*']);
-      mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*']);
-      mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true, unixify: false}, ['a*', '*', '\\*']);
-      mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*']);
-      mm(fixtures, ['a\\*', '\\*'], {unescape: true, unixify: false}, ['*', '\\*']);
-      mm(fixtures, ['a\\*', '\\*'], ['*', '\\*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a/*', '*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true, unixify: false}, ['a*', '*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*']);
+        mm(fixtures, ['a\\*', '\\*'], {unescape: true, unixify: false}, ['*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], ['*', '/*']);
 
-      mm(fixtures, ['a\\*'], {nonull: true}, ['a\\*']);
-      mm(fixtures, ['a\\*'], []);
+        mm(fixtures, ['a\\*'], {nonull: true}, ['a/*']);
+        mm(fixtures, ['a\\*'], []);
 
-      mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a\\*', '*q*']);
-      mm(fixtures, ['c*', 'a\\*', '*q*'], ['c', 'ca', 'cb']);
+        mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a/*', '*q*']);
+        mm(fixtures, ['c*', 'a\\*', '*q*'], ['c', 'ca', 'cb']);
 
-      mm(fixtures, '"*"*', {nonull: true}, ['"*"*']);
-      mm(fixtures, '"*"*', []);
+        mm(fixtures, '"*"*', {nonull: true}, ['"*"*']);
+        mm(fixtures, '"*"*', []);
 
-      mm(fixtures, '\\**', ['*']); // `*` is in the fixtures array
+        mm(fixtures, '\\**', ['*']); // `*` is in the fixtures array
+      } else {
+        mm(fixtures, '\\*', {nonull: true}, ['*', '\\*']);
+        mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
+        mm(fixtures, '\\*', {nonull: true, unescape: true, unixify: false}, ['*', '\\*']);
+
+        mm(fixtures, '\\^', {nonull: true}, ['\\^']);
+        mm(fixtures, '\\^', []);
+
+        mm(fixtures, 'a\\*', {nonull: true}, ['a\\*']);
+        mm(fixtures, 'a\\*', ['a*'], {nonull: true, unescape: true});
+        mm(fixtures, 'a\\*', []);
+
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a\\*', '*', '\\*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true, unixify: false}, ['a*', '*', '\\*']);
+        mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*']);
+        mm(fixtures, ['a\\*', '\\*'], {unescape: true, unixify: false}, ['*', '\\*']);
+        mm(fixtures, ['a\\*', '\\*'], ['*', '\\*']);
+
+        mm(fixtures, ['a\\*'], {nonull: true}, ['a\\*']);
+        mm(fixtures, ['a\\*'], []);
+
+        mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a\\*', '*q*']);
+        mm(fixtures, ['c*', 'a\\*', '*q*'], ['c', 'ca', 'cb']);
+
+        mm(fixtures, '"*"*', {nonull: true}, ['"*"*']);
+        mm(fixtures, '"*"*', []);
+
+        mm(fixtures, '\\**', ['*']); // `*` is in the fixtures array
+      }
     });
 
     it('should work for escaped paths/dots:', function() {
@@ -81,17 +113,26 @@ describe('bash options and features:', function() {
       mm(['a-b', 'aXb'], 'a[X-]b', ['a-b', 'aXb']);
       mm(f, '[a-y]*[^c]', ['*', 'a', 'b', 'd', 'abd', 'abe', 'baz', 'beware', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
       mm(f, '[a-y]*[^c]', {bash: true}, ['abd', 'abe', 'baz', 'beware', 'bzz', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
-      mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
       mm(['a*b/ooo'], 'a\\*b/*', ['a*b/ooo']);
       mm(['a*b/ooo'], 'a\\*?/*', ['a*b/ooo']);
       mm(f, 'a[b]c', ['abc']);
       mm(f, 'a["b"]c', ['abc']);
-      mm(f, 'a[\\\\b]c', ['abc']);
-      mm(f, 'a[\\b]c', []);
+      mm(f, 'a[\\\\b]c', ['abc']); //<= backslash and a "b"
+      mm(f, 'a[\\b]c', []); //<= word boundary in a character class
       mm(f, 'a[b-d]c', ['abc']);
       mm(f, 'a?c', ['abc']);
       mm(['a-b'], 'a[]-]b', ['a-b']);
       mm(['man/man1/bash.1'], '*/man*/bash.*', ['man/man1/bash.1']);
+
+      if (isWindows()) {
+        // should not match backslashes on windows, since backslashes are path
+        // separators and negation character classes should not match path separators
+        // unless it's explicitly defined in the character class
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*']);
+        mm(f, '[^\\\\a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
+      } else {
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
+      }
     });
 
     it('should support basic wildmatch (brackets) features', function() {
@@ -125,8 +166,13 @@ describe('bash options and features:', function() {
     it('should match escaped characters', function() {
       assert(!mm.isMatch('', '\\'));
       assert(!mm.isMatch('XXX/\\', '[A-Z]+/\\'));
-      assert(mm.isMatch('\\', '\\'));
-      assert(mm.isMatch('XXX/\\', '[A-Z]+/\\\\'));
+      if (isWindows()) {
+        assert(!mm.isMatch('\\', '\\'));
+        assert(!mm.isMatch('XXX/\\', '[A-Z]+/\\\\'));
+      } else {
+        assert(mm.isMatch('\\', '\\'));
+        assert(mm.isMatch('XXX/\\', '[A-Z]+/\\\\'));
+      }
       assert(mm.isMatch('[ab]', '\\[ab]'));
       assert(mm.isMatch('[ab]', '[\\[:]ab]'));
     });
