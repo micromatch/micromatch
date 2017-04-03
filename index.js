@@ -114,11 +114,11 @@ micromatch.match = function(list, pattern, options) {
   var matches = [];
 
   while (++idx < len) {
-    var ele = list[idx];
-    var unix = unixify(ele);
+    var origPath = list[idx];
+    var unixPath = unixify(origPath);
 
-    if (ele === pattern || unix === pattern || isMatch(unix)) {
-      matches.push((options && options.unixify === false) ? ele : unix);
+    if (origPath === pattern || unixPath === pattern || isMatch(unixPath)) {
+      matches.push(utils.value(origPath, unixPath, options));
     }
   }
 
@@ -202,14 +202,19 @@ micromatch.not = function(list, patterns, options) {
   var ignore = opts.ignore;
   delete opts.ignore;
 
+  list = utils.arrayify(list);
   var unixify = utils.unixify(opts);
-  var unixified = utils.arrayify(list).map(function(fp) {
-    return unixify(fp, opts);
-  });
+  var res = [];
 
-  var matches = utils.diff(unixified, micromatch(unixified, patterns, opts));
+  for (var i = 0; i < list.length; i++) {
+    var origPath = list[i];
+    var unixPath = unixify(origPath);
+    res.push(utils.value(origPath, unixPath, opts));
+  }
+
+  var matches = utils.diff(res, micromatch(res, patterns, opts));
   if (ignore) {
-    matches = utils.diff(matches, micromatch(unixified, ignore));
+    matches = utils.diff(matches, micromatch(res, ignore));
   }
 
   return opts.nodupes !== false ? utils.unique(matches) : matches;
@@ -271,19 +276,19 @@ micromatch.any = function(list, patterns, options) {
  * //=> false
  * ```
  * @param {String} `str` The string to match.
- * @param {String} `pattern` Glob pattern to use for matching.
+ * @param {String|Array} `patterns` Glob pattern to use for matching.
  * @param {Object} `options` Any [options](#options) to change how matches are performed
  * @return {Boolean} Returns true if the patter matches any part of `str`.
  * @api public
  */
 
-micromatch.contains = function(str, pattern, options) {
-  if (pattern === str) {
+micromatch.contains = function(str, patterns, options) {
+  if (patterns === str) {
     return true;
   }
 
-  if (utils.isSimpleChar(pattern)) {
-    return str === pattern;
+  if (utils.isSimpleChar(patterns)) {
+    return str === patterns;
   }
 
   var opts = extend({}, options);
@@ -291,7 +296,7 @@ micromatch.contains = function(str, pattern, options) {
   opts.strictOpen = false;
   opts.contains = true;
 
-  return micromatch(str, pattern, opts).length > 0;
+  return micromatch(str, patterns, opts).length > 0;
 };
 
 /**
