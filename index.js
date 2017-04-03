@@ -115,10 +115,10 @@ micromatch.match = function(list, pattern, options) {
 
   while (++idx < len) {
     var origPath = list[idx];
-    var unixPath = unixify(origPath);
 
-    if (origPath === pattern || unixPath === pattern || isMatch(unixPath)) {
-      matches.push(utils.value(origPath, unixPath, options));
+    if (origPath === pattern || isMatch(origPath)) {
+      var unixPath = unixify(origPath);
+      matches.push(utils.value(origPath, unixPath, options, pattern));
     }
   }
 
@@ -168,12 +168,9 @@ micromatch.isMatch = function(str, pattern, options) {
     throw new TypeError('expected a string: "' + util.inspect(str) + '"');
   }
 
-  if (pattern === str) {
+  var equals = utils.equalsPattern(options);
+  if (equals(str)) {
     return true;
-  }
-
-  if (utils.isSimpleChar(pattern) || utils.isSlash(pattern)) {
-    return str === pattern;
   }
 
   var isMatch = memoize('isMatch', pattern, options, micromatch.matcher);
@@ -203,18 +200,10 @@ micromatch.not = function(list, patterns, options) {
   delete opts.ignore;
 
   list = utils.arrayify(list);
-  var unixify = utils.unixify(opts);
-  var res = [];
 
-  for (var i = 0; i < list.length; i++) {
-    var origPath = list[i];
-    var unixPath = unixify(origPath);
-    res.push(utils.value(origPath, unixPath, opts));
-  }
-
-  var matches = utils.diff(res, micromatch(res, patterns, opts));
+  var matches = utils.diff(list, micromatch(list, patterns, opts));
   if (ignore) {
-    matches = utils.diff(matches, micromatch(res, ignore));
+    matches = utils.diff(matches, micromatch(list, ignore));
   }
 
   return opts.nodupes !== false ? utils.unique(matches) : matches;
@@ -240,7 +229,6 @@ micromatch.not = function(list, patterns, options) {
  */
 
 micromatch.any = function(list, patterns, options) {
-  var unixify = utils.unixify(options);
   var isMatch = memoize('any', patterns, options, micromatch.matcher);
 
   list = utils.arrayify(list);
@@ -250,9 +238,8 @@ micromatch.any = function(list, patterns, options) {
   while (++idx < len) {
     var ele = list[idx];
     if (ele === './' || ele === '') continue;
-    var unix = unixify(ele);
 
-    if (isMatch(unix)) {
+    if (isMatch(ele)) {
       if (options && options.ignore && micromatch.not(ele, options.ignored)) {
         continue;
       }
@@ -283,19 +270,25 @@ micromatch.any = function(list, patterns, options) {
  */
 
 micromatch.contains = function(str, patterns, options) {
-  if (patterns === str) {
-    return true;
-  }
+  if (typeof patterns === 'string') {
+    if (patterns === '') {
+      return false;
+    }
 
-  if (utils.isSimpleChar(patterns)) {
-    return str === patterns;
+    var equals = utils.equalsPattern(patterns, options);
+    if (equals(str)) {
+      return true;
+    }
+    var contains = utils.containsPattern(patterns, options);
+    if (contains(str)) {
+      return true;
+    }
   }
 
   var opts = extend({}, options);
   opts.strictClose = false;
   opts.strictOpen = false;
   opts.contains = true;
-
   return micromatch(str, patterns, opts).length > 0;
 };
 
@@ -393,10 +386,13 @@ micromatch.matcher = function matcher(pattern, options) {
 
   function test(regex) {
     var unixify = utils.unixify(options);
+    var equals = utils.equalsPattern(options);
 
     return function(str) {
-      var ele = unixify(str);
-      if (str === pattern || ele === pattern || regex.test(ele)) {
+      if (equals(str)) {
+        return true;
+      }
+      if (regex.test(unixify(str))) {
         return true;
       }
       return false;
