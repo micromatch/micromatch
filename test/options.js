@@ -193,7 +193,7 @@ describe('options', function() {
   });
 
   describe('options.unixify', function() {
-    it('should unixify file paths', function() {
+    it('should unixify file paths by default', function() {
       mm(['a\\b\\c.md'], '**/*.md', ['a/b/c.md']);
       mm(['a\\b\\c.md'], '**/*.md', ['a\\b\\c.md'], {unixify: false});
     });

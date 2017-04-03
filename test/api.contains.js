@@ -28,7 +28,7 @@ describe('.contains()', function() {
       assert(mm.contains('abcd', 'ab'));
     });
 
-    it('should match with common glob patterns', function() {
+    it('should be true when a glob pattern partially matches the path', function() {
       assert(mm.contains('a/b/c', 'a/*'));
       assert(mm.contains('/ab', '/a'));
       assert(mm.contains('/ab', '/*'));
