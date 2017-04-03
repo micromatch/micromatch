@@ -36,8 +36,7 @@ describe('bash options and features:', function() {
     it('should use quoted characters as literals:', function() {
       if (isWindows()) {
         mm(fixtures, '\\*', {nonull: true}, ['*', '/*']);
-        mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
-        mm(fixtures, '\\*', {nonull: true, unescape: true, unixify: false}, ['*', '/*']);
+        mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*', '/*']);
 
         mm(fixtures, '\\^', {nonull: true}, ['/^']);
         mm(fixtures, '\\^', []);
@@ -47,10 +46,8 @@ describe('bash options and features:', function() {
         mm(fixtures, 'a\\*', []);
 
         mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a/*', '*', '/*']);
-        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*']);
-        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true, unixify: false}, ['a*', '*', '/*']);
-        mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*']);
-        mm(fixtures, ['a\\*', '\\*'], {unescape: true, unixify: false}, ['*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*', '/*']);
         mm(fixtures, ['a\\*', '\\*'], ['*', '/*']);
 
         mm(fixtures, ['a\\*'], {nonull: true}, ['a/*']);
@@ -129,7 +126,6 @@ describe('bash options and features:', function() {
         // separators and negation character classes should not match path separators
         // unless it's explicitly defined in the character class
         mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*']);
-        mm(f, '[^\\\\a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
       } else {
         mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
       }
@@ -166,11 +162,10 @@ describe('bash options and features:', function() {
     it('should match escaped characters', function() {
       assert(!mm.isMatch('', '\\'));
       assert(!mm.isMatch('XXX/\\', '[A-Z]+/\\'));
+      assert(mm.isMatch('\\', '\\'));
       if (isWindows()) {
-        assert(!mm.isMatch('\\', '\\'));
         assert(!mm.isMatch('XXX/\\', '[A-Z]+/\\\\'));
       } else {
-        assert(mm.isMatch('\\', '\\'));
         assert(mm.isMatch('XXX/\\', '[A-Z]+/\\\\'));
       }
       assert(mm.isMatch('[ab]', '\\[ab]'));
