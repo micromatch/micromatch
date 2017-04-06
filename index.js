@@ -15,9 +15,9 @@ var extend = require('extend-shallow');
 
 var compilers = require('./lib/compilers');
 var parsers = require('./lib/parsers');
+var cache = require('./lib/cache');
 var utils = require('./lib/utils');
 var MAX_LENGTH = 1024 * 64;
-var cache = {};
 
 /**
  * The main function takes a list of strings and one or more
@@ -385,13 +385,14 @@ micromatch.matcher = function matcher(pattern, options) {
   }
 
   function test(regex) {
-    var unixify = utils.unixify(options);
     var equals = utils.equalsPattern(options);
+    var unixify = utils.unixify(options);
 
     return function(str) {
       if (equals(str)) {
         return true;
       }
+
       if (regex.test(unixify(str))) {
         return true;
       }
@@ -664,11 +665,13 @@ function memoize(type, pattern, options, fn) {
     return fn(pattern, options);
   }
 
-  if (cache.hasOwnProperty(key)) {
-    return cache[key];
+  if (cache.has(type, key)) {
+    return cache.get(type, key);
   }
 
-  return (cache[key] = fn(pattern, options));
+  var val = fn(pattern, options);
+  cache.set(type, key, val);
+  return val;
 }
 
 /**

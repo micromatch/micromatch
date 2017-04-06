@@ -32,42 +32,6 @@
   "scripts": {
     "test": "mocha"
   },
-  "dependencies": {
-    "arr-diff": "^3.0.0",
-    "array-unique": "^0.3.2",
-    "braces": "^2.0.3",
-    "define-property": "^0.2.5",
-    "extend-shallow": "^2.0.1",
-    "extglob": "^1.1.0",
-    "fragment-cache": "^0.2.1",
-    "kind-of": "^3.1.0",
-    "nanomatch": "^1.0.2",
-    "object.pick": "^1.2.0",
-    "regex-not": "^1.0.0",
-    "snapdragon": "^0.8.1",
-    "to-regex": "^3.0.1"
-  },
-  "devDependencies": {
-    "ansi-cyan": "^0.1.1",
-    "bash-match": "^0.2.0",
-    "benchmarked": "^0.2.5",
-    "for-own": "^1.0.0",
-    "fs-exists-sync": "^0.1.0",
-    "gulp": "^3.9.1",
-    "gulp-format-md": "^0.1.11",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.0",
-    "gulp-unused": "^0.2.1",
-    "is-object": "^1.0.1",
-    "is-primitive": "^2.0.0",
-    "is-windows": "^1.0.0",
-    "minimatch": "^3.0.3",
-    "mocha": "^3.2.0",
-    "multimatch": "^2.1.0",
-    "repeat-string": "^1.6.1",
-    "write": "^0.3.3",
-    "yargs-parser": "^5.0.0"
-  },
   "keywords": [
     "bash",
     "expand",
@@ -142,5 +106,41 @@
       "verb",
       "verb-generate-readme"
     ]
+  },
+  "dependencies": {
+    "arr-diff": "^3.0.0",
+    "array-unique": "^0.3.2",
+    "braces": "^2.0.3",
+    "define-property": "^0.2.5",
+    "extend-shallow": "^2.0.1",
+    "extglob": "^1.1.0",
+    "fragment-cache": "^0.2.1",
+    "kind-of": "^3.1.0",
+    "nanomatch": "^1.0.3",
+    "object.pick": "^1.2.0",
+    "regex-not": "^1.0.0",
+    "snapdragon": "^0.8.1",
+    "to-regex": "^3.0.1"
+  },
+  "devDependencies": {
+    "ansi-cyan": "^0.1.1",
+    "bash-match": "^0.2.0",
+    "benchmarked": "^0.2.5",
+    "for-own": "^1.0.0",
+    "fs-exists-sync": "^0.1.0",
+    "gulp": "^3.9.1",
+    "gulp-format-md": "^0.1.12",
+    "gulp-istanbul": "^1.1.1",
+    "gulp-mocha": "^3.0.0",
+    "gulp-unused": "^0.2.1",
+    "is-object": "^1.0.1",
+    "is-primitive": "^2.0.0",
+    "is-windows": "^1.0.0",
+    "minimatch": "^3.0.3",
+    "mocha": "^3.2.0",
+    "multimatch": "^2.1.0",
+    "repeat-string": "^1.6.1",
+    "write": "^0.3.3",
+    "yargs-parser": "^5.0.0"
   }
 }

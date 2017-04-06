@@ -36,7 +36,7 @@ f abc               ab?bc
 t a.a               [a-d]*.[a-b]
 t a.b               [a-d]*.[a-b]
 t c.a               [a-d]*.[a-b]
-f a.a.a             [a-d]*.[a-b]
+t a.a.a             [a-d]*.[a-b]
 t a.a.a             [a-d]*.[a-b]*.[a-b]
 
 t a.a               *.[a-b]
@@ -52,7 +52,7 @@ t a.a               *.[a-b]*
 t a.b               *.[a-b]*
 t a.a.a             *.[a-b]*
 t c.a               *.[a-b]*
-f d.a.d             *.[a-b]*
+t d.a.d             *.[a-b]*
 f d.a.d             *.[a-b]*.[a-b]*
 t d.a.d             *.[a-d]*.[a-d]*
 t a.bb              *.[a-b]*

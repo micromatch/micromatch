@@ -22,7 +22,8 @@ describe('brackets', function() {
       assert.equal(create('[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:xdigit:]]'), '[a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9\\x21-\\x7Ea-z\\x20-\\x7E \\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~ \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[^[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:lower:][:space:][:upper:][:xdigit:]]'), '[^a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9a-z \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[a-c[:digit:]x-z]'), '[a-c0-9x-z]');
-      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?(\\/|$)', []);
+      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*', {bash: false}), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?(\\/|$)', []);
+      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9][^/]*?(\\/|$)', []);
     });
   });
 
@@ -91,7 +92,8 @@ describe('brackets', function() {
 
     it('should match alpha-numeric characters', function() {
       mm(['01234', '0123e456', '0123e45g78'], '[\\de]+', ['01234', '0123e456']);
-      mm(['01234', '0123e456', '0123e45g78'], '[\\de]*', ['01234', '0123e456']);
+      mm(['01234', '0123e456', '0123e45g78'], '[\\de]*', ['01234', '0123e456'], {bash: false});
+      mm(['01234', '0123e456', '0123e45g78'], '[\\de]*', ['01234', '0123e456', '0123e45g78']);
       mm(['01234', '0123e456', '0123e45g78'], '[e\\d]+', ['01234', '0123e456']);
     });
 

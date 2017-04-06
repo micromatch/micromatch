@@ -1,6 +1,7 @@
 'use strict';
 
 var mi = require('minimatch');
+var isWindows = require('is-windows');
 var mm = require('./support/match');
 
 describe('negation', function() {
@@ -56,6 +57,7 @@ describe('negation', function() {
   });
 
   it('should negate dotfiles:', function() {
+    mm(['.dotfile.md'], '!*.md', {dot: true}, []);
     mm(['.dotfile.md'], '!*.md', ['.dotfile.md']);
     mm(['.dotfile.txt'], '!*.md', ['.dotfile.txt']);
     mm(['.dotfile.txt', 'a/b/.dotfile'], '!*.md', ['.dotfile.txt', 'a/b/.dotfile']);
@@ -67,12 +69,18 @@ describe('negation', function() {
   });
 
   it('should support any number of leading exclamations', function() {
-    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
     mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!a*', ['a!b']);
-    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
     mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!a*', ['a!b']);
-    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
     mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!!a*', ['a!b']);
+    if (!isWindows()) {
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+    } else {
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+    }
   });
 
   it('should not give special meaning to non-leading exclamations', function() {

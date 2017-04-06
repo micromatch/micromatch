@@ -1,6 +1,8 @@
 'use strict';
 
+var path = require('path');
 var assert = require('assert');
+var isWindows = require('is-windows');
 var mm = require('./support/match');
 
 describe('special characters', function() {
@@ -53,12 +55,28 @@ describe('special characters', function() {
     });
 
     it('should match backslashes', function() {
-      assert(mm.isMatch('\\', '[\\\\]'));
-      assert(mm.isMatch('\\', '[\\\\]+'));
-      assert(mm.isMatch('\\\\', '[\\\\]+'));
-      assert(mm.isMatch('\\\\\\', '[\\\\]+'));
-      mm(['\\'], '[\\\\]', ['\\']);
-      mm(['\\', '\\\\', '\\\\\\'], '[\\\\]+', ['\\', '\\\\', '\\\\\\']);
+      assert(mm.isMatch('\\', '[\\\\/]'));
+      assert(mm.isMatch('\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
+
+      if (isWindows()) {
+        mm(['\\'], '[\\\\/]', ['/']);
+        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+      } else {
+        mm(['\\'], '[\\\\/]', ['\\']);
+        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['\\', '\\\\', '\\\\\\']);
+      }
+
+      var sep = path.sep;
+      path.sep = '\\';
+      assert(mm.isMatch('\\', '[\\\\/]'));
+      assert(mm.isMatch('\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
+      mm(['\\'], '[\\\\/]', ['/']);
+      mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+      path.sep = sep;
     });
   });
 
@@ -68,7 +86,6 @@ describe('special characters', function() {
       assert(mm.isMatch(':/foo', ':/*'));
       assert(mm.isMatch('D://foo', 'D://*'));
       assert(mm.isMatch('D://foo', 'D:\\/\\/*'));
-      assert(mm.isMatch('D:\\/\\/foo', 'D:\\\\/\\\\/*'));
     });
   });
 
@@ -78,6 +95,11 @@ describe('special characters', function() {
       mm(['a/b.md', 'a/c.md', 'a/d.md'], 'a/[bd].md', ['a/b.md', 'a/d.md']);
       mm(['a-1.md', 'a-2.md', 'a-3.md', 'a-4.md', 'a-5.md'], 'a-[2-4].md', ['a-2.md', 'a-3.md', 'a-4.md']);
       mm(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '[bc]/[bd].md', ['b/b.md', 'c/b.md']);
+    });
+
+    it('should handle brackets', function() {
+      mm(['ab', 'ac', 'ad', 'a*', '*'], '[a*]*', ['*', 'a*'], {bash: false});
+      mm(['ab', 'ac', 'ad', 'a*', '*'], '[a*]*', ['*', 'a*', 'ab', 'ac', 'ad']);
     });
 
     it('should handle unclosed brackets', function() {

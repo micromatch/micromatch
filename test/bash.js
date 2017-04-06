@@ -11,7 +11,7 @@ var mm = require('./support/match');
  */
 
 // from the Bash 4.3 specification/unit tests
-var fixtures = ['*', '\\*', 'a', 'abc', 'abd', 'abe', 'b', 'bb', 'bcd', 'bdir/', 'Beware', 'c', 'ca', 'cb', 'd', 'dd', 'de'];
+var fixtures = ['*', '**', '\\*', 'a', 'a/*', 'abc', 'abd', 'abe', 'b', 'bb', 'bcd', 'bdir/', 'Beware', 'c', 'ca', 'cb', 'd', 'dd', 'de'];
 
 describe('bash options and features:', function() {
   describe('failglob:', function() {
@@ -38,28 +38,23 @@ describe('bash options and features:', function() {
         mm(fixtures, '\\*', {nonull: true}, ['*', '/*']);
         mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*', '/*']);
 
-        mm(fixtures, '\\^', {nonull: true}, ['/^']);
+        mm(fixtures, '\\^', {nonull: true}, ['\\^']);
         mm(fixtures, '\\^', []);
 
-        mm(fixtures, 'a\\*', {nonull: true}, ['a/*']);
+        mm(fixtures, 'a\\*', {nonull: true}, ['a\\*']);
         mm(fixtures, 'a\\*', ['a*'], {nonull: true, unescape: true});
         mm(fixtures, 'a\\*', []);
 
-        mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['a/*', '*', '/*']);
+        mm(fixtures, ['a\\*', '\\*'], {nonull: true}, ['*', '/*', 'a\\*']);
         mm(fixtures, ['a\\*', '\\*'], {nonull: true, unescape: true}, ['a*', '*', '/*']);
         mm(fixtures, ['a\\*', '\\*'], {unescape: true}, ['*', '/*']);
         mm(fixtures, ['a\\*', '\\*'], ['*', '/*']);
 
-        mm(fixtures, ['a\\*'], {nonull: true}, ['a/*']);
+        mm(fixtures, ['a\\*'], {nonull: true}, ['a\\*']);
         mm(fixtures, ['a\\*'], []);
 
-        mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a/*', '*q*']);
+        mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a\\*', '*q*']);
         mm(fixtures, ['c*', 'a\\*', '*q*'], ['c', 'ca', 'cb']);
-
-        mm(fixtures, '"*"*', {nonull: true}, ['"*"*']);
-        mm(fixtures, '"*"*', []);
-
-        mm(fixtures, '\\**', ['*']); // `*` is in the fixtures array
       } else {
         mm(fixtures, '\\*', {nonull: true}, ['*', '\\*']);
         mm(fixtures, '\\*', {nonull: true, unescape: true}, ['*']);
@@ -84,12 +79,17 @@ describe('bash options and features:', function() {
 
         mm(fixtures, ['c*', 'a\\*', '*q*'], {nonull: true}, ['c', 'ca', 'cb', 'a\\*', '*q*']);
         mm(fixtures, ['c*', 'a\\*', '*q*'], ['c', 'ca', 'cb']);
-
-        mm(fixtures, '"*"*', {nonull: true}, ['"*"*']);
-        mm(fixtures, '"*"*', []);
-
-        mm(fixtures, '\\**', ['*']); // `*` is in the fixtures array
       }
+    });
+
+    it('should work for quoted characters', function() {
+      mm(fixtures, '"***"', []);
+      mm(fixtures, '"***"', {nonull: true}, ['"***"']);
+      mm(fixtures, '"*"*', ['*', '**']);
+    });
+
+    it('should work for escaped characters', function() {
+      mm(fixtures, '\\**', ['*', '**']);
     });
 
     it('should work for escaped paths/dots:', function() {
@@ -106,10 +106,10 @@ describe('bash options and features:', function() {
     it('should support character classes', function() {
       var f = fixtures.slice();
       f.push('baz', 'bzz', 'BZZ', 'beware', 'BewAre');
+
       mm(f, 'a*[^c]', ['abd', 'abe']);
       mm(['a-b', 'aXb'], 'a[X-]b', ['a-b', 'aXb']);
-      mm(f, '[a-y]*[^c]', ['*', 'a', 'b', 'd', 'abd', 'abe', 'baz', 'beware', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
-      mm(f, '[a-y]*[^c]', {bash: true}, ['abd', 'abe', 'baz', 'beware', 'bzz', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
+      mm(f, '[a-y]*[^c]', ['abd', 'abe', 'baz', 'bzz', 'beware', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/']);
       mm(['a*b/ooo'], 'a\\*b/*', ['a*b/ooo']);
       mm(['a*b/ooo'], 'a\\*?/*', ['a*b/ooo']);
       mm(f, 'a[b]c', ['abc']);
@@ -125,9 +125,13 @@ describe('bash options and features:', function() {
         // should not match backslashes on windows, since backslashes are path
         // separators and negation character classes should not match path separators
         // unless it's explicitly defined in the character class
-        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*']);
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'Beware', 'BewAre', 'BZZ', '*', '**']);
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '**'], {bash: false});
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', '*', '**'], {nocase: true});
       } else {
-        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '\\*']);
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'Beware', 'BewAre', 'BZZ', '*', '**', '\\*']);
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', 'BewAre', 'BZZ', '*', '**', '\\*'], {bash: false});
+        mm(f, '[^a-c]*', ['d', 'dd', 'de', '*', '**', '\\*'], {nocase: true});
       }
     });
 

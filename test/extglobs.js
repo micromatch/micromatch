@@ -117,7 +117,8 @@ describe('extglobs', function() {
     mm(['abd', 'acd', 'ac', 'ab'], 'a!(@(b|B))', ['acd', 'abd', 'ac']);
     mm(['abd', 'acd'], 'a!(@(b|B))d', ['acd']);
     mm(['abd', 'acd'], 'a[b*(foo|bar)]d', ['abd']);
-    mm(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz']);
+    mm(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz'], {bash: false});
+    mm(['abcx', 'abcz', 'bbc', 'aaz', 'aaaz'], '[a*(]*z', ['aaz', 'aaaz', 'abcz']);
   });
 
   it('simple kleene star tests', function() {
