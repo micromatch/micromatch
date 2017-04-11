@@ -4,6 +4,13 @@ var assert = require('assert');
 var mm = require('./support/match');
 
 describe('qmarks and stars', function() {
+  it('should support qmark matching', function() {
+    var arr = ['a', 'aa', 'ab', 'aaa', 'abcdefg'];
+    mm(arr, '?', ['a']);
+    mm(arr, '??', ['aa', 'ab']);
+    mm(arr, '???', ['aaa']);
+  });
+
   it('should correctly handle question marks in globs', function() {
     mm(['?', '??', '???'], '?', ['?']);
     mm(['?', '??', '???'], '??', ['??']);

@@ -25,7 +25,7 @@ describe('extglobs', function() {
 
   it('should match extended globs:', function() {
     mm(['a.js.js', 'a.md.js'], '*.*(js).js', ['a.js.js']);
-    mm(['a/z', 'a/b'], 'a/!(z)', ['a/b']);
+    mm(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)', ['a/!(z)', 'a/b']);
     mm(['c/z/v'], 'c/z/v', ['c/z/v']);
     mm(['c/a/v'], 'c/!(z)/v', ['c/a/v']);
     mm(['c/z/v', 'c/a/v'], 'c/!(z)/v', ['c/a/v']);
@@ -52,13 +52,6 @@ describe('extglobs', function() {
     mm(arr, 'a!(b)*', ['a', 'aa', 'aaa', 'aab', 'ac']);
     mm(['foo'], '!(foo)', []);
     mm(['foo.js'], '!(foo).js', []);
-  });
-
-  it('should support qmark matching', function() {
-    var arr = ['a', 'aa', 'ab', 'aaa', 'abcdefg'];
-    mm(arr, '?', ['a']);
-    mm(arr, '??', ['aa', 'ab']);
-    mm(arr, '???', ['aaa']);
   });
 
   it('should match exactly one of the given pattern:', function() {

@@ -59,12 +59,6 @@ describe('options', function() {
     });
   });
 
-  describe('options.nobrace', function() {
-    it('should not expand braces', function() {
-      mm(['1', '2', '3'], '{1..2}', {nobrace: true}, []);
-    });
-  });
-
   describe('options.expand', function() {
     it('should expand braces to an array', function() {
       assert.deepEqual(mm.braces('{a,b}', {expand: true}), ['a', 'b']);
@@ -106,6 +100,14 @@ describe('options', function() {
     });
   });
 
+  describe('options.nobrace', function() {
+    it('should not expand braces when disabled', function() {
+      mm(['a', 'b', 'c'], '{a,b,c,d}', ['a', 'b', 'c']);
+      mm(['a', 'b', 'c'], '{a,b,c,d}', [], {nobrace: true});
+      mm(['1', '2', '3'], '{1..2}', [], {nobrace: true});
+    });
+  });
+
   describe('options.nocase', function() {
     it('should not be case-sensitive when `options.nocase` is true', function() {
       mm(['a/b/c/e.md'], 'A/b/*/E.md', ['a/b/c/e.md'], {nocase: true});
@@ -119,6 +121,32 @@ describe('options', function() {
       mm(['a/b/d/e.md'], 'a/b/D/*.md', opts, ['a/b/d/e.md']);
       mm(['a/b/c/e.md'], 'A/b/*/E.md', opts, ['a/b/c/e.md']);
       mm(['a/b/c/e.md'], 'A/b/C/*.MD', opts, ['a/b/c/e.md']);
+    });
+  });
+
+  describe('options.noext', function() {
+    it('should not match extglobs when noext is true', function() {
+      assert(!mm.isMatch('ax', '?(a*|b)', {noext: true}));
+      mm(['a.js.js', 'a.md.js'], '*.*(js).js', [], {noext: true});
+      mm(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)', ['a/!(z)'], {noext: true});
+      mm(['a/z', 'a/b'], 'a/!(z)', [], {noext: true});
+      mm(['c/a/v'], 'c/!(z)/v', [], {noext: true});
+      mm(['c/z/v', 'c/a/v'], 'c/!(z)/v', [], {noext: true});
+      mm(['c/z/v', 'c/a/v'], 'c/@(z)/v', [], {noext: true});
+      mm(['c/z/v', 'c/a/v'], 'c/+(z)/v', [], {noext: true});
+      mm(['c/z/v', 'c/a/v'], 'c/*(z)/v', [], {noext: true});
+      mm(['c/z/v', 'z', 'zf', 'fz'], '?(z)', [], {noext: true});
+      mm(['c/z/v', 'z', 'zf', 'fz'], '+(z)', [], {noext: true});
+      mm(['c/z/v', 'z', 'zf', 'fz'], '*(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a@(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a*@(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a!(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a?(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a+(z)', [], {noext: true});
+      mm(['az', 'bz', 'axz'], 'a+(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a*(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a**(z)', [], {noext: true});
+      mm(['cz', 'abz', 'az'], 'a*!(z)', [], {noext: true});
     });
   });
 
