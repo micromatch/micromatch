@@ -1,6 +1,7 @@
 'use strict';
 
 var assert = require('assert');
+var mini = require('minimatch');
 var mm = require('./support/match');
 
 describe('issue-related tests', function() {
@@ -58,5 +59,11 @@ describe('issue-related tests', function() {
     assert(mm.isMatch('aaa/bbb/.git', 'aaa/bbb/**', {dot: true}));
     assert(mm.isMatch('/aaa/bbb/.git', '/aaa/bbb/**', {dot: true}));
     assert(mm.isMatch('/aaa/bbb/ccc/.git', '/aaa/bbb/**', {dot: true}));
+  });
+
+  // see https://github.com/jonschlinkert/micromatch/issues/83
+  it('issue #83', function() {
+    assert(mini('Incl/qqq.log', '**/Incl/**', {matchBase: true}));
+    assert(mm.isMatch('Incl/qqq.log', '**/Incl/**', {matchBase: true}));
   });
 });
