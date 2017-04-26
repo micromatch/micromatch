@@ -29,7 +29,7 @@ Please try to determine if the issue is caused by an underlying library, and if 
 
 Try to follow these guidelines
 
-- **Investigate the issue**: There might be an existing issue that covers the bug you experienced. If so, please do not create a new issue, feel free to add comments to the issue that best describes what you're experiencing.
+- **Investigate the issue**: There might be an existing issue (open or closed) that covers the bug you experienced. If so, please do not create a new issue. If necessary you may add comments to the existing issue if you can shed additional light on the problem, or you'd like to help with debugging.
 - **Check the readme** - oftentimes you will find notes about creating issues, and where to go depending on the type of issue.
 - Create the issue in the appropriate repository: try to find out if the bug you're experiencing is in micromatch or one of its dependencies
 
@@ -52,6 +52,4 @@ Here are some tips for creating idiomatic issues. Taking just a little bit extra
 - use syntax highlighting by adding the correct language name after the first "code fence"
 
 
-[node-glob]: https://github.com/isaacs/node-glob
 [micromatch]: https://github.com/jonschlinkert/micromatch
-[so]: http://stackoverflow.com/questions/tagged/micromatch
