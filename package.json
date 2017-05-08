@@ -27,6 +27,7 @@
     "expand-brackets": "^0.1.4",
     "extglob": "^0.3.1",
     "filename-regex": "^2.0.0",
+    "glob-possible-parent": "^1.0.0",
     "is-extglob": "^1.0.0",
     "is-glob": "^2.0.1",
     "kind-of": "^3.0.2",
