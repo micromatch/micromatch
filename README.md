@@ -1,4 +1,4 @@
-# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Build Status](https://img.shields.io/travis/jonschlinkert/micromatch.svg?style=flat)](https://travis-ci.org/jonschlinkert/micromatch)
+# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Build Status](https://travis-ci.org/micromatch/micromatch.svg?branch=master)](https://travis-ci.org/micromatch/micromatch)
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
