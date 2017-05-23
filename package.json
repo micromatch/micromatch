@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "arr-diff": "^2.0.0",
-    "array-unique": "^0.2.1",
+    "array-unique": "^0.3.2",
     "braces": "^1.8.2",
     "expand-brackets": "^0.1.4",
     "extglob": "^0.3.1",
