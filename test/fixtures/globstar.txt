@@ -1,0 +1,30 @@
+t a.js           **/*.js
+t a/a.js         **/*.js
+t a/a/b.js       **/*.js
+
+t a/b/z.js       a/b/**/*.js
+t a/b/c/z.js     a/b/**/*.js
+
+t foo.md         **/*.md
+t foo/bar.md     **/*.md
+
+t foo/bar        foo/**/bar
+t foo/bar        foo/**bar
+
+t ab/a/d         **/*
+t ab/b           **/*
+t a/b/c/d/a.js   **/*
+t a/b/c.js       **/*
+t a/b/c.txt      **/*
+f a/b/.js/c.txt  **/*
+t a.js           **/*
+t za.js          **/*
+t ab             **/*
+t a.b            **/*
+
+t foo/               foo/**/
+f foo/bar            foo/**/
+f foo/bazbar         foo/**/
+f foo/barbar         foo/**/
+f foo/bar/baz/qux    foo/**/
+t foo/bar/baz/qux/   foo/**/

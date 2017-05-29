@@ -1,66 +1,93 @@
-/*!
- * micromatch <https://github.com/jonschlinkert/micromatch>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
 'use strict';
 
-var path = require('path');
-require('should');
-var argv = require('minimist')(process.argv.slice(2));
-var ref = require('./support/reference');
-var mm = require('..');
+var mi = require('minimatch');
+var isWindows = require('is-windows');
+var mm = require('./support/match');
 
-if ('minimatch' in argv) {
-  mm = ref;
-}
+describe('negation', function() {
+  it('should negate files with extensions:', function() {
+    mm(['.md'], '!.md', []);
+    mm(['a.js', 'b.md', 'c.txt'], '!**/*.md', ['a.js', 'c.txt']);
+    mm(['a.js', 'b.md', 'c.txt'], '!*.md', ['a.js', 'c.txt']);
+    mm(['abc.md', 'abc.txt'], '!*.md', ['abc.txt']);
+    mm(['foo.md'], '!*.md', []);
+    mm(['foo.md'], '!.md', ['foo.md']);
+  });
 
-describe('negation patterns', function() {
-  describe('.match()', function() {
-    it('should create a regular expression for negating extensions:', function() {
-      mm.match(['.md'], '!.md').should.eql([]);
-      mm.match(['foo.md'], '!.md').should.eql(['foo.md']);
-      mm.match(['foo.md'], '!*.md').should.eql([]);
-    });
+  it('should only treat leading exclamation as special', function() {
+    mm(['foo!.md', 'bar.md'], 'foo!.md', ['foo!.md']);
+    mm(['foo!.md', 'bar.md'], '*.md', ['foo!.md', 'bar.md']);
+    mm(['foo!.md', 'bar.md'], '*!.md', ['foo!.md']);
+    mm(['foobar.md'], '*b*.md', ['foobar.md']);
+    mm(['foo!bar.md', 'foo!.md', '!foo!.md'], '*!*.md', ['foo!bar.md', 'foo!.md', '!foo!.md']);
+    mm(['foo!bar.md', 'foo!.md', '!foo!.md'], '\\!*!*.md', ['!foo!.md']);
+    mm(['foo!.md', 'ba!r.js'], '**/*!*.*', ['foo!.md', 'ba!r.js']);
+  });
 
-    it('should negate files with extensions:', function() {
-      mm.match(['abc.md'], '!*.md').should.eql([]);
-      mm.match(['abc.txt'], '!*.md').should.eql(['abc.txt']);
-      mm.match(['a.js', 'b.md', 'c.txt'], '!**/*.md').should.eql(['a.js', 'c.txt']);
-    });
+  it('should support negated globs ("*")', function() {
+    mm(['a.js', 'b.txt', 'c.md'], '!*.md', ['a.js', 'b.txt']);
+    mm(['a/a/a.js', 'a/b/a.js', 'a/c/a.js'], '!a/*/a.js', []);
+    mm(['a/a/a/a.js', 'b/a/b/a.js', 'c/a/c/a.js'], '!a/*/*/a.js', ['b/a/b/a.js', 'c/a/c/a.js']);
+    mm(['a/a.txt', 'a/b.txt', 'a/c.txt'], '!a/a*.txt', ['a/b.txt', 'a/c.txt']);
+    mm(['a.a.txt', 'a.b.txt', 'a.c.txt'], '!a.a*.txt', ['a.b.txt', 'a.c.txt']);
+    mm(['a/a.txt', 'a/b.txt', 'a/c.txt'], '!a/*.txt', []);
+  });
 
-    it('should negate dotfiles:', function() {
-      mm.match(['.dotfile.md'], '!*.md').should.eql(['.dotfile.md']);
-      mm.match(['.dotfile.txt'], '!*.md').should.eql(['.dotfile.txt']);
-      mm.match(['.gitignore', 'a', 'b'], '!.gitignore').should.eql(['a', 'b']);
-    });
+  it('should support negated globstars ("**")', function() {
+    mm(['a.js', 'b.txt', 'c.md'], '!*.md', ['a.js', 'b.txt']);
+    mm(['a/a/a.js', 'a/b/a.js', 'a/c/a.js', 'a/a/b.js'], '!**/a.js', ['a/a/b.js']);
+    mm(['a/a/a/a.js', 'b/a/b/a.js', 'c/a/c/a.js'], '!a/**/a.js', ['b/a/b/a.js', 'c/a/c/a.js']);
+    mm(['a/a.txt', 'a/b.txt', 'a/c.txt'], '!a/b.txt', ['a/a.txt', 'a/c.txt']);
+    mm(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!**/*.md', ['a/b.js', 'a.js']);
+    mm(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '**/*.md', ['a/b.md', 'a.md']);
 
-    it('should negate files in the immediate directory:', function() {
-      mm.match(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!*.md').should.eql(['a/b.js', 'a.js', 'a/b.md']);
-    });
+    mm(['a/b.js'], '!**/*.md', ['a/b.js']);
+    mm(['a.js'], '!**/*.md', ['a.js']);
+    mm(['a/b.md'], '!**/*.md', []);
+    mm(['a.md'], '!**/*.md', []);
 
-    it('should negate files in any directory:', function() {
-      mm.match(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!**/*.md').should.eql(['a/b.js', 'a.js']);
-    });
+    mm(['a/b.js'], '!*.md', ['a/b.js']);
+    mm(['a.js'], '!*.md', ['a.js']);
+    mm(['a/b.md'], '!*.md', ['a/b.md']);
+    mm(['a.md'], '!*.md', []);
 
-    it('should create a regular expression for double stars:', function() {
-      mm.match(['.gitignore'], 'a/**/z/*.md').should.eql([]);
+    mm(['a.js'], '!**/*.md', ['a.js']);
+    mm(['b.md'], '!**/*.md', []);
+    mm(['c.txt'], '!**/*.md', ['c.txt']);
+  });
 
-      mm.match(['a/b/z/.dotfile.md'], 'a/**/z/.*.md').should.eql(['a/b/z/.dotfile.md']);
-      mm.match(['a/b/z/.dotfile'], 'a/**/z/*.md').should.eql([]);
-      mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/z/*.md').should.eql(['a/b/c/d/e/z/foo.md']);
+  it('should negate dotfiles:', function() {
+    mm(['.dotfile.md'], '!*.md', {dot: true}, []);
+    mm(['.dotfile.md'], '!*.md', ['.dotfile.md']);
+    mm(['.dotfile.txt'], '!*.md', ['.dotfile.txt']);
+    mm(['.dotfile.txt', 'a/b/.dotfile'], '!*.md', ['.dotfile.txt', 'a/b/.dotfile']);
+    mm(['.gitignore', 'a', 'b'], '!.gitignore', ['a', 'b']);
+  });
 
-      mm.match(['a/b/c/d/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql([]);
-      mm.match(['a/b/c/j/e/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/j/e/z/foo.md']);
-      mm.match(['a/b/c/d/e/j/n/p/o/z/foo.md'], 'a/**/j/**/z/*.md').should.eql(['a/b/c/d/e/j/n/p/o/z/foo.md']);
-      mm.match(['a/b/c/j/e/z/foo.txt'], 'a/**/j/**/z/*.md').should.eql([]);
+  it('should negate files in the immediate directory:', function() {
+    mm(['a/b.js', 'a.js', 'a/b.md', 'a.md'], '!*.md', ['a/b.js', 'a.js', 'a/b.md']);
+  });
 
-      mm.match(['a/b/d/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
-      mm.match(['a/b/c/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql([]);
-      mm.match(['a/b/foo/cd/bar/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/foo/cd/bar/xyz.md']);
-      mm.match(['a/b/baz/ce/fez/xyz.md'], 'a/b/**/c{d,e}/**/xyz.md').should.eql(['a/b/baz/ce/fez/xyz.md']);
-    });
+  it('should support any number of leading exclamations', function() {
+    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!a*', ['a!b']);
+    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!a*', ['a!b']);
+    mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!!a*', ['a!b']);
+    if (!isWindows()) {
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!a*', ['d', 'e', '!ab', '!abc', '\\!a']);
+    } else {
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!!!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+      mm(['d', 'e', '!ab', '!abc', 'a!b', '\\!a'], '!!!a*', ['d', 'e', '!ab', '!abc', '/!a']);
+    }
+  });
+
+  it('should not give special meaning to non-leading exclamations', function() {
+    mm(['a', 'aa', 'a/b', 'a!b', 'a!!b', 'a/!!/b'], 'a!!b', ['a!!b']);
+  });
+
+  it('should negate files in any directory:', function() {
+    mm(['a/a.txt', 'a/b.txt', 'a/c.txt'], '!a/b.txt', ['a/a.txt', 'a/c.txt']);
   });
 });

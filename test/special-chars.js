@@ -1,81 +1,119 @@
-/*!
- * micromatch <https://github.com/jonschlinkert/micromatch>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
 'use strict';
 
-require('should');
 var path = require('path');
 var assert = require('assert');
-var argv = require('minimist')(process.argv.slice(2));
-var ref = require('./support/reference');
-var mm = require('..');
-
-if ('minimatch' in argv) {
-  mm = ref.minimatch;
-}
+var isWindows = require('is-windows');
+var mm = require('./support/match');
 
 describe('special characters', function() {
+  describe('regex', function() {
+    it('should match common regex characters', function() {
+      var fixtures = ['a c', 'a1c', 'a123c', 'a.c', 'a.xy.zc', 'a.zc', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc', '^abc$'];
+
+      mm(fixtures, 'ab?bc', ['abbbc']);
+      mm(fixtures, 'ab*c', ['abbbbc', 'abbbc', 'abbc', 'abc']);
+      mm(fixtures, 'ab+bc', ['abbbbc', 'abbbc', 'abbc']);
+      mm(fixtures, '^abc$', ['^abc$']);
+      mm(fixtures, 'a.c', ['a.c']);
+      mm(fixtures, 'a.*c', ['a.c', 'a.xy.zc', 'a.zc']);
+      mm(fixtures, 'a*c', ['a c', 'a.c', 'a1c', 'a123c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'axyzc', 'axy zc', 'axy.zc', 'a.xy.zc', 'a.zc']);
+      mm(fixtures, 'a\\w+c', ['a1c', 'a123c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'axyzc'], 'Should match word characters');
+      mm(fixtures, 'a\\W+c', ['a.c', 'a c'], 'Should match non-word characters');
+      mm(fixtures, 'a\\d+c', ['a1c', 'a123c'], 'Should match numbers');
+      mm(['foo@#$%123ASD #$$%^&', 'foo!@#$asdfl;', '123'], '\\d+', ['123']);
+      mm(['a123c', 'abbbc'], 'a\\D+c', ['abbbc'], 'Should match non-numbers');
+      mm(['foo', ' foo '], '(f|o)+\\b', ['foo'], 'Should match word boundaries');
+    });
+  });
+
   describe('$ dollar signs', function() {
     it('should treat dollar signs as literal:', function() {
       assert(mm.isMatch('$', '$'));
       assert(mm.isMatch('$/foo', '$/*'));
       assert(mm.isMatch('$/foo', '$/*'));
+      assert(mm.isMatch('foo$', '*$'));
       assert(mm.isMatch('$foo/foo', '$foo/*'));
       assert(mm.isMatch('foo$/foo', 'foo$/*'));
+      assert(mm.isMatch('foo$/foo$', 'foo$/*'));
     });
   });
 
-  describe('?:', function() {
-    it('should match one character per question mark:', function() {
-      mm.match(['a/b/c.md'], 'a/?/c.md').should.eql(['a/b/c.md']);
-      mm.match(['a/bb/c.md'], 'a/?/c.md').should.eql([]);
-      mm.match(['a/bb/c.md'], 'a/??/c.md').should.eql(['a/bb/c.md']);
-      mm.match(['a/bbb/c.md'], 'a/??/c.md').should.eql([]);
-      mm.match(['a/bbb/c.md'], 'a/???/c.md').should.eql(['a/bbb/c.md']);
-      mm.match(['a/bbbb/c.md'], 'a/????/c.md').should.eql(['a/bbbb/c.md']);
+  describe('^ caret', function() {
+    it('should treat caret as literal:', function() {
+      assert(mm.isMatch('^', '^'));
+      assert(mm.isMatch('^/foo', '^/*'));
+      assert(mm.isMatch('^/foo', '^/*'));
+      assert(mm.isMatch('foo^', '*^'));
+      assert(mm.isMatch('^foo/foo', '^foo/*'));
+      assert(mm.isMatch('foo^/foo', 'foo^/*'));
+    });
+  });
+
+  describe('slashes', function() {
+    it('should match forward slashes', function() {
+      assert(mm.isMatch('/', '/'));
     });
 
-    it('should match multiple groups of question marks:', function() {
-      mm.match(['a/bb/c/dd/e.md'], 'a/?/c/?/e.md').should.eql([]);
-      mm.match(['a/b/c/d/e.md'], 'a/?/c/?/e.md').should.eql(['a/b/c/d/e.md']);
-      mm.match(['a/b/c/d/e.md'], 'a/?/c/???/e.md').should.eql([]);
-      mm.match(['a/b/c/zzz/e.md'], 'a/?/c/???/e.md').should.eql(['a/b/c/zzz/e.md']);
-    });
+    it('should match backslashes', function() {
+      assert(mm.isMatch('\\', '[\\\\/]'));
+      assert(mm.isMatch('\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
 
-    it('should use special characters and glob stars together:', function() {
-      mm.match(['a/b/c/d/e.md'], 'a/?/c/?/*/e.md').should.eql([]);
-      mm.match(['a/b/c/d/e/e.md'], 'a/?/c/?/*/e.md').should.eql(['a/b/c/d/e/e.md']);
-      mm.match(['a/b/c/d/efghijk/e.md'], 'a/?/c/?/*/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
-      mm.match(['a/b/c/d/efghijk/e.md'], 'a/?/**/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
-      mm.match(['a/bb/c/d/efghijk/e.md'], 'a/?/**/e.md').should.eql([]);
-      mm.match(['a/b/c/d/efghijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b/c/d/efghijk/e.md']);
-      mm.match(['a/b/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b/c/d/efgh.ijk/e.md']);
-      mm.match(['a/b.bb/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/b.bb/c/d/efgh.ijk/e.md']);
-      mm.match(['a/bbb/c/d/efgh.ijk/e.md'], 'a/*/?/**/e.md').should.eql(['a/bbb/c/d/efgh.ijk/e.md']);
+      if (isWindows()) {
+        mm(['\\'], '[\\\\/]', ['/']);
+        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+      } else {
+        mm(['\\'], '[\\\\/]', ['\\']);
+        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['\\', '\\\\', '\\\\\\']);
+      }
+
+      var sep = path.sep;
+      path.sep = '\\';
+      assert(mm.isMatch('\\', '[\\\\/]'));
+      assert(mm.isMatch('\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\', '[\\\\/]+'));
+      assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
+      mm(['\\'], '[\\\\/]', ['/']);
+      mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+      path.sep = sep;
+    });
+  });
+
+  describe('colons and drive letters', function() {
+    it('should treat common URL characters as literals', function() {
+      assert(mm.isMatch(':', ':'));
+      assert(mm.isMatch(':/foo', ':/*'));
+      assert(mm.isMatch('D://foo', 'D://*'));
+      assert(mm.isMatch('D://foo', 'D:\\/\\/*'));
     });
   });
 
   describe('[ab] - brackets:', function() {
     it('should support regex character classes:', function() {
-      mm.match(['a/b.md', 'a/c.md', 'a/d.md', 'a/E.md'], 'a/[A-Z].md').should.eql(['a/E.md']);
-      mm.match(['a/b.md', 'a/c.md', 'a/d.md'], 'a/[bd].md').should.eql(['a/b.md', 'a/d.md']);
-      mm.match(['a-1.md', 'a-2.md', 'a-3.md', 'a-4.md', 'a-5.md'], 'a-[2-4].md').should.eql(['a-2.md', 'a-3.md', 'a-4.md']);
-      mm.match(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '[bc]/[bd].md').should.eql(['b/b.md', 'c/b.md']);
+      mm(['a/b.md', 'a/c.md', 'a/d.md', 'a/E.md'], 'a/[A-Z].md', ['a/E.md']);
+      mm(['a/b.md', 'a/c.md', 'a/d.md'], 'a/[bd].md', ['a/b.md', 'a/d.md']);
+      mm(['a-1.md', 'a-2.md', 'a-3.md', 'a-4.md', 'a-5.md'], 'a-[2-4].md', ['a-2.md', 'a-3.md', 'a-4.md']);
+      mm(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '[bc]/[bd].md', ['b/b.md', 'c/b.md']);
+    });
+
+    it('should handle brackets', function() {
+      mm(['ab', 'ac', 'ad', 'a*', '*'], '[a*]*', ['*', 'a*'], {bash: false});
+      mm(['ab', 'ac', 'ad', 'a*', '*'], '[a*]*', ['*', 'a*', 'ab', 'ac', 'ad']);
+    });
+
+    it('should handle unclosed brackets', function() {
+      mm(['[!ab', '[ab'], '[!a*', ['[!ab']);
     });
   });
 
   describe('(a|b) - logical OR:', function() {
     it('should support regex logical OR:', function() {
-      mm.match(['a/a', 'a/b', 'a/c', 'b/a', 'b/b'], '(a|b)/b').should.eql(['a/b', 'b/b']);
-      mm.match(['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'c/b'], '((a|b)|c)/b').should.eql(['a/b', 'b/b', 'c/b']);
-      mm.match(['a/b.md', 'a/c.md', 'a/d.md'], 'a/(b|d).md').should.eql(['a/b.md', 'a/d.md']);
-      mm.match(['a-1.md', 'a-2.md', 'a-3.md', 'a-4.md', 'a-5.md'], 'a-(2|3|4).md').should.eql(['a-2.md', 'a-3.md', 'a-4.md']);
-      mm.match(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '(b|c)/(b|d).md').should.eql(['b/b.md', 'c/b.md']);
-      mm.match(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '{b,c}/{b,d}.md').should.eql(['b/b.md', 'c/b.md']);
+      mm(['a/a', 'a/b', 'a/c', 'b/a', 'b/b'], '(a|b)/b', ['a/b', 'b/b']);
+      mm(['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'c/b'], '((a|b)|c)/b', ['a/b', 'b/b', 'c/b']);
+      mm(['a/b.md', 'a/c.md', 'a/d.md'], 'a/(b|d).md', ['a/b.md', 'a/d.md']);
+      mm(['a-1.md', 'a-2.md', 'a-3.md', 'a-4.md', 'a-5.md'], 'a-(2|3|4).md', ['a-2.md', 'a-3.md', 'a-4.md']);
+      mm(['a/b.md', 'b/b.md', 'c/b.md', 'b/c.md', 'a/d.md'], '(b|c)/(b|d).md', ['b/b.md', 'c/b.md']);
     });
   });
 });

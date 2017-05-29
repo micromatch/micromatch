@@ -1,0 +1,81 @@
+f a/b/.x            **/.x/**
+f .x                **/.x/**
+t .x/               **/.x/**
+t .x/a              **/.x/**
+t .x/a/b            **/.x/**
+f .x/.x             **/.x/**
+f a/.x              **/.x/**
+
+t a/b/.x/c          **/.x/**
+t a/b/.x/c/d        **/.x/**
+t a/b/.x/c/d/e      **/.x/**
+t a/b/.x/           **/.x/**
+t a/.x/b            **/.x/**
+f a/.x/b/.x/c       **/.x/**
+
+t a/c/b             a/*/b
+f a/.d/b            a/*/b
+f a/./b             a/*/b
+f a/../b            a/*/b
+
+t ab                ab**
+t abcdef            ab**
+t abef              ab**
+t abcfef            ab**
+
+f ab                ab***ef
+t abcdef            ab***ef
+t abef              ab***ef
+t abcfef            ab***ef
+
+f .bashrc           ?bashrc
+
+f abbc              ab?bc
+f abc               ab?bc
+
+t a.a               [a-d]*.[a-b]
+t a.b               [a-d]*.[a-b]
+t c.a               [a-d]*.[a-b]
+t a.a.a             [a-d]*.[a-b]
+t a.a.a             [a-d]*.[a-b]*.[a-b]
+
+t a.a               *.[a-b]
+t a.b               *.[a-b]
+t a.a.a             *.[a-b]
+t c.a               *.[a-b]
+f d.a.d             *.[a-b]
+f a.bb              *.[a-b]
+f a.ccc             *.[a-b]
+f c.ccc             *.[a-b]
+
+t a.a               *.[a-b]*
+t a.b               *.[a-b]*
+t a.a.a             *.[a-b]*
+t c.a               *.[a-b]*
+t d.a.d             *.[a-b]*
+f d.a.d             *.[a-b]*.[a-b]*
+t d.a.d             *.[a-d]*.[a-d]*
+t a.bb              *.[a-b]*
+f a.ccc             *.[a-b]*
+f c.ccc             *.[a-b]*
+
+t a.a               *[a-b].[a-b]*
+t a.b               *[a-b].[a-b]*
+t a.a.a             *[a-b].[a-b]*
+f c.a               *[a-b].[a-b]*
+f d.a.d             *[a-b].[a-b]*
+t a.bb              *[a-b].[a-b]*
+f a.ccc             *[a-b].[a-b]*
+f c.ccc             *[a-b].[a-b]*
+
+t abd               [a-y]*[^c]
+t abe               [a-y]*[^c]
+t bb                [a-y]*[^c]
+t bcd               [a-y]*[^c]
+t ca                [a-y]*[^c]
+t cb                [a-y]*[^c]
+t dd                [a-y]*[^c]
+t de                [a-y]*[^c]
+t bdir/             [a-y]*[^c]
+
+t abd               **/*

@@ -1,51 +1,81 @@
-#1: basename-braces
-  micromatch x 26,420 ops/sec ±0.89% (91 runs sampled)
-  minimatch x 3,507 ops/sec ±0.64% (97 runs sampled)
+Benchmarking: (10 of 10)
+ · braces-globstar-large-list
+ · braces-multiple
+ · braces-range
+ · braces-set
+ · globstar-large-list
+ · globstar-long-list
+ · globstar-short-list
+ · no-glob
+ · star-basename
+ · star
 
-#2: basename
-  micromatch x 25,315 ops/sec ±0.82% (93 runs sampled)
-  minimatch x 4,398 ops/sec ±0.86% (94 runs sampled)
+# benchmark/fixtures/match/braces-globstar-large-list.js (485691 bytes)
+  micromatch x 595 ops/sec ±0.42% (89 runs sampled)
+  minimatch x 13.95 ops/sec ±1.04% (37 runs sampled)
+  multimatch x 14.09 ops/sec ±0.63% (37 runs sampled)
 
-#3: braces-no-glob
-  micromatch x 341,254 ops/sec ±0.78% (93 runs sampled)
-  minimatch x 30,197 ops/sec ±1.12% (91 runs sampled)
+  fastest is micromatch
 
-#4: braces
-  micromatch x 54,649 ops/sec ±0.74% (94 runs sampled)
-  minimatch x 3,095 ops/sec ±0.82% (95 runs sampled)
+# benchmark/fixtures/match/braces-multiple.js (3362 bytes)
+  micromatch x 48,362 ops/sec ±0.63% (84 runs sampled)
+  minimatch x 2.18 ops/sec ±1.95% (9 runs sampled)
+  multimatch x 2.15 ops/sec ±3.75% (9 runs sampled)
 
-#5: immediate
-  micromatch x 16,719 ops/sec ±0.79% (95 runs sampled)
-  minimatch x 4,348 ops/sec ±0.86% (96 runs sampled)
+  fastest is micromatch
 
-#6: large
-  micromatch x 721 ops/sec ±0.77% (94 runs sampled)
-  minimatch x 17.73 ops/sec ±1.08% (50 runs sampled)
+# benchmark/fixtures/match/braces-range.js (727 bytes)
+  micromatch x 187,481 ops/sec ±0.84% (88 runs sampled)
+  minimatch x 12,366 ops/sec ±1.45% (88 runs sampled)
+  multimatch x 11,841 ops/sec ±1.04% (92 runs sampled)
 
-#7: long
-  micromatch x 5,051 ops/sec ±0.87% (97 runs sampled)
-  minimatch x 628 ops/sec ±0.83% (94 runs sampled)
+  fastest is micromatch
 
-#8: mid
-  micromatch x 51,280 ops/sec ±0.80% (95 runs sampled)
-  minimatch x 1,923 ops/sec ±0.84% (95 runs sampled)
+# benchmark/fixtures/match/braces-set.js (2858 bytes)
+  micromatch x 24,344 ops/sec ±1.07% (90 runs sampled)
+  minimatch x 2,255 ops/sec ±1.30% (88 runs sampled)
+  multimatch x 2,199 ops/sec ±0.40% (92 runs sampled)
 
-#9: multi-patterns
-  micromatch x 22,440 ops/sec ±0.97% (94 runs sampled)
-  minimatch x 2,481 ops/sec ±1.10% (94 runs sampled)
+  fastest is micromatch
 
-#10: no-glob
-  micromatch x 722,823 ops/sec ±1.30% (87 runs sampled)
-  minimatch x 52,967 ops/sec ±1.09% (94 runs sampled)
+# benchmark/fixtures/match/globstar-large-list.js (485686 bytes)
+  micromatch x 561 ops/sec ±0.37% (85 runs sampled)
+  minimatch x 25.43 ops/sec ±0.55% (44 runs sampled)
+  multimatch x 25.27 ops/sec ±0.37% (44 runs sampled)
 
-#11: range
-  micromatch x 243,471 ops/sec ±0.79% (94 runs sampled)
-  minimatch x 11,736 ops/sec ±0.82% (96 runs sampled)
+  fastest is micromatch
 
-#12: shallow
-  micromatch x 190,874 ops/sec ±0.98% (95 runs sampled)
-  minimatch x 21,699 ops/sec ±0.81% (97 runs sampled)
+# benchmark/fixtures/match/globstar-long-list.js (90647 bytes)
+  micromatch x 3,257 ops/sec ±0.53% (89 runs sampled)
+  minimatch x 485 ops/sec ±1.01% (89 runs sampled)
+  multimatch x 485 ops/sec ±0.41% (89 runs sampled)
 
-#13: short
-  micromatch x 496,393 ops/sec ±3.86% (90 runs sampled)
-  minimatch x 53,765 ops/sec ±0.75% (95 runs sampled)
+  fastest is micromatch
+
+# benchmark/fixtures/match/globstar-short-list.js (182 bytes)
+  micromatch x 359,991 ops/sec ±1.04% (88 runs sampled)
+  minimatch x 44,763 ops/sec ±1.07% (90 runs sampled)
+  multimatch x 39,977 ops/sec ±0.50% (90 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/match/no-glob.js (701 bytes)
+  micromatch x 443,740 ops/sec ±1.36% (87 runs sampled)
+  minimatch x 44,152 ops/sec ±1.82% (90 runs sampled)
+  multimatch x 41,077 ops/sec ±0.45% (90 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/match/star-basename.js (12339 bytes)
+  micromatch x 10,286 ops/sec ±0.46% (92 runs sampled)
+  minimatch x 3,059 ops/sec ±0.37% (90 runs sampled)
+  multimatch x 3,129 ops/sec ±1.36% (90 runs sampled)
+
+  fastest is micromatch
+
+# benchmark/fixtures/match/star.js (12338 bytes)
+  micromatch x 9,756 ops/sec ±0.81% (88 runs sampled)
+  minimatch x 2,978 ops/sec ±0.38% (90 runs sampled)
+  multimatch x 2,970 ops/sec ±1.22% (91 runs sampled)
+
+  fastest is micromatch
