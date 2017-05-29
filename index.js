@@ -184,7 +184,7 @@ micromatch.isMatch = function(str, pattern, options) {
 };
 
 /**
- * Returns true if some of the elements in the given `list` match any of the
+ * Returns true if some of the strings in the given `list` match any of the
  * given glob `patterns`.
  *
  * ```js
@@ -207,19 +207,17 @@ micromatch.some = function(list, patterns, options) {
   if (typeof list === 'string') {
     list = [list];
   }
-
   for (var i = 0; i < list.length; i++) {
     if (micromatch(list[i], patterns, options).length === 1) {
       return true;
     }
   }
-
   return false;
 };
 
 /**
- * Returns true if every element in the given `list` matches
- * at least one of the given glob `patterns`.
+ * Returns true if every string in the given `list` matches
+ * any of the given glob `patterns`.
  *
  * ```js
  * var mm = require('micromatch');
@@ -245,13 +243,11 @@ micromatch.every = function(list, patterns, options) {
   if (typeof list === 'string') {
     list = [list];
   }
-
   for (var i = 0; i < list.length; i++) {
     if (micromatch(list[i], patterns, options).length !== 1) {
       return false;
     }
   }
-
   return true;
 };
 
@@ -297,8 +293,8 @@ micromatch.any = function(str, patterns, options) {
 };
 
 /**
- * Returns true if **all** of the given `patterns`
- * match the specified string.
+ * Returns true if **all** of the given `patterns` match
+ * the specified string.
  *
  * ```js
  * var mm = require('micromatch');
@@ -327,11 +323,9 @@ micromatch.all = function(str, patterns, options) {
   if (typeof str !== 'string') {
     throw new TypeError('expected a string: "' + util.inspect(str) + '"');
   }
-
   if (typeof patterns === 'string') {
     patterns = [patterns];
   }
-
   for (var i = 0; i < patterns.length; i++) {
     if (!micromatch.isMatch(str, patterns[i], options)) {
       return false;
@@ -478,12 +472,6 @@ micromatch.matchKeys = function(obj, patterns, options) {
  */
 
 micromatch.matcher = function matcher(pattern, options) {
-  if (isEmptyString(pattern)) {
-    return function() {
-      return false;
-    }
-  }
-
   if (Array.isArray(pattern)) {
     return compose(pattern, options, matcher);
   }
@@ -552,10 +540,6 @@ micromatch.matcher = function matcher(pattern, options) {
  */
 
 micromatch.makeRe = function(pattern, options) {
-  if (pattern instanceof RegExp) {
-    return pattern;
-  }
-
   if (typeof pattern !== 'string') {
     throw new TypeError('expected pattern to be a string');
   }
@@ -763,11 +747,11 @@ micromatch.parse = function(pattern, options) {
  */
 
 micromatch.compile = function(ast, options) {
-  return memoize('compile', ast.input, options, function() {
-    if (typeof ast === 'string') {
-      ast = micromatch.parse(ast, options);
-    }
+  if (typeof ast === 'string') {
+    ast = micromatch.parse(ast, options);
+  }
 
+  return memoize('compile', ast.input, options, function() {
     var snapdragon = utils.instantiate(ast, options);
     compilers(snapdragon, options);
     return snapdragon.compile(ast, options);

@@ -104,14 +104,14 @@
         ]
       },
       "files": [
-        "gulpfile.js",
         "examples/*.js",
+        "gulpfile.js",
         "test/**/*.js"
       ]
     }
   },
   "verb": {
-    "toc": true,
+    "toc": "collapsible",
     "layout": "default",
     "tasks": [
       "readme"
@@ -138,7 +138,9 @@
       "extglob",
       "glob-object",
       "minimatch",
-      "snapdragon"
+      "multimatch",
+      "snapdragon",
+      "expand-brackets"
     ]
   }
 }
