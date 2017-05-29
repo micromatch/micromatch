@@ -5,6 +5,18 @@ var sep = path.sep;
 var mm = require('./support/match');
 
 describe('micromatch', function() {
+  describe('empty list', function() {
+    it('should return an empty array', function() {
+      mm([], '*', []);
+    });
+  });
+
+  describe('options.nodupes', function() {
+    it('should return an array with duplicates', function() {
+      mm(['a', 'a', 'a'], ['*', 'a*'], {nodupes: false}, ['a', 'a', 'a', 'a', 'a', 'a']);
+    });
+  });
+
   describe('posix paths', function() {
     it('should return an array of matches for a literal string', function() {
       mm(['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'], '(a/b)', ['a/b']);

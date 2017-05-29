@@ -4,7 +4,7 @@ var path = require('path');
 var sep = path.sep;
 var mm = require('./support/match');
 
-describe('.not method', function() {
+describe('.not()', function() {
   describe('posix paths', function() {
     it('should return an array of matches for a literal string', function() {
       var fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];

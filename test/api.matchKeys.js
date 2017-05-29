@@ -3,7 +3,7 @@
 var assert = require('assert');
 var mm = require('..');
 
-describe('.matchKeys method', function() {
+describe('.matchKeys()', function() {
   describe('error handling', function() {
     it('should throw when the first argument is not an object', function() {
       assert.throws(function() {

@@ -6,6 +6,14 @@ var assert = require('assert');
 var mm = require('..');
 
 describe('.contains()', function() {
+  describe('errors', function() {
+    it('should throw an error arguments are invalid', function() {
+      assert.throws(function() {
+        mm.contains();
+      });
+    });
+  });
+
   describe('patterns', function() {
     it('should correctly deal with empty patterns', function() {
       assert(!mm.contains('ab', ''));

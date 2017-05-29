@@ -1,9 +1,18 @@
 'use strict';
 
 var path = require('path');
+var assert = require('assert');
 var mm = require('./support/match');
 
-describe('.match method', function() {
+describe('.match()', function() {
+  describe('errors', function() {
+    it('should throw an error when pattern is not a string', function() {
+      assert.throws(function() {
+        require('../').match([], []);
+      });
+    });
+  });
+
   describe('posix paths', function() {
     it('should return an array of matches for a literal string', function() {
       var fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];

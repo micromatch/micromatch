@@ -5,6 +5,14 @@ var assert = require('assert');
 var mm = require('..');
 
 describe('.any()', function() {
+  describe('errors', function() {
+    it('should throw an error when value is not a string', function() {
+      assert.throws(function() {
+        mm.any();
+      });
+    });
+  });
+
   describe('empty patterns', function() {
     it('should correctly handle empty patterns', function() {
       assert(!mm.any('', ''));
