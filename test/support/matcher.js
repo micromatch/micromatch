@@ -1,7 +1,7 @@
 'use strict';
 
 var utils = require('../../lib/utils');
-var argv = require('yargs-parser')(process.argv.slice(2));
+var argv = require('minimist')(process.argv.slice(2));
 var bash = require('bash-match');
 var minimatch = require('minimatch');
 var mu = require('multimatch');

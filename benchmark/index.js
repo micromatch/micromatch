@@ -3,7 +3,8 @@
 var path = require('path');
 var util = require('util');
 var cyan = require('ansi-cyan');
-var argv = require('yargs-parser')(process.argv.slice(2));
+var opts = { alias: {pattern: 'p' }};
+var argv = require('minimist')(process.argv.slice(2), opts);
 var isPrimitive = require('is-primitive');
 var isObject = require('is-object');
 var Suite = require('benchmarked');
@@ -11,7 +12,7 @@ var Suite = require('benchmarked');
 function run(type, pattern) {
   var suite = new Suite({
     cwd: __dirname,
-    fixtures: path.join('fixtures', type, '*.js'),
+    fixtures: path.join('fixtures', type, pattern || '*.js'),
     code: path.join('code', type, '*.js')
   });
 
@@ -39,4 +40,4 @@ function run(type, pattern) {
   }
 }
 
-run(argv._[0] || 'match', argv._[1] || 'large*');
+run(argv._[0] || 'match', argv._[1] || argv.pattern);

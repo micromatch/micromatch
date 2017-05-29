@@ -22,4 +22,4 @@ gulp.task('unused', function() {
     .pipe(unused({keys: Object.keys(require('./lib/utils.js'))}));
 });
 
-gulp.task('default', ['test', 'lint']);
+gulp.task('default', ['test']);

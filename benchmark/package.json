@@ -6,16 +6,31 @@
   "scripts": {
     "test": "mocha"
   },
+  "lintDeps": {
+    "dependencies": {
+      "options": {
+        "ignore": [
+          "index.js"
+        ]
+      }
+    },
+    "devDependencies": {
+      "files": [
+        "code/**/*.js",
+        "*.js"
+      ]
+    }
+  },
   "devDependencies": {
     "ansi-cyan": "^0.1.1",
-    "benchmarked": "^0.2.5",
-    "braces": "^2.0.2",
+    "benchmarked": "^1.1.1",
+    "braces": "^2.2.0",
     "is-object": "^1.0.1",
     "is-primitive": "^2.0.0",
-    "minimatch": "^3.0.3",
+    "minimatch": "^3.0.4",
+    "minimist": "^1.2.0",
     "multimatch": "^2.1.0",
     "repeat-string": "^1.6.1",
-    "write": "^0.3.2",
-    "yargs-parser": "^4.0.2"
+    "write": "^0.3.3"
   }
 }

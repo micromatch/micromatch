@@ -44,6 +44,9 @@ describe('extglobs', function() {
     mm(['cz', 'abz', 'az'], 'a*(z)', ['az']);
     mm(['cz', 'abz', 'az'], 'a**(z)', ['az', 'abz']);
     mm(['cz', 'abz', 'az'], 'a*!(z)', ['az', 'abz']);
+    mm(['cz', 'abz', 'az'], 'a!(*)', []);
+    mm(['a.js', 'a.txt', 'a.md'], 'a.!(js)', ['a.md', 'a.txt']);
+    mm(['a.js', 'a.txt', 'a.md'], 'a.!(js)*', ['a.md', 'a.txt']);
   });
 
   it('should support negation', function() {
@@ -300,7 +303,7 @@ describe('bash', function() {
     assert(!mm.isMatch('foo', 'bar'));
     assert(!mm.isMatch('foobar', 'foo\\*bar'));
     assert(!mm.isMatch('abc', '\\a\\b\\c'));
-    assert(mm.isMatch('', ''));
+    assert(!mm.isMatch('', ''));
     assert(mm.isMatch('?a?b', '\\??\\?b'));
     assert(mm.isMatch('aaaaaaabababab', '*ab'));
     assert(mm.isMatch('\\x\\y\\z', '\\x\\y\\z'));

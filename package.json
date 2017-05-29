@@ -2,23 +2,24 @@
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.",
   "version": "2.3.11",
-  "homepage": "https://github.com/jonschlinkert/micromatch",
+  "homepage": "https://github.com/micromatch/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
     "Amila Welihinda (amilajack.com)",
-    "Bogdan Chadkin <trysound@yandex.ru> (https://github.com/TrySound)",
-    "Brian Woodward <brian.woodward@gmail.com> (https://twitter.com/doowb)",
+    "Bogdan Chadkin (https://github.com/TrySound)",
+    "Brian Woodward (https://twitter.com/doowb)",
     "Charlike Mike Reagent (https://i.am.charlike.online)",
     "Elan Shanker (https://github.com/es128)",
     "Fabrício Matté (http://ultcombo.js.org)",
-    "Jon Schlinkert <jon.schlinkert@sellside.com> (http://twitter.com/jonschlinkert)",
-    "Martin Kolárik <martin@kolarik.sk> (http://kolarik.sk)",
-    "Paul Miller <paul+gh@paulmillr.com> (paulmillr.com)",
-    "Tom Byrer <tomByrer@gmail.com> (https://github.com/tomByrer)"
+    "Jon Schlinkert (http://twitter.com/jonschlinkert)",
+    "Martin Kolárik (https://kolarik.sk)",
+    "Paul Miller (paulmillr.com)",
+    "Tom Byrer (https://github.com/tomByrer)",
+    "(https://github.com/DianeLooney)"
   ],
-  "repository": "jonschlinkert/micromatch",
+  "repository": "micromatch/micromatch",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/micromatch/issues"
+    "url": "https://github.com/micromatch/micromatch/issues"
   },
   "license": "MIT",
   "files": [
@@ -31,6 +32,35 @@
   },
   "scripts": {
     "test": "mocha"
+  },
+  "dependencies": {
+    "arr-diff": "^3.0.0",
+    "array-unique": "^0.3.2",
+    "braces": "^2.0.3",
+    "define-property": "^0.2.5",
+    "extend-shallow": "^2.0.1",
+    "extglob": "^1.1.0",
+    "fragment-cache": "^0.2.1",
+    "kind-of": "^3.1.0",
+    "nanomatch": "^1.1.1",
+    "object.pick": "^1.2.0",
+    "regex-not": "^1.0.0",
+    "snapdragon": "^0.8.1",
+    "to-regex": "^3.0.1"
+  },
+  "devDependencies": {
+    "bash-match": "^0.2.0",
+    "extend-shallow": "^2.0.1",
+    "for-own": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-istanbul": "^1.1.1",
+    "gulp-mocha": "^3.0.0",
+    "gulp-unused": "^0.2.1",
+    "is-windows": "^1.0.1",
+    "minimatch": "^3.0.3",
+    "minimist": "^1.2.0",
+    "mocha": "^3.4.2",
+    "multimatch": "^2.1.0"
   },
   "keywords": [
     "bash",
@@ -68,8 +98,15 @@
       }
     },
     "devDependencies": {
+      "options": {
+        "ignore": [
+          "benchmark/**"
+        ]
+      },
       "files": [
-        "test/{reference,support}/*.js"
+        "gulpfile.js",
+        "examples/*.js",
+        "test/**/*.js"
       ]
     }
   },
@@ -101,46 +138,7 @@
       "extglob",
       "glob-object",
       "minimatch",
-      "multimatch",
-      "snapdragon",
-      "verb",
-      "verb-generate-readme"
+      "snapdragon"
     ]
-  },
-  "dependencies": {
-    "arr-diff": "^3.0.0",
-    "array-unique": "^0.3.2",
-    "braces": "^2.0.3",
-    "define-property": "^0.2.5",
-    "extend-shallow": "^2.0.1",
-    "extglob": "^1.1.0",
-    "fragment-cache": "^0.2.1",
-    "kind-of": "^3.1.0",
-    "nanomatch": "^1.0.3",
-    "object.pick": "^1.2.0",
-    "regex-not": "^1.0.0",
-    "snapdragon": "^0.8.1",
-    "to-regex": "^3.0.1"
-  },
-  "devDependencies": {
-    "ansi-cyan": "^0.1.1",
-    "bash-match": "^0.2.0",
-    "benchmarked": "^0.2.5",
-    "for-own": "^1.0.0",
-    "fs-exists-sync": "^0.1.0",
-    "gulp": "^3.9.1",
-    "gulp-format-md": "^0.1.12",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.0",
-    "gulp-unused": "^0.2.1",
-    "is-object": "^1.0.1",
-    "is-primitive": "^2.0.0",
-    "is-windows": "^1.0.0",
-    "minimatch": "^3.0.3",
-    "mocha": "^3.2.0",
-    "multimatch": "^2.1.0",
-    "repeat-string": "^1.6.1",
-    "write": "^0.3.3",
-    "yargs-parser": "^5.0.0"
   }
 }

@@ -109,14 +109,16 @@ describe('.isMatch():', function() {
     });
 
     it('should match with common glob patterns', function() {
+      assert(!mm.isMatch('/ab', './*/'));
+      assert(!mm.isMatch('/ef', '*'));
+      assert(!mm.isMatch('ab', './*/'));
+      assert(!mm.isMatch('ef', '/*'));
       assert(mm.isMatch('/ab', '/*'));
       assert(mm.isMatch('/cd', '/*'));
-      assert(!mm.isMatch('ef', '/*'));
-      assert(mm.isMatch('ab', './*'));
-      assert(mm.isMatch('ab/', './*/'));
-      assert(!mm.isMatch('ab', './*/'));
       assert(mm.isMatch('ab', '*'));
+      assert(mm.isMatch('ab', './*'));
       assert(mm.isMatch('ab', 'ab'));
+      assert(mm.isMatch('ab/', './*/'));
     });
 
     it('should exactly match leading slash', function() {
@@ -187,7 +189,7 @@ describe('.isMatch():', function() {
       assert(mm.isMatch('a/b/c/d/g/e.f', 'a/b/**/d/**/*.*'));
       assert(mm.isMatch('a/b/c/d/g/g/e.f', 'a/b/**/d/**/*.*'));
 
-      // https://github.com/jonschlinkert/micromatch/issues/15
+      // https://github.com/micromatch/micromatch/issues/15
       assert(mm.isMatch('z.js', 'z*'));
       assert(mm.isMatch('z.js', '**/z*'));
       assert(mm.isMatch('z.js', '**/z*.js'));
@@ -226,6 +228,14 @@ describe('.isMatch():', function() {
       assert(mm.isMatch('foo/baz/bar', 'foo/**/bar'));
       assert(mm.isMatch('foobazbar', 'foo**bar'));
       assert(mm.isMatch('XXX/foo', '**/foo'));
+
+      // https://github.com/micromatch/micromatch/issues/89
+      assert(mm.isMatch('foo//baz.md', 'foo//baz.md'));
+      assert(mm.isMatch('foo//baz.md', 'foo/+baz.md'));
+      assert(mm.isMatch('foo//baz.md', 'foo//+baz.md'));
+      assert(mm.isMatch('foo//baz.md', 'foo//*baz.md'));
+      assert(!mm.isMatch('foo//baz.md', 'foo/baz.md'));
+      assert(!mm.isMatch('foo/baz.md', 'foo//baz.md'));
     });
 
     it('question marks should not match slashes', function() {

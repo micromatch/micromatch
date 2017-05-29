@@ -1,13 +1,18 @@
 var mm = require('../');
 
-console.log(mm.braces('{a,b}'));
-//=> [ '(a|b)' ]
+/**
+ * Brace optimization
+ */
 
-console.log(mm.braces('{a,b}', {expand: true}));
-//=> [ 'a', 'b' ]
+console.log(mm.braces('{a,b,c}/{001..100}'));
+//=> [ '{a,b,c}/{1..100}' ]
 
-console.log(mm.braces('foo/{a,b}/bar'));
-//=> [ 'foo/(a|b)/bar' ]
+/**
+ * Brace expansion
+ */
 
-console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
+console.log(mm.braceExpand('{a,b,c}/{001..100}'));
+//=>  ['a/a', 'a/b', 'a/c', 'a/d', 'a/e', 'b/a', 'b/b', 'b/c', 'b/d', 'b/e', 'c/a', 'c/b', 'c/c', 'c/d', 'c/e']
+
+console.log(mm.braces('{a,b,c}/{001..100}', {expand: true}));
 //=> [ 'foo/a/bar', 'foo/b/bar' ]

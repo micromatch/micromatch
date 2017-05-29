@@ -1,13 +1,13 @@
 'use strict';
 
-var exists = require('fs-exists-sync');
+var fs = require('fs');
 var bashPath;
 
 exports.getBashPath = function() {
   if (bashPath) return bashPath;
-  if (exists('/usr/local/bin/bash')) {
+  if (fs.existsSync('/usr/local/bin/bash')) {
     bashPath = '/usr/local/bin/bash';
-  } else if (exports.exists('/bin/bash')) {
+  } else if (fs.existsSync('/bin/bash')) {
     bashPath = '/bin/bash';
   } else {
     bashPath = 'bash';
