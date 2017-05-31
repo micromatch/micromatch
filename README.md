@@ -158,7 +158,7 @@ console.log(mm(['a.js', 'a.txt'], ['*.js']));
 //=> [ 'a.js' ]
 ```
 
-### [.match](index.js#L107)
+### [.match](index.js#L95)
 
 Similar to the main function, but `pattern` must be a string.
 
@@ -179,7 +179,7 @@ console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
 //=> ['a.a', 'a.aa']
 ```
 
-### [.isMatch](index.js#L168)
+### [.isMatch](index.js#L156)
 
 Returns true if the specified `string` matches the given glob `pattern`.
 
@@ -202,7 +202,7 @@ console.log(mm.isMatch('a.b', '*.a'));
 //=> false
 ```
 
-### [.some](index.js#L206)
+### [.some](index.js#L194)
 
 Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
 
@@ -225,7 +225,7 @@ console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.every](index.js#L242)
+### [.every](index.js#L230)
 
 Returns true if every string in the given `list` matches any of the given glob `patterns`.
 
@@ -252,7 +252,7 @@ console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.any](index.js#L274)
+### [.any](index.js#L262)
 
 Returns true if **any** of the given glob `patterns` match the specified `string`.
 
@@ -275,7 +275,7 @@ console.log(mm.any('a.a', 'b.*'));
 //=> false
 ```
 
-### [.all](index.js#L322)
+### [.all](index.js#L310)
 
 Returns true if **all** of the given `patterns` match the specified string.
 
@@ -305,7 +305,7 @@ console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
 // true
 ```
 
-### [.not](index.js#L354)
+### [.not](index.js#L342)
 
 Returns a list of strings that _**do not match any**_ of the given `patterns`.
 
@@ -326,7 +326,7 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L389)
+### [.contains](index.js#L377)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -349,7 +349,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L445)
+### [.matchKeys](index.js#L433)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -371,7 +371,7 @@ console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.matcher](index.js#L474)
+### [.matcher](index.js#L462)
 
 Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
@@ -394,7 +394,7 @@ console.log(isMatch('a.b'));
 //=> true
 ```
 
-### [.makeRe](index.js#L542)
+### [.makeRe](index.js#L534)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -414,7 +414,7 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.braces](index.js#L585)
+### [.braces](index.js#L581)
 
 Expand the given brace `pattern`.
 
@@ -435,7 +435,7 @@ console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
 //=> ['foo/(a|b)/bar']
 ```
 
-### [.create](index.js#L649)
+### [.create](index.js#L648)
 
 Parses the given glob `pattern` and returns an array of abstract syntax trees (ASTs), with the compiled `output` and optional source `map` on each AST.
 
@@ -477,7 +477,7 @@ console.log(mm.create('abc/*.js'));
 //   idx: 6 }]
 ```
 
-### [.parse](index.js#L696)
+### [.parse](index.js#L695)
 
 Parse the given `str` with the given `options`.
 
@@ -510,7 +510,7 @@ console.log(ast);
 //      { type: 'eos', val: '' } ] }
 ```
 
-### [.compile](index.js#L749)
+### [.compile](index.js#L748)
 
 Compile the given `ast` or string with the given `options`.
 
@@ -544,7 +544,7 @@ console.log(mm.compile(ast));
 //   parsingErrors: [] }
 ```
 
-### [.clearCache](index.js#L770)
+### [.clearCache](index.js#L769)
 
 Clear the regex cache.
 
@@ -953,58 +953,58 @@ npm i -d && npm run benchmark
 
 ### Latest results
 
-As of May 29, 2017 (longer bars are better):
+As of May 31, 2017 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
-micromatch ██████████████████████████████████████████████████████████████████████ (595 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (595 ops/sec) 
 minimatch  █ (13.95 ops/sec) 
 multimatch █ (14.09 ops/sec) 
 
 # braces-multiple
-micromatch ██████████████████████████████████████████████████████████████████████ (48,362 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (48,362 ops/sec) 
 minimatch   (2.18 ops/sec) 
 multimatch  (2.15 ops/sec) 
 
 # braces-range
-micromatch ██████████████████████████████████████████████████████████████████████ (187,481 ops/sec) 
-minimatch  ████ (12,366 ops/sec) 
-multimatch ████ (11,841 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (187,481 ops/sec) 
+minimatch  ███ (12,366 ops/sec) 
+multimatch ███ (11,841 ops/sec) 
 
 # braces-set
-micromatch ██████████████████████████████████████████████████████████████████████ (24,344 ops/sec) 
-minimatch  ██████ (2,255 ops/sec) 
-multimatch ██████ (2,199 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (24,344 ops/sec) 
+minimatch  ████ (2,255 ops/sec) 
+multimatch ████ (2,199 ops/sec) 
 
 # globstar-large-list
-micromatch ██████████████████████████████████████████████████████████████████████ (561 ops/sec) 
-minimatch  ███ (25.43 ops/sec) 
-multimatch ███ (25.27 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (561 ops/sec) 
+minimatch  ██ (25.43 ops/sec) 
+multimatch ██ (25.27 ops/sec) 
 
 # globstar-long-list
-micromatch ██████████████████████████████████████████████████████████████████████ (3,257 ops/sec) 
-minimatch  ██████████ (485 ops/sec) 
-multimatch ██████████ (485 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (3,257 ops/sec) 
+minimatch  ███████ (485 ops/sec) 
+multimatch ███████ (485 ops/sec) 
 
 # globstar-short-list
-micromatch ██████████████████████████████████████████████████████████████████████ (359,991 ops/sec) 
-minimatch  ████████ (44,763 ops/sec) 
-multimatch ███████ (39,977 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (359,991 ops/sec) 
+minimatch  ██████ (44,763 ops/sec) 
+multimatch █████ (39,977 ops/sec) 
 
 # no-glob
-micromatch ██████████████████████████████████████████████████████████████████████ (443,740 ops/sec) 
-minimatch  ██████ (44,152 ops/sec) 
-multimatch ██████ (41,077 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (443,740 ops/sec) 
+minimatch  ████ (44,152 ops/sec) 
+multimatch ████ (41,077 ops/sec) 
 
 # star-basename
-micromatch ██████████████████████████████████████████████████████████████████████ (10,286 ops/sec) 
-minimatch  ████████████████████ (3,059 ops/sec) 
-multimatch █████████████████████ (3,129 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (10,286 ops/sec) 
+minimatch  ██████████████ (3,059 ops/sec) 
+multimatch ███████████████ (3,129 ops/sec) 
 
 # star
-micromatch ██████████████████████████████████████████████████████████████████████ (9,756 ops/sec) 
-minimatch  █████████████████████ (2,978 ops/sec) 
-multimatch █████████████████████ (2,970 ops/sec) 
+micromatch ██████████████████████████████████████████████████ (9,756 ops/sec) 
+minimatch  ███████████████ (2,978 ops/sec) 
+multimatch ███████████████ (2,970 ops/sec) 
 
 ```
 
@@ -1028,7 +1028,7 @@ Please read the [contributing guide](.github/contributing.md) for advice on open
 
 | **Commits** | **Contributor** | 
 | --- | --- |
-| 346 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 419 | [jonschlinkert](https://github.com/jonschlinkert) |
 | 12 | [es128](https://github.com/es128) |
 | 3 | [paulmillr](https://github.com/paulmillr) |
 | 2 | [TrySound](https://github.com/TrySound) |
@@ -1072,4 +1072,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 29, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 31, 2017._

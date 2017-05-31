@@ -69,7 +69,7 @@ function values(obj) {
 }
 
 function bar(tok, longest, diff) {
-  return repeat('█', (tok.num / longest) * 70);
+  return repeat('█', (tok.num / longest) * 50);
 }
 
 function format(name, tok, max, diff) {
