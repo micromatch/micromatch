@@ -24,6 +24,15 @@ describe('negation', function() {
     mm(['foo!.md', 'ba!r.js'], '**/*!*.*', ['foo!.md', 'ba!r.js']);
   });
 
+  it('should support negated file names', function() {
+    mm(['bar', 'baz', 'foo'], '!foo', ['bar', 'baz']);
+    mm(['bar', 'baz', 'foo'], ['!foo'], ['bar', 'baz']);
+    mm(['bar', 'baz', 'foo'], ['!foo', 'bar'], ['bar']);
+    mm(['bar', 'baz', 'foo'], ['bar', '!foo', '!bar'], []);
+    mm(['bar', 'baz', 'foo'], ['!bar', 'bar'], []);
+    mm(['bar', 'baz', 'foo'], ['!bar', 'bar', '*'], ['baz', 'foo']);
+  });
+
   it('should support negated globs ("*")', function() {
     mm(['a.js', 'b.txt', 'c.md'], '!*.md', ['a.js', 'b.txt']);
     mm(['a/a/a.js', 'a/b/a.js', 'a/c/a.js'], '!a/*/a.js', []);

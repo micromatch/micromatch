@@ -67,18 +67,6 @@ function micromatch(list, patterns, options) {
     }
   }
 
-  // minimatch.match parity
-  if (negated && keep.length === 0) {
-    if (options && options.unixify === false) {
-      keep = list.slice();
-    } else {
-      var unixify = utils.unixify(options);
-      for (var i = 0; i < list.length; i++) {
-        keep.push(unixify(list[i]));
-      }
-    }
-  }
-
   var matches = utils.diff(keep, omit);
   if (!options || options.nodupes !== false) {
     return utils.unique(matches);
@@ -519,7 +507,11 @@ micromatch.matcher = function matcher(pattern, options) {
   }
 
   var fn = test(re);
-  fn.result = re.result;
+  Object.defineProperty(fn, 'result', {
+    configurable: true,
+    enumerable: false,
+    value: re.result
+  });
   return fn;
 };
 
@@ -558,7 +550,11 @@ micromatch.makeRe = function(pattern, options) {
     });
 
     var regex = toRegex(output.join('|'), options);
-    regex.result = asts;
+    Object.defineProperty(regex, 'result', {
+      configurable: true,
+      enumerable: false,
+      value: asts
+    });
     return regex;
   }
 
@@ -590,6 +586,9 @@ micromatch.braces = function(pattern, options) {
   function expand() {
     if (options && options.nobrace === true) return [pattern];
     if (!/\{.*\}/.test(pattern)) return [pattern];
+    // if (/[!@*?+]\{/.test(pattern)) {
+    //   options = utils.extend({}, options, {expand: true});
+    // }
     return braces(pattern, options);
   }
 
