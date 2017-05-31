@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "homepage": "https://github.com/micromatch/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
@@ -50,9 +50,9 @@
   },
   "devDependencies": {
     "bash-match": "^0.2.0",
-    "extend-shallow": "^2.0.1",
     "for-own": "^1.0.0",
     "gulp": "^3.9.1",
+    "gulp-format-md": "^0.1.12",
     "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.0",
     "gulp-unused": "^0.2.1",
