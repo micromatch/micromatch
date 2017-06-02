@@ -34,30 +34,30 @@
     "test": "mocha"
   },
   "dependencies": {
-    "arr-diff": "^3.0.0",
+    "arr-diff": "^4.0.0",
     "array-unique": "^0.3.2",
-    "braces": "^2.0.3",
-    "define-property": "^0.2.5",
+    "braces": "^2.2.2",
+    "define-property": "^1.0.0",
     "extend-shallow": "^2.0.1",
     "extglob": "^1.1.0",
     "fragment-cache": "^0.2.1",
-    "kind-of": "^3.1.0",
-    "nanomatch": "^1.1.1",
+    "kind-of": "^4.0.0",
+    "nanomatch": "^1.2.0",
     "object.pick": "^1.2.0",
     "regex-not": "^1.0.0",
     "snapdragon": "^0.8.1",
     "to-regex": "^3.0.1"
   },
   "devDependencies": {
-    "bash-match": "^0.2.0",
+    "bash-match": "^1.0.2",
     "for-own": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-format-md": "^0.1.12",
     "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.0",
+    "gulp-mocha": "^4.3.1",
     "gulp-unused": "^0.2.1",
     "is-windows": "^1.0.1",
-    "minimatch": "^3.0.3",
+    "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
     "mocha": "^3.4.2",
     "multimatch": "^2.1.0"
@@ -93,8 +93,14 @@
   ],
   "lintDeps": {
     "dependencies": {
-      "lock": {
-        "snapdragon": "^0.8.1"
+      "files": [
+        "index.js",
+        "lib/**"
+      ],
+      "options": {
+        "lock": {
+          "snapdragon": "^0.8.1"
+        }
       }
     },
     "devDependencies": {
@@ -135,12 +141,12 @@
       "reflinks": true
     },
     "reflinks": [
+      "expand-brackets",
       "extglob",
       "glob-object",
       "minimatch",
       "multimatch",
-      "snapdragon",
-      "expand-brackets"
+      "snapdragon"
     ]
   }
 }
