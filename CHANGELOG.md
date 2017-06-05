@@ -13,7 +13,7 @@ Changelog entries are classified using the following labels _(from [keep-a-chang
 
 ### [3.0.0] - 2017-04-11
 
-TODO
+TODO. There should be no breaking changes. Please report any regressions. I will [reformat these release notes](https://github.com/micromatch/micromatch/pull/76) and add them to the changelog as soon as I have a chance. 
 
 ### [1.0.1] - 2016-12-12
 
