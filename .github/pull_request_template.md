@@ -16,7 +16,7 @@ Please don't hesitate to [ask questions][issues] for clarification, or to [make 
 
 ## Description
 
-To help the project's maintainers and community to quickly understand the nature of your pull requeset, please create a description that incorporates the following elements:
+To help the project's maintainers and community to quickly understand the nature of your pull request, please create a description that incorporates the following elements:
 
 - [] what is accomplished by the pr
 - [] if there is something potentially controversial in your pr, please take a moment to tell us about your choices
