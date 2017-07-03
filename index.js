@@ -344,7 +344,8 @@ micromatch.not = function(list, patterns, options) {
   var ignore = opts.ignore;
   delete opts.ignore;
 
-  list = utils.arrayify(list);
+  var unixify = utils.unixify(opts);
+  list = utils.arrayify(list).map(unixify);
 
   var matches = utils.diff(list, micromatch(list, patterns, opts));
   if (ignore) {
