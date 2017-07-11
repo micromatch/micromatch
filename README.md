@@ -1,4 +1,4 @@
-# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
+# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch)  [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
@@ -326,7 +326,7 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L377)
+### [.contains](index.js#L378)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -349,7 +349,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L433)
+### [.matchKeys](index.js#L434)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -371,7 +371,7 @@ console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.matcher](index.js#L462)
+### [.matcher](index.js#L463)
 
 Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
@@ -394,7 +394,7 @@ console.log(isMatch('a.b'));
 //=> true
 ```
 
-### [.makeRe](index.js#L534)
+### [.makeRe](index.js#L535)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -414,7 +414,7 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.braces](index.js#L581)
+### [.braces](index.js#L582)
 
 Expand the given brace `pattern`.
 
@@ -435,7 +435,7 @@ console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
 //=> ['foo/(a|b)/bar']
 ```
 
-### [.create](index.js#L648)
+### [.create](index.js#L649)
 
 Parses the given glob `pattern` and returns an array of abstract syntax trees (ASTs), with the compiled `output` and optional source `map` on each AST.
 
@@ -477,7 +477,7 @@ console.log(mm.create('abc/*.js'));
 //   idx: 6 }]
 ```
 
-### [.parse](index.js#L695)
+### [.parse](index.js#L696)
 
 Parse the given `str` with the given `options`.
 
@@ -510,7 +510,7 @@ console.log(ast);
 //      { type: 'eos', val: '' } ] }
 ```
 
-### [.compile](index.js#L748)
+### [.compile](index.js#L749)
 
 Compile the given `ast` or string with the given `options`.
 
@@ -544,7 +544,7 @@ console.log(mm.compile(ast));
 //   parsingErrors: [] }
 ```
 
-### [.clearCache](index.js#L769)
+### [.clearCache](index.js#L770)
 
 Clear the regex cache.
 
@@ -832,7 +832,7 @@ Micromatch also supports extended globbing features.
 
 Extended globbing, as described by the bash man page:
 
-| **pattern** | **regex equivalent** | **description** | 
+| **pattern** | **regex equivalent** | **description** |
 | --- | --- | --- |
 | `?(pattern)` | `(pattern)?` | Matches zero or one occurrence of the given patterns |
 | `*(pattern)` | `(pattern)*` | Matches zero or more occurrences of the given patterns |
@@ -953,7 +953,7 @@ npm i -d && npm run benchmark
 
 ### Latest results
 
-As of June 02, 2017 (longer bars are better):
+As of July 11, 2017 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
@@ -1016,7 +1016,7 @@ multimatch ███████████████ (2,970 ops/sec)
 * [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
 * [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/jonschlinkert/extglob) | [homepage](https://github.com/jonschlinkert/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
 * [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
-* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/jonschlinkert/nanomatch) | [homepage](https://github.com/jonschlinkert/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
+* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
 
 ### Contributing
 
@@ -1026,19 +1026,19 @@ Please read the [contributing guide](.github/contributing.md) for advice on open
 
 ### Contributors
 
-| **Commits** | **Contributor** | 
-| --- | --- |
-| 423 | [jonschlinkert](https://github.com/jonschlinkert) |
-| 12 | [es128](https://github.com/es128) |
-| 3 | [paulmillr](https://github.com/paulmillr) |
-| 2 | [TrySound](https://github.com/TrySound) |
-| 2 | [doowb](https://github.com/doowb) |
-| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
-| 2 | [tunnckoCore](https://github.com/tunnckoCore) |
-| 1 | [amilajack](https://github.com/amilajack) |
-| 1 | [DianeLooney](https://github.com/DianeLooney) |
-| 1 | [UltCombo](https://github.com/UltCombo) |
-| 1 | [tomByrer](https://github.com/tomByrer) |
+| **Commits** | **Contributor** |  
+| --- | --- |  
+| 429 | [jonschlinkert](https://github.com/jonschlinkert) |  
+| 12  | [es128](https://github.com/es128) |  
+| 4   | [doowb](https://github.com/doowb) |  
+| 3   | [paulmillr](https://github.com/paulmillr) |  
+| 2   | [TrySound](https://github.com/TrySound) |  
+| 2   | [MartinKolarik](https://github.com/MartinKolarik) |  
+| 2   | [tunnckoCore](https://github.com/tunnckoCore) |  
+| 1   | [amilajack](https://github.com/amilajack) |  
+| 1   | [DianeLooney](https://github.com/DianeLooney) |  
+| 1   | [UltCombo](https://github.com/UltCombo) |  
+| 1   | [tomByrer](https://github.com/tomByrer) |  
 
 ### Building docs
 
@@ -1072,4 +1072,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on June 02, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on July 11, 2017._
