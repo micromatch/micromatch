@@ -49,6 +49,13 @@ describe('extglobs', function() {
     mm(['a.js', 'a.txt', 'a.md'], 'a.!(js)*', ['a.md', 'a.txt']);
   });
 
+  it('handles extglobs and patterns, issues 100, 102, 103', function() {
+    mm(['foo/MyDir/MyFile.jsx'], 'foo/MyDir/**/*.+(js|jsx)', ['foo/MyDir/MyFile.jsx']);
+    mm(['file.txt'], '**/!(folder).txt', ['file.txt']);
+    mm(['a/dir/file.txt'], '*/dir/**/!(folder).txt', ['a/dir/file.txt']);
+    mm(['a/b/c.txt', 'a/b/cc.txt'], '*/b/!(c).txt', ['a/b/cc.txt']);
+  });
+
   it('should support negation', function() {
     var arr = ['a', 'b', 'aa', 'ab', 'bb', 'ac', 'aaa', 'aab', 'abb', 'ccc'];
     mm(arr, '!(a)*', ['b', 'bb', 'ccc']);
