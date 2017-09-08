@@ -4,8 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var repeat = require('repeat-string');
 
-function bench() {
-  var filepath = path.join(__dirname, 'last.md');
+function bench(filepath) {
   var str = fs.readFileSync(filepath, 'utf8');
   var sections = str.split(/(?=\n?(?:# benchmark))/);
   sections.shift();
