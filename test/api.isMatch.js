@@ -165,11 +165,20 @@ describe('.isMatch():', function() {
       assert(!mm.isMatch('a/z.js', 'a/b/**/*.js'));
       assert(!mm.isMatch('z.js', 'a/b/**/*.js'));
 
-      // issue #23
+      // https://github.com/micromatch/micromatch/issues/15
+      assert(mm.isMatch('z.js', 'z*'));
+      assert(mm.isMatch('z.js', '**/z*'));
+      assert(mm.isMatch('z.js', '**/z*.js'));
+      assert(mm.isMatch('z.js', '**/*.js'));
+      assert(mm.isMatch('foo', '**/foo'));
+    });
+
+    it('issue #23', function() {
       assert(!mm.isMatch('zzjs', 'z*.js'));
       assert(!mm.isMatch('zzjs', '*z.js'));
+    });
 
-      // issue #24
+    it('issue #24', function() {
       assert(mm.isMatch('a', '**'));
       assert(!mm.isMatch('a', 'a/**'));
       assert(mm.isMatch('a/', '**'));
@@ -188,14 +197,6 @@ describe('.isMatch():', function() {
       assert(mm.isMatch('a/b/c/d/e.f', 'a/b/**/d/**/*.*'));
       assert(mm.isMatch('a/b/c/d/g/e.f', 'a/b/**/d/**/*.*'));
       assert(mm.isMatch('a/b/c/d/g/g/e.f', 'a/b/**/d/**/*.*'));
-
-      // https://github.com/micromatch/micromatch/issues/15
-      assert(mm.isMatch('z.js', 'z*'));
-      assert(mm.isMatch('z.js', '**/z*'));
-      assert(mm.isMatch('z.js', '**/z*.js'));
-      assert(mm.isMatch('z.js', '**/*.js'));
-      assert(mm.isMatch('foo', '**/foo'));
-
       assert(mm.isMatch('a/b-c/z.js', 'a/b-*/**/z.js'));
       assert(mm.isMatch('a/b-c/d/e/z.js', 'a/b-*/**/z.js'));
     });

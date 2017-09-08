@@ -17,6 +17,20 @@ describe('extglobs', function() {
     path.sep = sep;
   });
 
+  it('should match extglobs with wildcards (issue #100)', function() {
+    mm(['foo/bar/baz.jsx'], 'foo/bar/*.+(js|jsx)', ['foo/bar/baz.jsx']);
+    mm(['foo/bar/baz.jsx'], 'foo/bar/**/*.+(js|jsx)', ['foo/bar/baz.jsx']);
+    mm(['foo.txt'], '**/!(bar).txt', ['foo.txt']);
+    mm(['a/dir/foo.txt'], '*/dir/**/!(bar).txt', ['a/dir/foo.txt']);
+    mm(['a/b/c.txt', 'a/b/cc.txt'], '*/b/!(c).txt', []);
+    mm(['a/b/c.txt', 'a/b/cc.txt'], '*/b/!(*).txt', []);
+    mm(['a/b/c.txt', 'a/b/cc.txt'], '*/b/!(cc).txt', ['a/b/c.txt']);
+    mm(['b/c', 'b/cc'], 'b/!(cc)', ['b/c']);
+    mm(['b/c', 'b/ccc', 'b/cc'], 'b/!(c)', ['b/cc', 'b/ccc']);
+    mm(['b/c.txt', 'b/cc.txt'], 'b/!(cc).txt', ['b/c.txt']);
+    mm(['b/c.txt', 'b/cc.txt'], 'b/!(c).txt', []);
+  });
+
   it('should match extglobs ending with statechar', function() {
     // from minimatch tests
     assert(!mm.isMatch('ax', 'a?(b*)'));
@@ -47,13 +61,6 @@ describe('extglobs', function() {
     mm(['cz', 'abz', 'az'], 'a!(*)', []);
     mm(['a.js', 'a.txt', 'a.md'], 'a.!(js)', ['a.md', 'a.txt']);
     mm(['a.js', 'a.txt', 'a.md'], 'a.!(js)*', ['a.md', 'a.txt']);
-  });
-
-  it('handles extglobs and patterns, issues 100, 102, 103', function() {
-    mm(['foo/MyDir/MyFile.jsx'], 'foo/MyDir/**/*.+(js|jsx)', ['foo/MyDir/MyFile.jsx']);
-    mm(['file.txt'], '**/!(folder).txt', ['file.txt']);
-    mm(['a/dir/file.txt'], '*/dir/**/!(folder).txt', ['a/dir/file.txt']);
-    mm(['a/b/c.txt', 'a/b/cc.txt'], '*/b/!(c).txt', ['a/b/cc.txt']);
   });
 
   it('should support negation', function() {
