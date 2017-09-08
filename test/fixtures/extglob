@@ -163,7 +163,7 @@ t aaab       a??b
 t a          a?(x)
 
 t foo.js.js  *.!(js)
-t foo.js.js  *.!(js)*
+f foo.js.js  *.!(js)*
 f foo.js.js  *.!(js)+
 f foo.js.js  *.!(js)*.!(js)
 
@@ -195,6 +195,11 @@ t d.d            *!(.a|.b|.c)
 t e.e            *!(.a|.b|.c)
 t f.f            *!(.a|.b|.c)
 t a.abcd         *!(.a|.b|.c)
+
+t b/b.txt        b/!(c).txt
+f b/c.txt        b/!(c).txt
+f b/cc.txt       b/!(c).txt
+f b/ccc.txt      b/!(c).txt
 
 t *(a|b[)        *(a|b\\[)
 
