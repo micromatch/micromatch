@@ -1,9 +1,13 @@
-# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch)  [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
+# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
+Follow this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), for updates on this project and others.
+
+## Table of Contents
+
 <details>
-<summary><strong>Table of Contents</strong></summary>
+<summary><strong>Details</strong></summary>
 
 - [Install](#install)
 - [Quickstart](#quickstart)
@@ -158,7 +162,7 @@ console.log(mm(['a.js', 'a.txt'], ['*.js']));
 //=> [ 'a.js' ]
 ```
 
-### [.match](index.js#L95)
+### [.match](index.js#L93)
 
 Similar to the main function, but `pattern` must be a string.
 
@@ -179,7 +183,7 @@ console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
 //=> ['a.a', 'a.aa']
 ```
 
-### [.isMatch](index.js#L156)
+### [.isMatch](index.js#L154)
 
 Returns true if the specified `string` matches the given glob `pattern`.
 
@@ -202,7 +206,7 @@ console.log(mm.isMatch('a.b', '*.a'));
 //=> false
 ```
 
-### [.some](index.js#L194)
+### [.some](index.js#L192)
 
 Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
 
@@ -225,7 +229,7 @@ console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.every](index.js#L230)
+### [.every](index.js#L228)
 
 Returns true if every string in the given `list` matches any of the given glob `patterns`.
 
@@ -252,7 +256,7 @@ console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.any](index.js#L262)
+### [.any](index.js#L260)
 
 Returns true if **any** of the given glob `patterns` match the specified `string`.
 
@@ -275,7 +279,7 @@ console.log(mm.any('a.a', 'b.*'));
 //=> false
 ```
 
-### [.all](index.js#L310)
+### [.all](index.js#L308)
 
 Returns true if **all** of the given `patterns` match the specified string.
 
@@ -305,7 +309,7 @@ console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
 // true
 ```
 
-### [.not](index.js#L342)
+### [.not](index.js#L340)
 
 Returns a list of strings that _**do not match any**_ of the given `patterns`.
 
@@ -326,7 +330,7 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L378)
+### [.contains](index.js#L376)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -349,7 +353,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L434)
+### [.matchKeys](index.js#L432)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -371,7 +375,7 @@ console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.matcher](index.js#L463)
+### [.matcher](index.js#L461)
 
 Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
@@ -394,7 +398,7 @@ console.log(isMatch('a.b'));
 //=> true
 ```
 
-### [.makeRe](index.js#L535)
+### [.makeRe](index.js#L533)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -414,7 +418,7 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.braces](index.js#L582)
+### [.braces](index.js#L580)
 
 Expand the given brace `pattern`.
 
@@ -435,7 +439,7 @@ console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
 //=> ['foo/(a|b)/bar']
 ```
 
-### [.create](index.js#L649)
+### [.create](index.js#L647)
 
 Parses the given glob `pattern` and returns an array of abstract syntax trees (ASTs), with the compiled `output` and optional source `map` on each AST.
 
@@ -477,7 +481,7 @@ console.log(mm.create('abc/*.js'));
 //   idx: 6 }]
 ```
 
-### [.parse](index.js#L696)
+### [.parse](index.js#L694)
 
 Parse the given `str` with the given `options`.
 
@@ -510,7 +514,7 @@ console.log(ast);
 //      { type: 'eos', val: '' } ] }
 ```
 
-### [.compile](index.js#L749)
+### [.compile](index.js#L747)
 
 Compile the given `ast` or string with the given `options`.
 
@@ -544,7 +548,7 @@ console.log(mm.compile(ast));
 //   parsingErrors: [] }
 ```
 
-### [.clearCache](index.js#L770)
+### [.clearCache](index.js#L768)
 
 Clear the regex cache.
 
@@ -832,7 +836,7 @@ Micromatch also supports extended globbing features.
 
 Extended globbing, as described by the bash man page:
 
-| **pattern** | **regex equivalent** | **description** |
+| **pattern** | **regex equivalent** | **description** | 
 | --- | --- | --- |
 | `?(pattern)` | `(pattern)?` | Matches zero or one occurrence of the given patterns |
 | `*(pattern)` | `(pattern)*` | Matches zero or more occurrences of the given patterns |
@@ -953,7 +957,7 @@ npm i -d && npm run benchmark
 
 ### Latest results
 
-As of July 11, 2017 (longer bars are better):
+As of September 07, 2017 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list
@@ -1012,6 +1016,8 @@ multimatch ███████████████ (2,970 ops/sec)
 
 ### Related projects
 
+You might also be interested in these projects:
+
 * [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
 * [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
 * [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/jonschlinkert/extglob) | [homepage](https://github.com/jonschlinkert/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
@@ -1026,19 +1032,20 @@ Please read the [contributing guide](.github/contributing.md) for advice on open
 
 ### Contributors
 
-| **Commits** | **Contributor** |  
-| --- | --- |  
-| 429 | [jonschlinkert](https://github.com/jonschlinkert) |  
-| 12  | [es128](https://github.com/es128) |  
-| 4   | [doowb](https://github.com/doowb) |  
-| 3   | [paulmillr](https://github.com/paulmillr) |  
-| 2   | [TrySound](https://github.com/TrySound) |  
-| 2   | [MartinKolarik](https://github.com/MartinKolarik) |  
-| 2   | [tunnckoCore](https://github.com/tunnckoCore) |  
-| 1   | [amilajack](https://github.com/amilajack) |  
-| 1   | [DianeLooney](https://github.com/DianeLooney) |  
-| 1   | [UltCombo](https://github.com/UltCombo) |  
-| 1   | [tomByrer](https://github.com/tomByrer) |  
+| **Commits** | **Contributor** | 
+| --- | --- |
+| 430 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 12 | [es128](https://github.com/es128) |
+| 8 | [doowb](https://github.com/doowb) |
+| 3 | [paulmillr](https://github.com/paulmillr) |
+| 2 | [TrySound](https://github.com/TrySound) |
+| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
+| 2 | [charlike](https://github.com/charlike) |
+| 1 | [amilajack](https://github.com/amilajack) |
+| 1 | [DianeLooney](https://github.com/DianeLooney) |
+| 1 | [UltCombo](https://github.com/UltCombo) |
+| 1 | [tomByrer](https://github.com/tomByrer) |
+| 1 | [fidian](https://github.com/fidian) |
 
 ### Building docs
 
@@ -1072,4 +1079,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on July 11, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on September 07, 2017._
