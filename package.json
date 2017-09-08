@@ -94,10 +94,6 @@
   ],
   "lintDeps": {
     "dependencies": {
-      "files": [
-        "index.js",
-        "lib/**"
-      ],
       "options": {
         "lock": {
           "snapdragon": "^0.8.1"
@@ -105,16 +101,13 @@
       }
     },
     "devDependencies": {
-      "options": {
-        "ignore": [
-          "benchmark/**"
-        ]
-      },
-      "files": [
-        "examples/*.js",
-        "gulpfile.js",
-        "test/**/*.js"
-      ]
+      "files": {
+        "options": {
+          "ignore": [
+            "benchmark/**"
+          ]
+        }
+      }
     }
   },
   "verb": {
