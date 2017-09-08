@@ -33,7 +33,7 @@ describe('.isMatch', function() {
             actual = true;
           } else if (/^\?/.test(pattern)) {
             actual = true;
-          } else if (!isWindows() && !isTravis)  {
+          } else if (!isWindows() && !isTravis) {
             actual = miRes === mi.bash.isMatch(fixture, pattern);
           } else {
             this.skip();
@@ -56,7 +56,7 @@ describe('.isMatch', function() {
             actual = true;
           } else if (/^\?/.test(pattern) || /^\.\//.test(fixture)) {
             actual = true;
-          } else if (!isWindows() && !isTravis)  {
+          } else if (!isWindows() && !isTravis) {
             actual = miRes === mi.bash.isMatch(fixture, pattern, {dot: true});
           } else {
             this.skip();

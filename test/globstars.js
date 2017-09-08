@@ -77,13 +77,13 @@ describe('globstars', function() {
   it('should respect trailing slashes on paterns', function() {
     var fixtures = ['a', 'a/', 'b', 'b/', 'a/a', 'a/a/', 'a/b', 'a/b/', 'a/c', 'a/c/', 'a/x', 'a/x/', 'a/a/a', 'a/a/b', 'a/a/b/', 'a/a/a/', 'a/a/a/a', 'a/a/a/a/', 'a/a/a/a/a', 'a/a/a/a/a/', 'x/y', 'z/z', 'x/y/', 'z/z/', 'a/b/c/.d/e/'];
 
-    console.log(mi.makeRe('**/*/a/'))
-    console.log(mm.makeRe('(|**/)*/a/'))
+    console.log(mi.makeRe('**/*/a/'));
+    console.log(mm.makeRe('(|**/)*/a/'));
     var re = mi.makeRe('{,**/}*/a/');
     var res = fixtures.filter(function(p) {
       return re.test(p);
     });
-    console.log(res)
+    console.log(res);
 
     mm(fixtures, '**/*/a/', ['a/a/', 'a/a/a/', 'a/a/a/a/', 'a/a/a/a/a/']);
     mm(fixtures, '**/*/a/*/', ['a/a/a/', 'a/a/a/a/', 'a/a/a/a/a/', 'a/a/b/']);

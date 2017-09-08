@@ -51,7 +51,6 @@ function micromatch(list, patterns, options) {
     return micromatch.match(list, patterns[0], options);
   }
 
-  var negated = false;
   var omit = [];
   var keep = [];
   var idx = -1;
@@ -61,7 +60,6 @@ function micromatch(list, patterns, options) {
 
     if (typeof pattern === 'string' && pattern.charCodeAt(0) === 33 /* ! */) {
       omit.push.apply(omit, micromatch.match(list, pattern.slice(1), options));
-      negated = true;
     } else {
       keep.push.apply(keep, micromatch.match(list, pattern, options));
     }

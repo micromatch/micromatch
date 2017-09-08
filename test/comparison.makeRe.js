@@ -3,7 +3,6 @@
 var isTravis = process.env.CI || process.env.TRAVIS;
 var isWindows = require('is-windows');
 var assert = require('assert');
-var bash = require('bash-match');
 var mm = require('minimatch');
 var mi = require('./support/matcher');
 
@@ -32,7 +31,7 @@ describe('.makeRe', function() {
           // tie-breaker
           if (miRes === mm(fixture, pattern) || /^\?/.test(pattern)) {
             actual = true;
-          } else if (!isWindows() && !isTravis)  {
+          } else if (!isWindows() && !isTravis) {
             actual = miRes === mi.bash.isMatch(fixture, pattern);
           } else {
             this.skip();
@@ -55,7 +54,7 @@ describe('.makeRe', function() {
             actual = true;
           } else if (/^\?/.test(pattern) || /^\.\//.test(fixture)) {
             actual = true;
-          } else if (!isWindows() && !isTravis)  {
+          } else if (!isWindows() && !isTravis) {
             actual = miRes === mi.bash.isMatch(fixture, pattern, {dot: true});
           } else {
             this.skip();
@@ -78,7 +77,7 @@ describe('.makeRe', function() {
             actual = true;
           } else if (/^\?/.test(pattern) || /^\!/.test(fixture)) {
             actual = true;
-          } else if (!isWindows() && !isTravis)  {
+          } else if (!isWindows() && !isTravis) {
             actual = miRes === mi.bash.isMatch(fixture, pattern, {nonegate: true});
           } else {
             this.skip();

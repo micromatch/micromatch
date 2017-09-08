@@ -1,6 +1,5 @@
 'use strict';
 
-var mi = require('minimatch');
 var isWindows = require('is-windows');
 var mm = require('./support/match');
 
