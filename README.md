@@ -398,7 +398,30 @@ console.log(isMatch('a.b'));
 //=> true
 ```
 
-### [.makeRe](index.js#L533)
+### [.capture](index.js#L536)
+
+Returns an array of matches captured by `pattern` in `string, or`null` if the pattern did not match.
+
+**Params**
+
+* `pattern` **{String}**: Glob pattern to use for matching.
+* `string` **{String}**: String to match
+* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* `returns` **{Boolean}**: Returns an array of captures if the string matches the glob pattern, otherwise `null`.
+
+**Example**
+
+```js
+var mm = require('micromatch');
+mm.capture(pattern, string[, options]);
+
+console.log(mm.capture('test/*.js', 'test/foo.js));
+//=> ['foo']
+console.log(mm.capture('test/*.js', 'foo/bar.css'));
+//=> null
+```
+
+### [.makeRe](index.js#L571)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -418,7 +441,7 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.braces](index.js#L580)
+### [.braces](index.js#L618)
 
 Expand the given brace `pattern`.
 
@@ -439,7 +462,7 @@ console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
 //=> ['foo/(a|b)/bar']
 ```
 
-### [.create](index.js#L647)
+### [.create](index.js#L685)
 
 Parses the given glob `pattern` and returns an array of abstract syntax trees (ASTs), with the compiled `output` and optional source `map` on each AST.
 
@@ -481,7 +504,7 @@ console.log(mm.create('abc/*.js'));
 //   idx: 6 }]
 ```
 
-### [.parse](index.js#L694)
+### [.parse](index.js#L732)
 
 Parse the given `str` with the given `options`.
 
@@ -514,7 +537,7 @@ console.log(ast);
 //      { type: 'eos', val: '' } ] }
 ```
 
-### [.compile](index.js#L747)
+### [.compile](index.js#L785)
 
 Compile the given `ast` or string with the given `options`.
 
@@ -548,7 +571,7 @@ console.log(mm.compile(ast));
 //   parsingErrors: [] }
 ```
 
-### [.clearCache](index.js#L768)
+### [.clearCache](index.js#L806)
 
 Clear the regex cache.
 
