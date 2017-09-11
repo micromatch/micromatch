@@ -515,6 +515,44 @@ micromatch.matcher = function matcher(pattern, options) {
 };
 
 /**
+ * Returns an array of matches captured by `pattern` in `string, or `null` if the pattern did not match.
+ *
+ * ```js
+ * var mm = require('micromatch');
+ * mm.capture(pattern, string[, options]);
+ *
+ * console.log(mm.capture('test/*.js', 'test/foo.js));
+ * //=> ['foo']
+ * console.log(mm.capture('test/*.js', 'foo/bar.css'));
+ * //=> null
+ * ```
+ * @param {String} `pattern` Glob pattern to use for matching.
+ * @param {String} `string` String to match
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns an array of captures if the string matches the glob pattern, otherwise `null`.
+ * @api public
+ */
+
+micromatch.capture = function(pattern, str, options) {
+  var re = micromatch.makeRe(pattern, extend({capture: true}, options));
+  var unixify = utils.unixify(options);
+
+  function match() {
+    return function(string) {
+      var match = re.exec(unixify(string));
+      if (!match) {
+        return null;
+      }
+
+      return match.slice(1);
+    };
+  }
+
+  var capture = memoize('capture', pattern, options, match);
+  return capture(str);
+};
+
+/**
  * Create a regular expression from the given glob `pattern`.
  *
  * ```js
