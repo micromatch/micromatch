@@ -1,43 +1,14 @@
 'use strict';
 
-var path = require('path');
-var util = require('util');
-var cyan = require('ansi-cyan');
-var opts = { alias: {pattern: 'p' }};
-var argv = require('minimist')(process.argv.slice(2), opts);
-var isPrimitive = require('is-primitive');
-var isObject = require('is-object');
-var Suite = require('benchmarked');
+const path = require('path');
+const argv = require('minimist')(process.argv.slice(2));
+const suite = require('benchmarked');
+const write = require('write');
+const type = argv._[0] || 'match';
 
-function run(type, pattern) {
-  var suite = new Suite({
-    cwd: __dirname,
-    fixtures: path.join('fixtures', type, pattern || '*.js'),
-    code: path.join('code', type, '*.js')
-  });
-
-  if (argv.dry) {
-    console.log(type);
-    console.log();
-    suite.dryRun(function(code, fixture) {
-      console.log(cyan('%s > %s'), code.key, fixture.key);
-      var args = require(fixture.path);
-      var last = [];
-      if (args.length > 2) {
-        last = args.pop();
-      }
-      var expected = util.inspect(last, {depth: null});
-      var res = code.run.apply(null, args);
-      console.log(util.inspect(res, {depth: null}));
-      if (Array.isArray(res)) {
-        console.log();
-        console.log(cyan('  total:'), res.length, 'items');
-      }
-      console.log();
-    });
-  } else {
-    suite.run();
-  }
-}
-
-run(argv._[0] || 'match', argv._[1] || argv.pattern);
+suite.run({code: `code/${type}/*.js`, fixtures: `fixtures/${type}/*.js`})
+  .then(function(stats) {
+    write.sync(path.join(__dirname, 'stats.json'), JSON.stringify(stats, null, 2))
+    write.sync(path.join(__dirname, 'stats.md'), suite.render(stats));
+  })
+  .catch(console.error);

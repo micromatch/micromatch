@@ -1,0 +1,27 @@
+module.exports = [
+  [
+    "a00.js",
+    "b00.js",
+    "c00.js",
+    "d00.js",
+    "e00.js",
+    "f00.js",
+    "g00.js",
+    "h00.js",
+    "i00.js",
+    "j00.js",
+    "k00.js",
+    "l00.js",
+    "m00.js",
+    "n00.js",
+    "o00.js",
+    "p00.js",
+    "q00.js",
+    "r00.js",
+    "s00.js",
+    "t00.js",
+    "u00.js",
+    "v00.js"
+  ],
+  "c*3.txt"
+];

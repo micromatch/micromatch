@@ -3,8 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "scripts": {
-    "test": "mocha"
+  "devDependencies": {
+    "braces": "^2.2.2",
+    "longest": "^2.0.1",
+    "minimatch": "^3.0.4",
+    "multimatch": "^2.1.0",
+    "repeat-string": "^1.6.1"
+  },
+  "dependencies": {
+    "benchmarked": "^2.0.0",
+    "minimist": "^1.2.0",
+    "write": "^1.0.3"
   },
   "lintDeps": {
     "dependencies": {
@@ -20,17 +29,5 @@
         "*.js"
       ]
     }
-  },
-  "devDependencies": {
-    "ansi-cyan": "^0.1.1",
-    "benchmarked": "^1.1.1",
-    "braces": "^2.2.0",
-    "is-object": "^1.0.1",
-    "is-primitive": "^2.0.0",
-    "minimatch": "^3.0.4",
-    "minimist": "^1.2.0",
-    "multimatch": "^2.1.0",
-    "repeat-string": "^1.6.1",
-    "write": "^0.3.3"
   }
 }

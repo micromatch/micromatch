@@ -1,82 +1,79 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var repeat = require('repeat-string');
+const fs = require('fs');
+const repeat = require('repeat-string');
+const longest = require('longest');
 
-function bench(filepath) {
-  var str = fs.readFileSync(filepath, 'utf8');
-  var sections = str.split(/(?=\n?(?:# benchmark))/);
-  sections.shift();
+function render(filepath) {
+  const benchmarks = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+  const res = [];
 
-  var len = sections.length;
-  var idx = -1;
-  var res = [];
+  for (let i = 0; i < benchmarks.length; i++) {
+    const target = benchmarks[i];
+    const vals = values(target.results, 'hz');
+    const max = +Math.max.apply(Math, vals).toFixed();
 
-  while (++idx < len) {
-    var section = sections[idx].trim();
-    var tok = parseSection(section);
-    if (tok) res.push(tok);
+    const keys = values(target.results, 'name');
+    const len = longest(keys).length;
+    const names = {};
+    keys.forEach(function(key) {
+      names[key] = key + repeat(' ', len - key.length);
+    });
+
+    let b = `# ${target.name} ${target.file.bytes}\n`;
+
+    for (let i = 0; i < target.results.length; i++) {
+      const stats = target.results[i];
+      const name = names[stats.name];
+      b += `  ${name} ${bar(stats.hz, max)} (${stats.ops} ops/sec ±${stats.rme}%)`;
+      b += '\n';
+    }
+
+    b += `\n  ${target.fastest.join(', ')} is faster by an avg. of ${diff(target)}`;
+    b += '\n';
+    res.push(b);
   }
+  return res.join('\n').trim();
+};
 
-  return res.join('\n');
-}
+function diff(target) {
+  let len = target.results.length;
+  let fastest = 0;
+  let rest = 0;
 
-function parseSection(str) {
-  var lines = str.split('\n').filter(Boolean);
-  if (!lines.length) return;
-  var title = lines.shift().trim();
-  var m = /^.*\/fixtures\/match\/([^(]+)/.exec(title);
+  for (let i = 0; i < len; i++) {
+    let stats = target.results[i];
 
-  var tok = {title: (m ? m[1] : title).trim()};
-  tok.title = tok.title.slice(0, tok.title.length - 3);
-
-  tok.micromatch = parseStats(lines);
-  tok['minimatch '] = parseStats(lines);
-  tok.multimatch = parseStats(lines);
-  var vals = values(tok);
-  var max = Math.max.apply(Math, vals);
-
-  var str = '';
-  str += ['#', tok.title].join(' ') + '\n';
-  str += format('micromatch', tok, max, 100);
-  str += format('minimatch ', tok, max, 100);
-  str += format('multimatch', tok, max, 100);
-  // console.log(str)
-  return str;
-}
-
-function parseStats(lines) {
-  var str = lines.shift().trim();
-  var m = /^([^\s]+)\s*x\s*([\d,.]+)/.exec(str);
-  if (!m) return 0;
-  var str = m[2];
-  var num = String(str).split(',').join('');
-  return {
-    num: num,
-    str: str
-  };
-}
-
-function values(obj) {
-  var vals = [];
-  for (var key in obj) {
-    if (key === 'title') continue;
-    vals.push(obj[key].num);
+    if (target.fastest.indexOf(stats.name) !== -1) {
+      fastest = +stats.hz;
+    } else {
+      rest += +stats.hz;
+    }
   }
-  return vals;
+  var avg = (fastest / (+rest / (len - 1)) * 100);
+  return formatNumber(avg) + '%';
 }
 
-function bar(tok, longest, diff) {
-  return repeat('█', (tok.num / longest) * 50);
+function formatNumber(num) {
+  num = String(num.toFixed(num < 100 ? 2 : 0)).split('.');
+  return num[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',')
+    + (num[1] ? '.' + num[1] : '');
 }
 
-function format(name, tok, max, diff) {
-  return [name, bar(tok[name], max, diff), '(' + tok[name].str + ' ops/sec)', '\n'].join(' ');
+function values(results, prop) {
+  const res = [];
+  for (let val of results) {
+    res.push(val[prop]);
+  }
+  return res;
+}
+
+function bar(len, longest, max) {
+  return repeat('█', (len / longest) * (max || 50));
 }
 
 /**
  * Expose `.bench` helper
  */
 
-module.exports.bench = bench;
+module.exports.benchmarks = render;

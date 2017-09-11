@@ -957,59 +957,92 @@ npm i -d && npm run benchmark
 
 ### Latest results
 
-As of September 07, 2017 (longer bars are better):
+As of September 11, 2017 (longer bars are better):
 
 ```sh
-# braces-globstar-large-list
-micromatch ██████████████████████████████████████████████████ (595 ops/sec) 
-minimatch  █ (13.95 ops/sec) 
-multimatch █ (14.09 ops/sec) 
+# braces-globstar-large-list (485691 bytes)
+  micromatch ██████████████████████████████████████████████████ (517 ops/sec ±0.49%)
+  minimatch  █ (18.92 ops/sec ±0.54%)
+  multimatch █ (18.94 ops/sec ±0.62%)
 
-# braces-multiple
-micromatch ██████████████████████████████████████████████████ (48,362 ops/sec) 
-minimatch   (2.18 ops/sec) 
-multimatch  (2.15 ops/sec) 
+  micromatch is faster by an avg. of 2,733%
 
-# braces-range
-micromatch ██████████████████████████████████████████████████ (187,481 ops/sec) 
-minimatch  ███ (12,366 ops/sec) 
-multimatch ███ (11,841 ops/sec) 
+# braces-multiple (3362 bytes)
+  micromatch ██████████████████████████████████████████████████ (33,625 ops/sec ±0.45%)
+  minimatch   (2.92 ops/sec ±3.26%)
+  multimatch  (2.90 ops/sec ±2.76%)
 
-# braces-set
-micromatch ██████████████████████████████████████████████████ (24,344 ops/sec) 
-minimatch  ████ (2,255 ops/sec) 
-multimatch ████ (2,199 ops/sec) 
+  micromatch is faster by an avg. of 1,156,935%
 
-# globstar-large-list
-micromatch ██████████████████████████████████████████████████ (561 ops/sec) 
-minimatch  ██ (25.43 ops/sec) 
-multimatch ██ (25.27 ops/sec) 
+# braces-range (727 bytes)
+  micromatch █████████████████████████████████████████████████ (155,220 ops/sec ±0.56%)
+  minimatch  ██████ (20,186 ops/sec ±1.27%)
+  multimatch ██████ (19,809 ops/sec ±0.60%)
 
-# globstar-long-list
-micromatch ██████████████████████████████████████████████████ (3,257 ops/sec) 
-minimatch  ███████ (485 ops/sec) 
-multimatch ███████ (485 ops/sec) 
+  micromatch is faster by an avg. of 776%
 
-# globstar-short-list
-micromatch ██████████████████████████████████████████████████ (359,991 ops/sec) 
-minimatch  ██████ (44,763 ops/sec) 
-multimatch █████ (39,977 ops/sec) 
+# braces-set (2858 bytes)
+  micromatch █████████████████████████████████████████████████ (24,354 ops/sec ±0.92%)
+  minimatch  █████ (2,566 ops/sec ±0.56%)
+  multimatch ████ (2,431 ops/sec ±1.25%)
 
-# no-glob
-micromatch ██████████████████████████████████████████████████ (443,740 ops/sec) 
-minimatch  ████ (44,152 ops/sec) 
-multimatch ████ (41,077 ops/sec) 
+  micromatch is faster by an avg. of 975%
 
-# star-basename
-micromatch ██████████████████████████████████████████████████ (10,286 ops/sec) 
-minimatch  ██████████████ (3,059 ops/sec) 
-multimatch ███████████████ (3,129 ops/sec) 
+# globstar-large-list (485686 bytes)
+  micromatch █████████████████████████████████████████████████ (504 ops/sec ±0.45%)
+  minimatch  ███ (33.36 ops/sec ±1.08%)
+  multimatch ███ (33.19 ops/sec ±1.35%)
 
-# star
-micromatch ██████████████████████████████████████████████████ (9,756 ops/sec) 
-minimatch  ███████████████ (2,978 ops/sec) 
-multimatch ███████████████ (2,970 ops/sec) 
+  micromatch is faster by an avg. of 1,514%
 
+# globstar-long-list (90647 bytes)
+  micromatch ██████████████████████████████████████████████████ (2,694 ops/sec ±1.08%)
+  minimatch  ████████████████ (870 ops/sec ±1.09%)
+  multimatch ████████████████ (862 ops/sec ±0.84%)
+
+  micromatch is faster by an avg. of 311%
+
+# globstar-short-list (182 bytes)
+  micromatch ██████████████████████████████████████████████████ (328,921 ops/sec ±1.06%)
+  minimatch  █████████ (64,808 ops/sec ±1.42%)
+  multimatch ████████ (57,991 ops/sec ±2.11%)
+
+  micromatch is faster by an avg. of 536%
+
+# no-glob (701 bytes)
+  micromatch █████████████████████████████████████████████████ (415,935 ops/sec ±0.36%)
+  minimatch  ███████████ (92,730 ops/sec ±1.44%)
+  multimatch █████████ (81,958 ops/sec ±2.13%)
+
+  micromatch is faster by an avg. of 476%
+
+# star-basename-long (12339 bytes)
+  micromatch █████████████████████████████████████████████████ (7,963 ops/sec ±0.36%)
+  minimatch  ███████████████████████████████ (5,072 ops/sec ±0.83%)
+  multimatch ███████████████████████████████ (5,028 ops/sec ±0.40%)
+
+  micromatch is faster by an avg. of 158%
+
+# star-basename-short (349 bytes)
+  micromatch ██████████████████████████████████████████████████ (269,552 ops/sec ±0.70%)
+  minimatch  ██████████████████████ (122,457 ops/sec ±1.39%)
+  multimatch ████████████████████ (110,788 ops/sec ±1.99%)
+
+  micromatch is faster by an avg. of 231%
+
+# star-folder-long (19207 bytes)
+  micromatch █████████████████████████████████████████████████ (3,806 ops/sec ±0.38%)
+  minimatch  ████████████████████████████ (2,204 ops/sec ±0.32%)
+  multimatch ██████████████████████████ (2,020 ops/sec ±1.07%)
+
+  micromatch is faster by an avg. of 180%
+
+# star-folder-short (551 bytes)
+  micromatch ██████████████████████████████████████████████████ (249,077 ops/sec ±0.40%)
+  minimatch  ███████████ (59,431 ops/sec ±1.67%)
+  multimatch ███████████ (55,569 ops/sec ±1.43%)
+
+  micromatch is faster by an avg. of 433%
 ```
 
 ## About
@@ -1034,7 +1067,7 @@ Please read the [contributing guide](.github/contributing.md) for advice on open
 
 | **Commits** | **Contributor** | 
 | --- | --- |
-| 430 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 439 | [jonschlinkert](https://github.com/jonschlinkert) |
 | 12 | [es128](https://github.com/es128) |
 | 8 | [doowb](https://github.com/doowb) |
 | 3 | [paulmillr](https://github.com/paulmillr) |
@@ -1079,4 +1112,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on September 07, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on September 11, 2017._
