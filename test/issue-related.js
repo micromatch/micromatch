@@ -2,9 +2,19 @@
 
 var assert = require('assert');
 var mini = require('minimatch');
-var mm = require('./support/match');
+var mm = require('..');
 
 describe('issue-related tests', function() {
+  // https://github.com/micromatch/micromatch/issues/108
+  it('issue micromatch#108', function() {
+    var fixture = './css/foo{.css,**/*.css}';
+    assert(mm.isMatch('./css/foo/bar.css', fixture));
+    assert.deepEqual(mm(['./css/foo/bar.css'], fixture), ['css/foo/bar.css']);
+
+    assert(mm.isMatch('.\\css\\foo\\bar.css', fixture, {unixify: true}));
+    assert.deepEqual(mm(['.\\css\\foo\\bar.css'], fixture, {unixify: true}), ['css/foo/bar.css']);
+  });
+
   // see https://github.com/jonschlinkert/micromatch/issues/15
   it('issue #15', function() {
     assert(mm.isMatch('a/b-c/d/e/z.js', 'a/b-*/**/z.js'));
