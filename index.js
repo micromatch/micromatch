@@ -521,7 +521,7 @@ micromatch.matcher = function matcher(pattern, options) {
  * var mm = require('micromatch');
  * mm.capture(pattern, string[, options]);
  *
- * console.log(mm.capture('test/*.js', 'test/foo.js));
+ * console.log(mm.capture('test/*.js', 'test/foo.js'));
  * //=> ['foo']
  * console.log(mm.capture('test/*.js', 'foo/bar.css'));
  * //=> null
@@ -579,10 +579,10 @@ micromatch.makeRe = function(pattern, options) {
 
   function makeRe() {
     var result = micromatch.create(pattern, options);
-    var asts = [];
+    var ast_array = [];
     var output = result.map(function(obj) {
       obj.ast.state = obj.state;
-      asts.push(obj.ast);
+      ast_array.push(obj.ast);
       return obj.output;
     });
 
@@ -590,7 +590,7 @@ micromatch.makeRe = function(pattern, options) {
     Object.defineProperty(regex, 'result', {
       configurable: true,
       enumerable: false,
-      value: asts
+      value: ast_array
     });
     return regex;
   }
