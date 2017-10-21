@@ -2,7 +2,7 @@
 
 > Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
-Follow this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), for updates on this project and others.
+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
 ## Table of Contents
 
@@ -102,7 +102,7 @@ console.log(mm.isMatch('foo', 'f*'));
 * Support for multiple glob patterns (no need for wrappers like multimatch)
 * Wildcards (`**`, `*.js`)
 * Negation (`'!a/*.js'`, `'*!(b).js']`)
-* [extglobs](https://github.com/jonschlinkert/extglob) (`+(x|y)`, `!(a|b)`)
+* [extglobs](https://github.com/micromatch/extglob) (`+(x|y)`, `!(a|b)`)
 * [POSIX character classes](https://github.com/micromatch/expand-brackets) (`[[:alpha:][:digit:]]`)
 * [brace expansion](https://github.com/micromatch/braces) (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
 * regex character classes (`foo-[1-5].js`)
@@ -415,7 +415,7 @@ Returns an array of matches captured by `pattern` in `string, or`null` if the pa
 var mm = require('micromatch');
 mm.capture(pattern, string[, options]);
 
-console.log(mm.capture('test/*.js', 'test/foo.js));
+console.log(mm.capture('test/*.js', 'test/foo.js'));
 //=> ['foo']
 console.log(mm.capture('test/*.js', 'foo/bar.css'));
 //=> null
@@ -869,7 +869,7 @@ Extended globbing, as described by the bash man page:
 
 <sup><strong>*</strong></sup> Note that `@` isn't a RegEx character.
 
-Powered by [extglob](https://github.com/jonschlinkert/extglob). Visit that library for the full range of options or to report extglob related issues.
+Powered by [extglob](https://github.com/micromatch/extglob). Visit that library for the full range of options or to report extglob related issues.
 
 ### braces
 
@@ -980,7 +980,7 @@ npm i -d && npm run benchmark
 
 ### Latest results
 
-As of September 11, 2017 (longer bars are better):
+As of October 20, 2017 (longer bars are better):
 
 ```sh
 # braces-globstar-large-list (485691 bytes)
@@ -1070,40 +1070,28 @@ As of September 11, 2017 (longer bars are better):
 
 ## About
 
-### Related projects
-
-You might also be interested in these projects:
-
-* [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
-* [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
-* [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/jonschlinkert/extglob) | [homepage](https://github.com/jonschlinkert/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
-* [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
-* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
-
-### Contributing
+<details>
+<summary><strong>Contributing</strong></summary>
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
 Please read the [contributing guide](.github/contributing.md) for advice on opening issues, pull requests, and coding standards.
 
-### Contributors
+</details>
 
-| **Commits** | **Contributor** | 
-| --- | --- |
-| 439 | [jonschlinkert](https://github.com/jonschlinkert) |
-| 12 | [es128](https://github.com/es128) |
-| 8 | [doowb](https://github.com/doowb) |
-| 3 | [paulmillr](https://github.com/paulmillr) |
-| 2 | [TrySound](https://github.com/TrySound) |
-| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
-| 2 | [charlike](https://github.com/charlike) |
-| 1 | [amilajack](https://github.com/amilajack) |
-| 1 | [DianeLooney](https://github.com/DianeLooney) |
-| 1 | [UltCombo](https://github.com/UltCombo) |
-| 1 | [tomByrer](https://github.com/tomByrer) |
-| 1 | [fidian](https://github.com/fidian) |
+<details>
+<summary><strong>Running Tests</strong></summary>
 
-### Building docs
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+
+```sh
+$ npm install && npm test
+```
+
+</details>
+
+<details>
+<summary><strong>Building docs</strong></summary>
 
 _(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
@@ -1113,13 +1101,35 @@ To generate the readme, run the following command:
 $ npm install -g verbose/verb#dev verb-generate-readme && verb
 ```
 
-### Running tests
+</details>
 
-Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+### Related projects
 
-```sh
-$ npm install && npm test
-```
+You might also be interested in these projects:
+
+* [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
+* [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
+* [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/micromatch/extglob) | [homepage](https://github.com/micromatch/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
+* [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
+* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
+
+### Contributors
+
+| **Commits** | **Contributor** | 
+| --- | --- |
+| 443 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 12 | [es128](https://github.com/es128) |
+| 8 | [doowb](https://github.com/doowb) |
+| 3 | [paulmillr](https://github.com/paulmillr) |
+| 2 | [TrySound](https://github.com/TrySound) |
+| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
+| 2 | [olstenlarck-old](https://github.com/olstenlarck-old) |
+| 1 | [amilajack](https://github.com/amilajack) |
+| 1 | [devongovett](https://github.com/devongovett) |
+| 1 | [DianeLooney](https://github.com/DianeLooney) |
+| 1 | [UltCombo](https://github.com/UltCombo) |
+| 1 | [tomByrer](https://github.com/tomByrer) |
+| 1 | [fidian](https://github.com/fidian) |
 
 ### Author
 
@@ -1135,4 +1145,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on September 11, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on October 20, 2017._
