@@ -152,7 +152,7 @@ describe('bash options and features:', function() {
     });
 
     it('should not expand literal braces inside brackets', function() {
-      assert.deepEqual(mm.makeRe('foo[{a,b}]+baz'), /^(?:foo[{a,b}]+baz)$/);
+      assert.deepEqual(mm.makeRe('foo[{a,b}]+baz'), /^(?:(?:(?:\.(?:\/|\\))(?=.))?foo[{a,b}]+baz)$/);
       assert(match.isMatch('foo{}baz', 'foo[{a,b}]+baz'));
     });
 

@@ -5,7 +5,7 @@ var mm = require('./support/match');
 
 function create(pattern, options) {
   return mm.create(pattern, options).map(function(obj) {
-    return obj.output;
+    return obj.output.replace('(?:(?:\\.(?:\\/|\\\\))(?=.))?', '');
   }).join('|');
 }
 
@@ -132,8 +132,8 @@ describe('brackets', function() {
 
   describe('.makeRe()', function() {
     it('should make a regular expression for the given pattern:', function() {
-      assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:[a-zA-Z123])$/);
-      assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:[^a-z])$/);
+      assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:(?:\.(?:\/|\\))(?=.))?[a-zA-Z123])$/);
+      assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:(?:\.(?:\/|\\))(?=.))?[^a-z])$/);
     });
   });
 

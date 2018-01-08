@@ -35,7 +35,14 @@ describe('.compile()', function() {
         { type: 'bos', val: '' },
         { type: 'text', val: 'a' },
         { type: 'slash', val: '/' },
-        { type: 'globstar', val: '**' },
+        {
+          type: 'globstar',
+          val: '**',
+          isInside: {
+            brace: false,
+            paren: false
+          }
+        },
         { type: 'slash', val: '/' },
         { type: 'star', val: '*' },
         { type: 'eos', val: '' }

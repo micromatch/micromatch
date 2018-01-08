@@ -28,6 +28,7 @@ describe('.parse()', function() {
 
     ast = mm.parse('a/**/*');
     delete ast.state;
+
     assert.deepEqual(ast, {
       type: 'root',
       errors: [],
@@ -35,7 +36,14 @@ describe('.parse()', function() {
         { type: 'bos', val: '' },
         { type: 'text', val: 'a' },
         { type: 'slash', val: '/' },
-        { type: 'globstar', val: '**' },
+        {
+          type: 'globstar',
+          val: '**',
+          isInside: {
+            brace: false,
+            paren: false
+          }
+        },
         { type: 'slash', val: '/' },
         { type: 'star', val: '*' },
         { type: 'eos', val: '' }
