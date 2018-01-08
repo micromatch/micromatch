@@ -738,11 +738,6 @@ micromatch.parse = function(pattern, options) {
     var snapdragon = utils.instantiate(null, options);
     parsers(snapdragon, options);
 
-    if (pattern.slice(0, 2) === './') {
-      pattern = pattern.slice(2);
-    }
-
-    pattern = utils.combineDuplicates(pattern, '\\*\\*\\/|\\/\\*\\*');
     var ast = snapdragon.parse(pattern, options);
     utils.define(ast, 'snapdragon', snapdragon);
     ast.input = pattern;
