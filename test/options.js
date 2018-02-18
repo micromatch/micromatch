@@ -125,6 +125,10 @@ describe('options', function() {
   });
 
   describe('options.noext', function() {
+    it('should match when noext is true (issue #116)', function() {
+      assert(mm.isMatch('a/(dir)', 'a/(dir)', {noext: true}));
+    });
+
     it('should not match extglobs when noext is true', function() {
       assert(!mm.isMatch('ax', '?(a*|b)', {noext: true}));
       mm(['a.js.js', 'a.md.js'], '*.*(js).js', [], {noext: true});
