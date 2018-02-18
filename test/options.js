@@ -2,14 +2,17 @@
 
 var assert = require('assert');
 var path = require('path');
-var sep = path.sep;
 var mm = require('./support/match');
+var sep = path.sep;
 
 describe('options', function() {
   beforeEach(function() {
     path.sep = '\\';
   });
   afterEach(function() {
+    path.sep = sep;
+  });
+  after(function() {
     path.sep = sep;
   });
 

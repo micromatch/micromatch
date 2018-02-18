@@ -2,11 +2,15 @@
 
 var assert = require('assert');
 var path = require('path');
-var sep = path.sep;
 var matcher = require('./support/match');
 var mm = require('..');
+var sep = path.sep;
 
 describe('micromatch', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   describe('empty list', function() {
     it('should return an empty array', function() {
       matcher([], '*', []);

@@ -1,10 +1,14 @@
 'use strict';
 
 var path = require('path');
-var sep = path.sep;
 var mm = require('./support/match');
+var sep = path.sep;
 
 describe('.not()', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   describe('posix paths', function() {
     it('should return an array of matches for a literal string', function() {
       var fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];

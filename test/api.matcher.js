@@ -3,8 +3,13 @@
 var path = require('path');
 var assert = require('assert');
 var mm = require('./support/match');
+var sep = path.sep;
 
 describe('.matcher()', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   describe('errors', function() {
     it('should throw an error when arguments are invalid', function() {
       assert.throws(function() {
@@ -87,7 +92,6 @@ describe('.matcher()', function() {
   });
 
   describe('windows paths', function() {
-    var sep = path.sep;
     beforeEach(function() {
       path.sep = '\\';
     });

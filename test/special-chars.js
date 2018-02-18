@@ -4,8 +4,13 @@ var path = require('path');
 var assert = require('assert');
 var isWindows = require('is-windows');
 var mm = require('./support/match');
+var sep = path.sep;
 
 describe('special characters', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   describe('regex', function() {
     it('should match common regex characters', function() {
       var fixtures = ['a c', 'a1c', 'a123c', 'a.c', 'a.xy.zc', 'a.zc', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc', '^abc$'];
@@ -68,7 +73,6 @@ describe('special characters', function() {
         mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['\\', '\\\\', '\\\\\\']);
       }
 
-      var sep = path.sep;
       path.sep = '\\';
       assert(mm.isMatch('\\', '[\\\\/]'));
       assert(mm.isMatch('\\', '[\\\\/]+'));

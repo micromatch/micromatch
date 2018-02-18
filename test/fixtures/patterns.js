@@ -189,12 +189,12 @@ module.exports = [
   // ],
 
   // crazy nested {,,} and *(||) tests.
-  function () {
+  function() {
     fixtures = [
       'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
       'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
       'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'
-    ]
+    ];
   },
   ['*(a|{b,c})', ['a', 'b', 'c', 'ab', 'ac'], {expand: true}],
   // ['{a,*(b|c,d)}', ['a', '(b|c', '*(b|c', 'd)'], {expand: true}], //<= minimatch (wrong)

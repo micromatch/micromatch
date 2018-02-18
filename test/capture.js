@@ -1,3 +1,5 @@
+'use strict';
+
 var capture = require('../').capture;
 var assert = require('assert');
 

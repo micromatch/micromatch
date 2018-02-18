@@ -15,6 +15,6 @@ describe('.makeRe()', function() {
   });
 
   it('should create a regex for a string', function() {
-    assert.deepEqual(mm.makeRe('abc').source, '^(?:(?:(?:\\.(?:\\/|\\\\))(?=.))?abc)$');
+    assert.deepEqual(mm.makeRe('abc').source, '^(?:(?:\\.[\\\\\\/](?=.))?abc)$');
   });
 });

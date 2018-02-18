@@ -86,7 +86,7 @@ module.exports = [
   'a/b/c',
   'a/b/c/*',
   'a/b/c/**/*.js',
-  'a/b/c/*.js',
+  'a/b/c/*.js'
 ];
 
 module.exports.other = [

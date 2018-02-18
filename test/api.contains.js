@@ -1,11 +1,15 @@
 'use strict';
 
 var path = require('path');
-var sep = path.sep;
 var assert = require('assert');
 var mm = require('..');
+var sep = path.sep;
 
 describe('.contains()', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   describe('errors', function() {
     it('should throw an error arguments are invalid', function() {
       assert.throws(function() {

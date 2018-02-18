@@ -81,5 +81,5 @@ module.exports = [
   'a (foo)/(bar)',
   'a/b/c (1)',
   'a/b (2)/c (1)',
-  'a/b/c [def]',
+  'a/b/c [def]'
 ];

@@ -5,7 +5,7 @@ var mm = require('./support/match');
 
 function create(pattern, options) {
   return mm.create(pattern, options).map(function(obj) {
-    return obj.output.replace('(?:(?:\\.(?:\\/|\\\\))(?=.))?', '');
+    return obj.output.replace('(?:\\.[\\\\/](?=.))?', '');
   }).join('|');
 }
 
@@ -22,8 +22,8 @@ describe('brackets', function() {
       assert.equal(create('[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:xdigit:]]'), '[a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9\\x21-\\x7Ea-z\\x20-\\x7E \\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~ \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[^[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:lower:][:space:][:upper:][:xdigit:]]'), '[^a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9a-z \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(create('[a-c[:digit:]x-z]'), '[a-c0-9x-z]');
-      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*', {bash: false}), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?(?:(?:\\/|\\\\)|$)', []);
-      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9][^/]*?(?:(?:\\/|\\\\)|$)', []);
+      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*', {bash: false}), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9]*?(?:[\\\\/]|$)', []);
+      assert.equal(create('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9][^\\\\/]*?(?:[\\\\/]|$)', []);
     });
   });
 
@@ -132,8 +132,8 @@ describe('brackets', function() {
 
   describe('.makeRe()', function() {
     it('should make a regular expression for the given pattern:', function() {
-      assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:(?:\.(?:\/|\\))(?=.))?[a-zA-Z123])$/);
-      assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:(?:\.(?:\/|\\))(?=.))?[^a-z])$/);
+      assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:\.[\\\/](?=.))?[a-zA-Z123])$/);
+      assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:\.[\\\/](?=.))?[^a-z])$/);
     });
   });
 

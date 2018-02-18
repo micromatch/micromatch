@@ -6,12 +6,17 @@ var isWindows = require('is-windows');
 var extend = require('extend-shallow');
 var patterns = require('./fixtures/patterns');
 var mm = require('./support/match');
+var sep = path.sep;
 
 /**
  * Minimatch comparison tests
  */
 
 describe('basic tests', function() {
+  after(function() {
+    path.sep = sep;
+  });
+
   patterns.forEach(function(unit, i) {
     it(i + ': ' + unit[0], function() {
       if (typeof unit === 'string') {
@@ -98,7 +103,6 @@ describe('minimatch parity:', function() {
     });
 
     it('https://github.com/isaacs/minimatch/issues/78', function() {
-      var sep = path.sep;
       path.sep = '\\';
       assert(mm.isMatch('a\\b\\c.txt', 'a/**/*.txt'));
       assert(mm.isMatch('a/b/c.txt', 'a/**/*.txt'));

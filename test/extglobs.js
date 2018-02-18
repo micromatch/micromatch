@@ -16,6 +16,9 @@ describe('extglobs', function() {
   afterEach(function() {
     path.sep = sep;
   });
+  after(function() {
+    path.sep = sep;
+  });
 
   it('should match extglobs with wildcards (issue #100)', function() {
     mm(['foo/bar/baz.jsx'], 'foo/bar/*.+(js|jsx)', ['foo/bar/baz.jsx']);
