@@ -128,8 +128,18 @@ describe('options', function() {
   });
 
   describe('options.noext', function() {
-    it('should match when noext is true (issue #116)', function() {
+    it('should match literal parens when noext is true (issue #116)', function() {
       assert(mm.isMatch('a/(dir)', 'a/(dir)', {noext: true}));
+    });
+
+    it('should not escape word characters in extglobs', function() {
+      var res = mm.create('./test(dir)/foo.txt', {noext: true});
+      assert.equal(res[0].output, '(?:\\.[\\\\/](?=.))?test\\(dir\\)[\\\\/]foo\\.txt');
+    });
+
+    it.only('should escape non-word characters in extglobs', function() {
+      var res = mm.create('./test(+dir)/foo.txt', {noext: true});
+      assert.equal(res[0].output, '(?:\\.[\\\\/](?=.))?test\\(\\+dir\\)[\\\\/]foo\\.txt');
     });
 
     it('should not match extglobs when noext is true', function() {
