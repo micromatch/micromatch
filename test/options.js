@@ -87,6 +87,13 @@ describe('options', function() {
       mm(['a/b/c/foo.md'], '*.md', ['a/b/c/foo.md'], {basename: true});
       mm(['x/y/acb', 'acb/', 'acb/d/e', 'x/y/acb/d'], 'a?b', ['x/y/acb', 'acb/'], {basename: true});
     });
+
+    it('should work with negation patterns', function() {
+      assert(mm.isMatch("./x/y.js", "*.js", { matchBase: true }));
+      assert(!mm.isMatch("./x/y.js", "!*.js", { matchBase: true }));
+      assert(mm.isMatch("./x/y.js", "**/*.js", { matchBase: true }));
+      assert(!mm.isMatch("./x/y.js", "!**/*.js", { matchBase: true }));
+    });
   });
 
   describe('options.flags', function() {
