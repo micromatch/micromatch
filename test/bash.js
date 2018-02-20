@@ -4,6 +4,7 @@ require('mocha');
 var assert = require('assert');
 var isWindows = require('is-windows');
 var match = require('./support/match');
+var utils = require('../lib/utils');
 var mm = require('..');
 
 // from the Bash 4.3 specification/unit tests
@@ -152,8 +153,10 @@ describe('bash options and features:', function() {
     });
 
     it('should not expand literal braces inside brackets', function() {
-      assert.deepEqual(mm.makeRe('foo[{a,b}]+baz'), /^(?:(?:\.[\\\/](?=.))?foo[{a,b}]+baz)$/);
       assert(match.isMatch('foo{}baz', 'foo[{a,b}]+baz'));
+      if (!utils.isWindows()) {
+        assert.deepEqual(mm.makeRe('foo[{a,b}]+baz'), /^(?:(?:\.[\\\/](?=.))?foo[{a,b}]+baz)$/);
+      }
     });
 
     it('should match literal parens', function() {

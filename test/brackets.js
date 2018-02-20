@@ -2,6 +2,7 @@
 
 var assert = require('assert');
 var mm = require('./support/match');
+var utils = require('../lib/utils');
 
 function create(pattern, options) {
   return mm.create(pattern, options).map(function(obj) {
@@ -132,8 +133,10 @@ describe('brackets', function() {
 
   describe('.makeRe()', function() {
     it('should make a regular expression for the given pattern:', function() {
-      assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:\.[\\\/](?=.))?[a-zA-Z123])$/);
-      assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:\.[\\\/](?=.))?[^a-z])$/);
+      if (!utils.isWindows()) {
+        assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:\.[\\\/](?=.))?[a-zA-Z123])$/);
+        assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:\.[\\\/](?=.))?[^a-z])$/);
+      }
     });
   });
 
