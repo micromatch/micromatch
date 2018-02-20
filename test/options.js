@@ -137,7 +137,7 @@ describe('options', function() {
       assert.equal(res[0].output, '(?:\\.[\\\\/](?=.))?test\\(dir\\)[\\\\/]foo\\.txt');
     });
 
-    it.only('should escape non-word characters in extglobs', function() {
+    it('should escape non-word characters in extglobs', function() {
       var res = mm.create('./test(+dir)/foo.txt', {noext: true});
       assert.equal(res[0].output, '(?:\\.[\\\\/](?=.))?test\\(\\+dir\\)[\\\\/]foo\\.txt');
     });
