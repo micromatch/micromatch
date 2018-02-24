@@ -15,14 +15,12 @@ function optimize(pattern, options) {
   return mm.braces(pattern, extend({optimize: true}, options));
 }
 
-describe('expanded', function() {
+describe('braces - expanded', function() {
   it('should handle extglobs in braces', function() {
-    var fixtures = [
-      'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
-      'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
-      'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'
-    ];
+    var fixtures = ['a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d', 'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c', 'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'];
 
+    assert.deepEqual(mm(fixtures, ['a', '*(b|c,d)']), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
+    assert.deepEqual(mm(fixtures, '{a,*(b|c,d)}'), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
     assert.deepEqual(mm(fixtures, ['a', '*(b|c,d)'], {expand: true}), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
     assert.deepEqual(mm(fixtures, '{a,*(b|c,d)}', {expand: true}), ['a', 'b', 'bc,d', 'c,db', 'c,d']);
 
@@ -33,7 +31,24 @@ describe('expanded', function() {
   });
 });
 
-describe('optimized', function() {
+describe('braces - optimized', function() {
+  describe('array of patterns', function() {
+    it('should expand an array of patterns', function() {
+      var actual = mm.braces(['a/{b,c}/d', 'a/{b,c}/d']);
+      assert.deepEqual(actual, ['a/(b|c)/d', 'a/(b|c)/d']);
+    });
+
+    it('should not uniquify by default', function() {
+      var actual = mm.braces(['a/{b,c}/d', 'a/{b,c}/d']);
+      assert.deepEqual(actual, ['a/(b|c)/d', 'a/(b|c)/d']);
+    });
+
+    it('should uniquify when `options.nodupes` is true', function() {
+      var actual = mm.braces(['a/{b,c}/d', 'a/{b,c}/d'], {nodupes: true});
+      assert.deepEqual(actual, ['a/(b|c)/d']);
+    });
+  });
+
   describe('sets', function() {
     describe('invalid sets', function() {
       it('should handle invalid sets:', function() {
@@ -163,10 +178,6 @@ describe('optimized', function() {
       });
     });
   });
-
-  /**
-   * Ranges
-   */
 
   describe('ranges', function() {
     describe('escaping / invalid ranges', function() {

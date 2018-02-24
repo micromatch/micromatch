@@ -616,16 +616,14 @@ micromatch.makeRe = function(pattern, options) {
  */
 
 micromatch.braces = function(pattern, options) {
-  if (typeof pattern !== 'string') {
-    throw new TypeError('expected a string');
+  if (typeof pattern !== 'string' && !Array.isArray(pattern)) {
+    throw new TypeError('expected pattern to be an array or string');
   }
 
   function expand() {
-    if (options && options.nobrace === true) return [pattern];
-    if (!/\{.*\}/.test(pattern)) return [pattern];
-    // if (/[!@*?+]\{/.test(pattern)) {
-    //   options = utils.extend({}, options, {expand: true});
-    // }
+    if (options && options.nobrace === true || !/\{.*\}/.test(pattern)) {
+      return utils.arrayify(pattern);
+    }
     return braces(pattern, options);
   }
 
