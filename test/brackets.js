@@ -131,15 +131,6 @@ describe('brackets', function() {
     });
   });
 
-  describe('.makeRe()', function() {
-    it('should make a regular expression for the given pattern:', function() {
-      if (!utils.isWindows()) {
-        assert.deepEqual(mm.makeRe('[[:alpha:]123]'), /^(?:(?:\.[\\\/](?=.))?[a-zA-Z123])$/);
-        assert.deepEqual(mm.makeRe('[![:lower:]]'), /^(?:(?:\.[\\\/](?=.))?[^a-z])$/);
-      }
-    });
-  });
-
   describe('.mm()', function() {
     it('should return an array of matching strings:', function() {
       mm(['a1B', 'a1b'], '[[:alpha:]][[:digit:]][[:upper:]]', ['a1B']);

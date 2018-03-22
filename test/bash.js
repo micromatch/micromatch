@@ -152,13 +152,6 @@ describe('bash options and features:', function() {
       assert(match.isMatch('foo-bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r'));
     });
 
-    it('should not expand literal braces inside brackets', function() {
-      assert(match.isMatch('foo{}baz', 'foo[{a,b}]+baz'));
-      if (!utils.isWindows()) {
-        assert.deepEqual(mm.makeRe('foo[{a,b}]+baz'), /^(?:(?:\.[\\\/](?=.))?foo[{a,b}]+baz)$/);
-      }
-    });
-
     it('should match literal parens', function() {
       assert(match.isMatch('foo(bar)baz', 'foo[bar()]+baz'));
     });

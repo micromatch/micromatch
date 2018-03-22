@@ -32,6 +32,18 @@ describe('braces - expanded', function() {
 });
 
 describe('braces - optimized', function() {
+  describe('extglob characters', function() {
+    it('should expand braces (in extglobs) when preceded by an extglob character', function() {
+      var actual = mm.braces('abc/*!(-v@{1,2}.0).js', { optimize: true });
+      assert.deepEqual(actual, [ 'abc/*!(-v@1.0).js', 'abc/*!(-v@2.0).js' ]);
+    });
+
+    it('should expand braces when preceded by an extglob character', function() {
+      var actual = mm.braces('abc/*-v@{1,2}.0.js', { optimize: true });
+      assert.deepEqual(actual, [ 'abc/*-v@1.0.js', 'abc/*-v@2.0.js' ]);
+    });
+  });
+
   describe('array of patterns', function() {
     it('should expand an array of patterns', function() {
       var actual = mm.braces(['a/{b,c}/d', 'a/{b,c}/d']);
