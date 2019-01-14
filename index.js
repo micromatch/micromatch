@@ -870,6 +870,19 @@ micromatch.parsers = parsers;
 micromatch.caches = cache.caches;
 
 /**
+ * Replace backslashes used as path separator with forward slashes.
+ * This is useful when doing `path.resolve` etc. in Windows.
+ */
+
+micromatch.replaceSeparatorsForGlob = function(path) {
+  if (typeof path !== 'string') {
+    throw new TypeError('expected a string: "' + util.inspect(path) + '"');
+  }
+
+  return path.replace(/\\(?![{}()+?.^$])/g, '/');
+};
+
+/**
  * Expose `micromatch`
  * @type {Function}
  */

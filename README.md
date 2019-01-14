@@ -581,6 +581,16 @@ Clear the regex cache.
 mm.clearCache();
 ```
 
+### [.replaceSeparatorsForGlob](index.js#L871)
+
+Replaces backslashes used as path separators with forward slashes. This is useful on Windows when using `path.join` et.al. See [Backslashes](#backslashes).
+
+**Example**
+
+```js
+var reaplcedPath = mm.replaceSeparatorsForGlob(path.join(rootDir, 'other/path/**'));
+```
+
 ## Options
 
 * [basename](#optionsbasename)
@@ -944,6 +954,8 @@ We made this decision for micromatch for a couple of reasons:
 
 * consistency with bash conventions.
 * glob patterns are not filepaths. They are a type of [regular language](https://en.wikipedia.org/wiki/Regular_language) that is converted to a JavaScript regular expression. Thus, when forward slashes are defined in a glob pattern, the resulting regular expression will match windows or POSIX path separators just fine.
+
+You can use `.replaceSeparatorsForGlob` to replace backslashes used as path separators.
 
 **A note about joining paths to globs**
 
