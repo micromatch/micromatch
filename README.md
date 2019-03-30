@@ -1,6 +1,6 @@
 # micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
 
-> Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
+> Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.
 
 Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
@@ -87,7 +87,7 @@ console.log(mm.isMatch('foo', 'f*'));
 
 ## Why use micromatch?
 
-> micromatch is a [drop-in replacement](#switching-to-micromatch) for minimatch and multimatch
+> micromatch is a [replacement](#switching-to-micromatch) for minimatch and multimatch
 
 * Supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch)
 * Micromatch uses [snapdragon](https://github.com/jonschlinkert/snapdragon) for parsing and compiling globs, which provides granular control over the entire conversion process in a way that is easy to understand, reason about, and maintain.
