@@ -1,6 +1,6 @@
-var path = require('path');
-var mini = require('minimatch');
-var mm = require('../');
+const path = require('path');
+const mini = require('minimatch');
+const mm = require('..');
 
 function resolve(fp) {
   return path.resolve(fp);

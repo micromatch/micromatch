@@ -1,5 +1,5 @@
-var mm = require('../');
-var files = [
+const mm = require('..');
+const files = [
   'ab',
   'a/bc',
   'bb',

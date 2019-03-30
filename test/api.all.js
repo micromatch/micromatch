@@ -1,26 +1,32 @@
 'use strict';
 
-var assert = require('assert');
-var mm = require('..');
+process.env.PICOMATCH_NO_CACHE = 'true';
 
-describe('.all()', function() {
-  it('should throw an error when value is not a string', function() {
-    assert.throws(function() {
-      mm.all();
-    });
+require('mocha');
+const path = require('path');
+const assert = require('assert');
+const { all } = require('..');
+
+if (!process.env.ORIGINAL_PATH_SEP) {
+  process.env.ORIGINAL_PATH_SEP = path.sep;
+}
+
+describe('.all()', () => {it('should throw an error when value is not a string', () => {
+    assert.throws(() => all());
   });
 
-  it('should return true when all patterns match the given string', function() {
-    assert(mm.all('z', ['z', '*', '[a-z]']));
-    assert(mm.all('b', 'b'));
-    assert(mm.all('b', '*'));
+  it('should return true when all patterns match the given string', () => {
+    assert(all('z', ['z', '*', '[a-z]']));
+    assert(all('b', 'b'));
+    assert(all('b', '*'));
   });
 
-  it('should return false when some patterns do not match', function() {
-    assert(!mm.all('a', ['a', 'b', '*']));
+  it('should return false when some patterns do not match', () => {
+    assert(!all('a', ['a', 'b', '*']));
+    assert(!all('a', ['a*', 'z*']));
   });
 
-  it('should arrayify a string value', function() {
-    assert(mm.all('a', ['*']));
+  it('should arrayify a string pattern', () => {
+    assert(all('a', '*'));
   });
 });

@@ -1,9 +1,12 @@
-'use strict';
+const minimatch = require('minimatch');
+const mm = require('..');
 
-var mm = require('..');
-var pattern = '*(*(of*(a)x)z)';
+console.log(minimatch.makeRe('foo/!(z*)'));
+console.log(mm.makeRe('foo/!(z*)'));
 
-// var res = mm(pattern);
-// console.log(res.ast.nodes);
-// console.log(res);
-console.log(mm(['a/b.js', 'a/b.md'], 'a/*.!(js)'))
+
+// console.log(minimatch('foo/bar/baz', 'foo/!(z*)'));
+// console.log(mm.isMatch('foo/bar/baz', 'foo/!(z*)'));
+
+
+// console.log(mm(['a/b.js', 'a/b.md'], 'a/*.!(js)'));
