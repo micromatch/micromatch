@@ -1,15 +1,43 @@
-## History
+# Release history
 
-### key
+All notable changes to this project will be documented in this file.
 
-Changelog entries are classified using the following labels _(from [keep-a-changelog][]_):
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-- `added`: for new features
-- `changed`: for changes in existing functionality
-- `deprecated`: for once-stable features removed in upcoming releases
-- `removed`: for deprecated features removed in this release
-- `fixed`: for any bug fixes
-- `bumped`: updated dependencies, only minor or higher will be listed.
+<details>
+  <summary><strong>Guiding Principles</strong></summary>
+
+- Changelogs are for humans, not machines.
+- There should be an entry for every single version.
+- The same types of changes should be grouped.
+- Versions and sections should be linkable.
+- The latest version comes first.
+- The release date of each versions is displayed.
+- Mention whether you follow Semantic Versioning.
+
+</details>
+
+<details>
+  <summary><strong>Types of changes</strong></summary>
+
+Changelog entries are classified using the following labels _(from [keep-a-changelog](http://keepachangelog.com/)_):
+
+- `Added` for new features.
+- `Changed` for changes in existing functionality.
+- `Deprecated` for soon-to-be removed features.
+- `Removed` for now removed features.
+- `Fixed` for any bug fixes.
+- `Security` in case of vulnerabilities.
+
+</details>
+
+### [4.0.0] - 2019-03-20
+
+**Removed**
+
+- Removed support for passing an array of brace patterns to `micromatch.braces()`.
+- To strictly enforce closing brackets (for `{`, `[`, and `(`), you must now use `strictBrackets=true` instead of `strictErrors`.   
 
 ### [3.0.0] - 2017-04-11
 

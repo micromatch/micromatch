@@ -1,16 +1,19 @@
 'use strict';
 
-var assert = require('assert');
-var mm = require('..');
+require('mocha');
+const path = require('path');
+const assert = require('assert');
+const { braceExpand } = require('..');
 
-describe('.braceExpand()', function() {
-  it('should throw an error when arguments are invalid', function() {
-    assert.throws(function() {
-      mm.braceExpand();
-    });
+if (!process.env.ORIGINAL_PATH_SEP) {
+  process.env.ORIGINAL_PATH_SEP = path.sep
+}
+
+describe('.braceExpand()', () => {it('should throw an error when arguments are invalid', () => {
+    assert.throws(() => braceExpand());
   });
 
-  it('should expand a brace pattern', function() {
-    assert.deepEqual(mm.braceExpand('{a,b}'), ['a', 'b']);
+  it('should expand a brace pattern', () => {
+    assert.deepEqual(braceExpand('{a,b}'), ['a', 'b']);
   });
 });

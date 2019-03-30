@@ -616,7 +616,7 @@ Allow glob patterns without slashes to match a file path based on its basename. 
 mm(['a/b.js', 'a/c.md'], '*.js');
 //=> []
 
-mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
+mm(['a/b.js', 'a/c.md'], '*.js', { matchBase: true });
 //=> ['a/b.js']
 ```
 

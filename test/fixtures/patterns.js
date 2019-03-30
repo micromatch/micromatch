@@ -6,7 +6,7 @@
  * https://github.com/isaacs/minimatch
  */
 
-var fixtures = ['a', 'b', 'c', 'd', 'abc', 'abd', 'abe', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/', 'bdir/cfile'];
+let fixtures = ['a', 'b', 'c', 'd', 'abc', 'abd', 'abe', 'bb', 'bcd', 'ca', 'cb', 'dd', 'de', 'bdir/', 'bdir/cfile'];
 
 // pattern | expected | options | fixtures
 module.exports = [
@@ -43,15 +43,15 @@ module.exports = [
   ['[a-c]b*', ['abc', 'abd', 'abe', 'bb', 'cb']],
   ['[a-y]*[^c]', ['abd', 'abe', 'bb', 'bcd', 'bdir/', 'ca', 'cb', 'dd', 'de'], {bash: true}],
   ['a*[^c]', ['abd', 'abe']],
-  function() {
+  () => {
     fixtures.push('a-b', 'aXb');
   },
   ['a[X-]b', ['a-b', 'aXb']],
-  function() {
+  () => {
     fixtures.push('.x', '.y');
   },
   ['[^a-c]*', ['d', 'dd', 'de']],
-  function() {
+  () => {
     fixtures.push('a*b/', 'a*b/ooo', 'ab/ooo');
   },
 
@@ -67,14 +67,13 @@ module.exports = [
   ['a[\\\\b]c', ['abc']],
   ['a?c', ['abc']],
   ['a\\*c', [], {null: true}, ['abc']],
-  ['', [''], { null: true }, ['']],
 
   /**
    * Bash tests
    */
 
   'http://www.opensource.apple.com/source/bash/bash-23/bash/tests/glob-test',
-  function() {
+  () => {
     fixtures.push('man/', 'man/man1/', 'man/man1/bash.1');
   },
   ['*/man*/bash.*', ['man/man1/bash.1']],
@@ -139,7 +138,7 @@ module.exports = [
 
   // .. and . can only match patterns starting with .,
   // even when options.dot is set.
-  function() {
+  () => {
     fixtures = ['a/./b', 'a/../b', 'a/c/b', 'a/.d/b'];
   },
   ['a/*/b', ['a/c/b', 'a/.d/b'], {dot: true}],
@@ -189,7 +188,7 @@ module.exports = [
   // ],
 
   // crazy nested {,,} and *(||) tests.
-  function() {
+  () => {
     fixtures = [
       'a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d',
       'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c',
@@ -214,7 +213,7 @@ module.exports = [
 
   // begin channelling Boole and deMorgan...
   'negation tests',
-  function() {
+  () => {
     fixtures = ['d', 'e', '!ab', '!abc', 'a!b'];
   },
 
@@ -231,7 +230,7 @@ module.exports = [
   ['!\\!a*', ['a!b', 'd', 'e']],
 
   // negation nestled within a pattern
-  function() {
+  () => {
     fixtures = [
       'foo.js',
       'foo.bar',
@@ -245,7 +244,7 @@ module.exports = [
   // copy bash 4.3 behavior on this.
 
   'https://github.com/isaacs/minimatch/issues/5',
-  function() {
+  () => {
     fixtures = [
       'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e', 'a/b/.x', 'a/b/.x/',
       'a/.x/b', '.x', '.x/', '.x/a', '.x/a/b', 'a/.x/b/.x/c', '.x/.x'
@@ -266,7 +265,7 @@ module.exports = [
 ];
 
 Object.defineProperty(module.exports, 'fixtures', {
-  get: function() {
+  get: () => {
     return fixtures;
   }
 });

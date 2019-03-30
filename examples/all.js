@@ -1,4 +1,4 @@
-var mm = require('..');
+const mm = require('..');
 
 console.log(mm.all('foo.js', ['foo.js']));
 // true

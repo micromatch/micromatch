@@ -15,5 +15,6 @@ f a/.x/b/.x/c       **/.x/**
 
 f .bashrc           ?bashrc
 
-t .bar.baz/         .*.*
+f .bar.baz/         .*.*
+t .bar.baz/         .*.*/
 t .bar.baz          .*.*

@@ -1,31 +1,28 @@
 'use strict';
 
-var path = require('path');
-var assert = require('assert');
-var mm = require('..');
-var sep = path.sep;
+const path = require('path');
+const assert = require('assert');
+const mm = require('..');
+const sep = path.sep;
 
-describe('.contains()', function() {
-  after(function() {
-    path.sep = sep;
-  });
+describe('.contains()', () => {
+  afterEach(() => (path.sep = sep));
+  after(() => (path.sep = sep));
 
-  describe('errors', function() {
-    it('should throw an error arguments are invalid', function() {
-      assert.throws(function() {
-        mm.contains();
-      });
+  describe('errors', () => {
+    it('should throw an error arguments are invalid', () => {
+      assert.throws(() => mm.contains());
     });
   });
 
-  describe('patterns', function() {
-    it('should correctly deal with empty patterns', function() {
+  describe('patterns', () => {
+    it('should correctly deal with empty patterns', () => {
       assert(!mm.contains('ab', ''));
       assert(!mm.contains('a', ''));
       assert(!mm.contains('.', ''));
     });
 
-    it('should return true when the path contains the pattern', function() {
+    it('should return true when the path contains the pattern', () => {
       assert(mm.contains('ab', 'b'));
       assert(mm.contains('.', '.'));
       assert(mm.contains('a/b/c', 'a/b'));
@@ -40,7 +37,7 @@ describe('.contains()', function() {
       assert(mm.contains('abcd', 'ab'));
     });
 
-    it('should be true when a glob pattern partially matches the path', function() {
+    it('should be true when a glob pattern partially matches the path', () => {
       assert(mm.contains('a/b/c', 'a/*'));
       assert(mm.contains('/ab', '/a'));
       assert(mm.contains('/ab', '/*'));
@@ -57,7 +54,7 @@ describe('.contains()', function() {
       assert(mm.contains('a/b', '?/?'));
     });
 
-    it('should return false when the path does not contain the pattern', function() {
+    it('should return false when the path does not contain the pattern', () => {
       assert(!mm.contains('/ab', '?/?'));
       assert(!mm.contains('ab', '*/*'));
       assert(!mm.contains('abcd', 'f'));
@@ -67,7 +64,7 @@ describe('.contains()', function() {
       assert(!mm.contains('ef', '/*'));
     });
 
-    it('should match files that contain the given extension:', function() {
+    it('should match files that contain the given extension', () => {
       assert(mm.contains('ab', './*'));
       assert(mm.contains('.c.md', '*.md'));
       assert(mm.contains('.c.md', '.*.md'));
@@ -82,13 +79,13 @@ describe('.contains()', function() {
       assert(mm.contains('c.md', '*.md'));
     });
 
-    it('should not match files that do not contain the given extension:', function() {
+    it('should not match files that do not contain the given extension', () => {
       assert(!mm.contains('.md', '*.md'));
       assert(!mm.contains('a/b/c/c.md', 'c.js'));
       assert(!mm.contains('a/b/c.md', 'a/*.md'));
     });
 
-    it('should match dotfiles when a dot is explicitly defined in the pattern:', function() {
+    it('should match dotfiles when a dot is explicitly defined in the pattern', () => {
       assert(mm.contains('.a', '.a'));
       assert(mm.contains('.ab', '.*'));
       assert(mm.contains('.ab', '.a*'));
@@ -102,17 +99,17 @@ describe('.contains()', function() {
       assert(mm.contains('a/b/c/d.a.md', 'a/b/c/*.md'));
     });
 
-    it('should match dotfiles when `dot` or `dotfiles` is set:', function() {
-      assert(mm.contains('.c.md', '*.md', {dot: true}));
-      assert(mm.contains('.c.md', '.*', {dot: true}));
-      assert(mm.contains('a/b/c/.xyz.md', '**/*.md', {dot: true}));
-      assert(mm.contains('a/b/c/.xyz.md', '**/.*.md', {dot: true}));
-      assert(mm.contains('a/b/c/.xyz.md', '.*.md', {dot: true}));
-      assert(mm.contains('a/b/c/.xyz.md', 'a/b/c/*.md', {dot: true}));
-      assert(mm.contains('a/b/c/.xyz.md', 'a/b/c/.*.md', {dot: true}));
+    it('should match dotfiles when `dot` or `dotfiles` is set', () => {
+      assert(mm.contains('.c.md', '*.md', { dot: true }));
+      assert(mm.contains('.c.md', '.*', { dot: true }));
+      assert(mm.contains('a/b/c/.xyz.md', '**/*.md', { dot: true }));
+      assert(mm.contains('a/b/c/.xyz.md', '**/.*.md', { dot: true }));
+      assert(mm.contains('a/b/c/.xyz.md', '.*.md', { dot: true }));
+      assert(mm.contains('a/b/c/.xyz.md', 'a/b/c/*.md', { dot: true }));
+      assert(mm.contains('a/b/c/.xyz.md', 'a/b/c/.*.md', { dot: true }));
     });
 
-    it('should not match dotfiles when `dot` or `dotfiles` is not set:', function() {
+    it('should not match dotfiles when `dot` or `dotfiles` is not set', () => {
       assert(!mm.contains('.a', '*.md'));
       assert(!mm.contains('.ba', '.a'));
       assert(!mm.contains('.a.md', 'a/b/c/*.md'));
@@ -123,7 +120,7 @@ describe('.contains()', function() {
       assert(!mm.contains('a/b/d/.md', 'a/b/c/*.md'));
     });
 
-    it('should match file paths:', function() {
+    it('should match file paths', () => {
       assert(mm.contains('a/b/c/xyz.md', 'a/b/c/*.md'));
       assert(mm.contains('a/bb/c/xyz.md', 'a/*/c/*.md'));
       assert(mm.contains('a/bbbb/c/xyz.md', 'a/*/c/*.md'));
@@ -132,7 +129,7 @@ describe('.contains()', function() {
       assert(mm.contains('a/bb.bb/aa/b.b/aa/c/xyz.md', 'a/**/c/*.md'));
     });
 
-    it('should return true when full file paths are matched:', function() {
+    it('should return true when full file paths are matched', () => {
       assert(mm.contains('a/.b', 'a/.*'));
       assert(mm.contains('a/.b', 'a/'));
       assert(mm.contains('a/b/z/.a', 'b/z'));
@@ -142,7 +139,7 @@ describe('.contains()', function() {
       assert(mm.contains('a/b/c/d/e/j/n/p/o/z/c.md', 'a/**/j/**/z/*.md'));
     });
 
-    it('should match path segments:', function() {
+    it('should match path segments', () => {
       assert(mm.contains('aaa', 'aaa'));
       assert(mm.contains('aaa', 'aa'));
       assert(mm.contains('aaa/bbb', 'aaa/bbb'));
@@ -170,7 +167,7 @@ describe('.contains()', function() {
       assert(mm.contains('ab/zzz/ejkl/hi', '*/*jk*/*i'));
     });
 
-    it('should return false when full file paths are not matched:', function() {
+    it('should return false when full file paths are not matched', () => {
       assert(!mm.contains('a/b/z/.a', 'b/a'));
       assert(!mm.contains('a/.b', 'a/**/z/*.md'));
       assert(!mm.contains('a/b/z/.a', 'a/**/z/*.a'));
@@ -178,7 +175,7 @@ describe('.contains()', function() {
       assert(!mm.contains('a/b/c/j/e/z/c.txt', 'a/**/j/**/z/*.md'));
     });
 
-    it('should match paths with leading `./`:', function() {
+    it('should match paths with leading `./`', () => {
       assert(!mm.contains('./.a', 'a/**/z/*.md'));
       assert(mm.contains('./a/b/z/.a', 'a/**/z/.a'));
       assert(mm.contains('./a/b/z/.a', './a/**/z/.a'));
@@ -192,16 +189,17 @@ describe('.contains()', function() {
     });
   });
 
-  describe('windows paths', function() {
-    beforeEach(function() {
+  describe('windows paths', () => {
+    beforeEach(() => {
       path.sep = '\\';
     });
-    afterEach(function() {
+    afterEach(() => {
       path.sep = sep;
     });
 
-    it('should match with common glob patterns', function() {
+    it('should match with common glob patterns', () => {
       assert(mm.contains('\\ab', '*/'));
+      assert(mm.contains('ab\\', '*/'));
       assert(mm.contains('\\ab', '*/*'));
       assert(mm.contains('\\ab', '*/[a-z]*'));
       assert(mm.contains('\\ab', '*/*[a-z]'));
@@ -216,22 +214,22 @@ describe('.contains()', function() {
       assert(mm.contains('a\\b', '?/?'));
       assert(mm.contains('a\\b\\c', 'a/*'));
 
-      assert(mm.contains('\\ab', '*/', {unixify: false}));
-      assert(mm.contains('\\ab', '*/*', {unixify: false}));
-      assert(mm.contains('\\ab', '*/[a-z]*', {unixify: false}));
-      assert(mm.contains('\\ab', '*/a', {unixify: false}));
-      assert(mm.contains('\\ab', '/', {unixify: false}));
-      assert(mm.contains('\\ab', '/*', {unixify: false}));
-      assert(mm.contains('\\ab', '/?', {unixify: false}));
-      assert(mm.contains('\\ab', '/??', {unixify: false}));
-      assert(mm.contains('\\ab', '/?b', {unixify: false}));
-      assert(mm.contains('\\ab', '/a', {unixify: false}));
-      assert(mm.contains('\\cd', '/*', {unixify: false}));
-      assert(mm.contains('a\\b', '?/?', {unixify: false}));
-      assert(mm.contains('a\\b\\c', 'a/*', {unixify: false}));
+      assert(!mm.contains('\\ab', '*/', { unixify: false }));
+      assert(!mm.contains('\\ab', '*/*', { unixify: false }));
+      assert(!mm.contains('\\ab', '*/[a-z]*', { unixify: false }));
+      assert(!mm.contains('\\ab', '*/a', { unixify: false }));
+      assert(!mm.contains('\\ab', '/', { unixify: false }));
+      assert(!mm.contains('\\ab', '/*', { unixify: false }));
+      assert(!mm.contains('\\ab', '/?', { unixify: false }));
+      assert(!mm.contains('\\ab', '/??', { unixify: false }));
+      assert(!mm.contains('\\ab', '/?b', { unixify: false }));
+      assert(!mm.contains('\\ab', '/a', { unixify: false }));
+      assert(!mm.contains('\\cd', '/*', { unixify: false }));
+      assert(!mm.contains('a\\b', '?/?', { unixify: false }));
+      assert(!mm.contains('a\\b\\c', 'a/*', { unixify: false }));
     });
 
-    it('should match files that contain the given extension:', function() {
+    it('should match files that contain the given extension', () => {
       assert(mm.contains('a\\b\\c.md', '**/*.md'));
       assert(mm.contains('a\\b\\c.md', '*.md'));
       assert(mm.contains('a\\b\\c.md', '.md'));
@@ -239,19 +237,19 @@ describe('.contains()', function() {
       assert(mm.contains('a\\b\\c\\c.md', '*.md'));
     });
 
-    it('should match dotfiles when `dot` or `dotfiles` is set:', function() {
-      assert(mm.contains('a\\b\\c\\.xyz.md', '.*.md', {unixify: true, dot: true}));
-      assert(mm.contains('a\\b\\c\\.xyz.md', '**/*.md', {unixify: true, dot: true}));
-      assert(mm.contains('a\\b\\c\\.xyz.md', '**/.*.md', {unixify: true, dot: true}));
-      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/*.md', {unixify: true, dot: true}));
-      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md', {unixify: true, dot: true}));
+    it('should match dotfiles when `dot` is true', () => {
+      assert(mm.contains('a\\b\\c\\.xyz.md', '.*.md', { unixify: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', '**/*.md', { unixify: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', '**/.*.md', { unixify: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/*.md', { unixify: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md', { unixify: true, dot: true }));
     });
 
-    it('should not match dotfiles when `dot` or `dotfiles` is not set:', function() {
+    it('should not match dotfiles when `dot` or `dotfiles` is not set', () => {
       assert(!mm.contains('a\\b\\d\\.md', 'a/b/c/*.md'));
     });
 
-    it('should match file paths:', function() {
+    it('should match file paths', () => {
       assert(mm.contains('a\\b\\c\\xyz.md', 'a/b/c/*.md'));
       assert(mm.contains('a\\bb\\c\\xyz.md', 'a/*/c/*.md'));
       assert(mm.contains('a\\bbbb\\c\\xyz.md', 'a/*/c/*.md'));
@@ -260,7 +258,7 @@ describe('.contains()', function() {
       assert(mm.contains('a\\bb.bb\\aa\\b.b\\aa\\c\\xyz.md', 'a/**/c/*.md'));
     });
 
-    it('should return true when full file paths are matched:', function() {
+    it('should return true when full file paths are matched', () => {
       assert(mm.contains('a\\.b', 'a/.*'));
       assert(mm.contains('a\\.b', 'a/'));
       assert(mm.contains('a\\b\\z\\.a', 'b/z'));
@@ -270,7 +268,7 @@ describe('.contains()', function() {
       assert(mm.contains('a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', 'a/**/j/**/z/*.md'));
     });
 
-    it('should match path segments:', function() {
+    it('should match path segments', () => {
       assert(mm.contains('aaa\\bbb', 'aaa/bbb'));
       assert(mm.contains('aaa\\bbb', 'aaa/*'));
       assert(mm.contains('aaa\\bba\\ccc', '**/*/ccc'));
@@ -296,7 +294,7 @@ describe('.contains()', function() {
       assert(mm.contains('ab\\zzz\\ejkl\\hi', '*/*jk*/*i'));
     });
 
-    it('should return false when full file paths are not matched:', function() {
+    it('should return false when full file paths are not matched', () => {
       assert(!mm.contains('a\\b\\z\\.a', 'b/a'));
       assert(!mm.contains('a\\.b', 'a/**/z/*.md'));
       assert(!mm.contains('a\\b\\z\\.a', 'a/**/z/*.a'));
@@ -304,14 +302,14 @@ describe('.contains()', function() {
       assert(!mm.contains('a\\b\\c\\j\\e\\z\\c.txt', 'a/**/j/**/z/*.md'));
     });
 
-    it('should match dotfiles when a dot is explicitly defined in the pattern:', function() {
+    it('should match dotfiles when a dot is explicitly defined in the pattern', () => {
       assert(mm.contains('a\\.c.md', 'a/.c.md'));
       assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md'));
       assert(mm.contains('a\\.c.md', '*.md'));
       assert(mm.contains('a\\b\\c\\d.a.md', 'a/b/c/*.md'));
     });
 
-    it('should match paths with leading `./`:', function() {
+    it('should match paths with leading `./`', () => {
       assert(!mm.contains('.\\.a', 'a/**/z/*.md'));
       assert(!mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', './a/**/j/**/z/*.md'));
       assert(mm.contains('.\\a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', './a/**/j/**/z/*.md'));
