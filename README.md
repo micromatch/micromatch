@@ -1,6 +1,6 @@
-# micromatch [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch) [![Windows Build Status](https://img.shields.io/appveyor/ci/micromatch/micromatch.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/micromatch/micromatch)
+# micromatch [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W8YFZ425KND68) [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch)
 
-> Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.
+> Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
 
 Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
@@ -47,9 +47,6 @@ Please consider following this project's author, [Jon Schlinkert](https://github
   * [Bash 4.3 parity](#bash-43-parity)
   * [Backslashes](#backslashes)
 - [Contributing](#contributing)
-- [Benchmarks](#benchmarks)
-  * [Running benchmarks](#running-benchmarks)
-  * [Latest results](#latest-results)
 - [About](#about)
 
 </details>
@@ -87,10 +84,10 @@ console.log(mm.isMatch('foo', 'f*'));
 
 ## Why use micromatch?
 
-> micromatch is a [replacement](#switching-to-micromatch) for minimatch and multimatch
+> micromatch is a [drop-in replacement](#switching-to-micromatch) for minimatch and multimatch
 
 * Supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch)
-* Micromatch uses [snapdragon](https://github.com/jonschlinkert/snapdragon) for parsing and compiling globs, which provides granular control over the entire conversion process in a way that is easy to understand, reason about, and maintain.
+* Micromatch uses [snapdragon](https://github.com/here-be/snapdragon) for parsing and compiling globs, which provides granular control over the entire conversion process in a way that is easy to understand, reason about, and maintain.
 * More consistently accurate matching [than minimatch](https://github.com/yarnpkg/yarn/pull/3339), with more than 36,000 [test assertions](./test) to prove it.
 * More complete support for the Bash 4.3 specification than minimatch and multimatch. In fact, micromatch passes _all of the spec tests_ from bash, including some that bash still fails.
 * [Faster matching](#benchmarks), from a combination of optimized glob patterns, faster algorithms, and regex caching.
@@ -141,175 +138,66 @@ mm(['foo', 'bar', 'baz'], ['f*', '*z']);
 
 ## API
 
-### [micromatch](index.js#L41)
-
-The main function takes a list of strings and one or more glob patterns to use for matching.
-
 **Params**
 
-* `list` **{Array}**: A list of strings to match
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* **{String|Array<string>}**: list List of strings to match.
+* **{String|Array<string>}**: patterns One or more glob patterns to use for matching.
+* **{Object}**: options See available [options](#options)
 * `returns` **{Array}**: Returns an array of matches
 
 **Example**
 
 ```js
-var mm = require('micromatch');
+const mm = require('micromatch');
 mm(list, patterns[, options]);
 
 console.log(mm(['a.js', 'a.txt'], ['*.js']));
 //=> [ 'a.js' ]
 ```
 
-### [.match](index.js#L93)
+### [.matcher](index.js#L100)
 
-Similar to the main function, but `pattern` must be a string.
+Returns a matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
 **Params**
 
-* `list` **{Array}**: Array of strings to match
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Array}**: Returns an array of matches
+* `pattern` **{String}**: Glob pattern
+* `options` **{Object}**
+* `returns` **{Function}**: Returns a matcher function.
 
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.match(list, pattern[, options]);
+const mm = require('micromatch');
+mm.matcher(pattern[, options]);
 
-console.log(mm.match(['a.a', 'a.aa', 'a.b', 'a.c'], '*.a'));
-//=> ['a.a', 'a.aa']
+const isMatch = mm.matcher('*.!(*a)');
+console.log(isMatch('a.a')); //=> false
+console.log(isMatch('a.b')); //=> true
 ```
 
-### [.isMatch](index.js#L154)
-
-Returns true if the specified `string` matches the given glob `pattern`.
-
-**Params**
-
-* `string` **{String}**: String to match
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if the string matches the glob pattern.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.isMatch(string, pattern[, options]);
-
-console.log(mm.isMatch('a.a', '*.a'));
-//=> true
-console.log(mm.isMatch('a.b', '*.a'));
-//=> false
-```
-
-### [.some](index.js#L192)
-
-Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
-
-**Params**
-
-* `list` **{String|Array}**: The string or array of strings to test. Returns as soon as the first match is found.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.some(list, patterns[, options]);
-
-console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
-// true
-console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
-// false
-```
-
-### [.every](index.js#L228)
-
-Returns true if every string in the given `list` matches any of the given glob `patterns`.
-
-**Params**
-
-* `list` **{String|Array}**: The string or array of strings to test.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.every(list, patterns[, options]);
-
-console.log(mm.every('foo.js', ['foo.js']));
-// true
-console.log(mm.every(['foo.js', 'bar.js'], ['*.js']));
-// true
-console.log(mm.every(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
-// false
-console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
-// false
-```
-
-### [.any](index.js#L260)
+### [.isMatch](index.js#L119)
 
 Returns true if **any** of the given glob `patterns` match the specified `string`.
 
 **Params**
 
-* `str` **{String|Array}**: The string to test.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* **{String}**: str The string to test.
+* **{String|Array}**: patterns One or more glob patterns to use for matching.
+* **{Object}**: See available [options](#options).
 * `returns` **{Boolean}**: Returns true if any patterns match `str`
 
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.any(string, patterns[, options]);
+const mm = require('micromatch');
+// mm.isMatch(string, patterns[, options]);
 
-console.log(mm.any('a.a', ['b.*', '*.a']));
-//=> true
-console.log(mm.any('a.a', 'b.*'));
-//=> false
+console.log(mm.isMatch('a.a', ['b.*', '*.a'])); //=> true
+console.log(mm.isMatch('a.a', 'b.*')); //=> false
 ```
 
-### [.all](index.js#L308)
-
-Returns true if **all** of the given `patterns` match the specified string.
-
-**Params**
-
-* `str` **{String|Array}**: The string to test.
-* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.all(string, patterns[, options]);
-
-console.log(mm.all('foo.js', ['foo.js']));
-// true
-
-console.log(mm.all('foo.js', ['*.js', '!foo.js']));
-// false
-
-console.log(mm.all('foo.js', ['*.js', 'foo.js']));
-// true
-
-console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
-// true
-```
-
-### [.not](index.js#L340)
+### [.not](index.js#L138)
 
 Returns a list of strings that _**do not match any**_ of the given `patterns`.
 
@@ -323,14 +211,14 @@ Returns a list of strings that _**do not match any**_ of the given `patterns`.
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.not(list, patterns[, options]);
+const mm = require('micromatch');
+// mm.not(list, patterns[, options]);
 
 console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L376)
+### [.contains](index.js#L178)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -353,7 +241,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L432)
+### [.matchKeys](index.js#L220)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -367,52 +255,109 @@ Filter the keys of the given object with the given `glob` pattern and `options`.
 **Example**
 
 ```js
-var mm = require('micromatch');
+const mm = require('micromatch');
 mm.matchKeys(object, patterns[, options]);
 
-var obj = { aa: 'a', ab: 'b', ac: 'c' };
+const obj = { aa: 'a', ab: 'b', ac: 'c' };
 console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.matcher](index.js#L461)
+### [.some](index.js#L249)
 
-Returns a memoized matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
+Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
 
 **Params**
 
-* `pattern` **{String}**: Glob pattern
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed.
-* `returns` **{Function}**: Returns a matcher function.
+* `list` **{String|Array}**: The string or array of strings to test. Returns as soon as the first match is found.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* `returns` **{Boolean}**: Returns true if any patterns match `str`
 
 **Example**
 
 ```js
-var mm = require('micromatch');
-mm.matcher(pattern[, options]);
+const mm = require('micromatch');
+mm.some(list, patterns[, options]);
 
-var isMatch = mm.matcher('*.!(*a)');
-console.log(isMatch('a.a'));
-//=> false
-console.log(isMatch('a.b'));
-//=> true
+console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
+// true
+console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
+// false
 ```
 
-### [.capture](index.js#L536)
+### [.every](index.js#L285)
+
+Returns true if every string in the given `list` matches any of the given glob `patterns`.
+
+**Params**
+
+* `list` **{String|Array}**: The string or array of strings to test.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* `returns` **{Boolean}**: Returns true if any patterns match `str`
+
+**Example**
+
+```js
+const mm = require('micromatch');
+mm.every(list, patterns[, options]);
+
+console.log(mm.every('foo.js', ['foo.js']));
+// true
+console.log(mm.every(['foo.js', 'bar.js'], ['*.js']));
+// true
+console.log(mm.every(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
+// false
+console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
+// false
+```
+
+### [.all](index.js#L324)
+
+Returns true if **all** of the given `patterns` match the specified string.
+
+**Params**
+
+* `str` **{String|Array}**: The string to test.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: See available [options](#options) for changing how matches are performed
+* `returns` **{Boolean}**: Returns true if any patterns match `str`
+
+**Example**
+
+```js
+const mm = require('micromatch');
+mm.all(string, patterns[, options]);
+
+console.log(mm.all('foo.js', ['foo.js']));
+// true
+
+console.log(mm.all('foo.js', ['*.js', '!foo.js']));
+// false
+
+console.log(mm.all('foo.js', ['*.js', 'foo.js']));
+// true
+
+console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
+// true
+```
+
+### [.capture](index.js#L351)
 
 Returns an array of matches captured by `pattern` in `string, or`null` if the pattern did not match.
 
 **Params**
 
-* `pattern` **{String}**: Glob pattern to use for matching.
-* `string` **{String}**: String to match
+* `glob` **{String}**: Glob pattern to use for matching.
+* `input` **{String}**: String to match
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns an array of captures if the string matches the glob pattern, otherwise `null`.
+* `returns` **{Boolean}**: Returns an array of captures if the input matches the glob pattern, otherwise `null`.
 
 **Example**
 
 ```js
-var mm = require('micromatch');
+const mm = require('micromatch');
 mm.capture(pattern, string[, options]);
 
 console.log(mm.capture('test/*.js', 'test/foo.js'));
@@ -421,27 +366,72 @@ console.log(mm.capture('test/*.js', 'foo/bar.css'));
 //=> null
 ```
 
-### [.makeRe](index.js#L571)
+### [.makeRe](index.js#L377)
 
 Create a regular expression from the given glob `pattern`.
 
 **Params**
 
 * `pattern` **{String}**: A glob pattern to convert to regex.
-* `options` **{Object}**: See available [options](#options) for changing how matches are performed.
+* `options` **{Object}**
 * `returns` **{RegExp}**: Returns a regex created from the given pattern.
 
 **Example**
 
 ```js
-var mm = require('micromatch');
+const mm = require('micromatch');
 mm.makeRe(pattern[, options]);
 
 console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.braces](index.js#L618)
+### [.scan](index.js#L393)
+
+Scan a glob pattern to separate the pattern into segments. Used by the [split](#split) method.
+
+**Params**
+
+* `pattern` **{String}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns an object with
+
+**Example**
+
+```js
+const mm = require('micromatch');
+const state = mm.scan(pattern[, options]);
+```
+
+### [.split](index.js#L405)
+
+Split a glob pattern into two parts: the directory part of the glob,
+and the matching part.
+
+**Params**
+
+* `pattern` **{String}**
+* `options` **{Object}**
+* `returns` **{Array}**
+
+### [.parse](index.js#L421)
+
+Parse a glob pattern to create the source string for a regular expression.
+
+**Params**
+
+* `glob` **{String}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns an object with useful properties and output to be used as regex source string.
+
+**Example**
+
+```js
+const mm = require('micromatch');
+const state = mm(pattern[, options]);
+```
+
+### [.braces](index.js#L448)
 
 Expand the given brace `pattern`.
 
@@ -454,131 +444,12 @@ Expand the given brace `pattern`.
 **Example**
 
 ```js
-var mm = require('micromatch');
+const mm = require('micromatch');
 console.log(mm.braces('foo/{a,b}/bar'));
 //=> ['foo/(a|b)/bar']
 
-console.log(mm.braces('foo/{a,b}/bar', {expand: true}));
-//=> ['foo/(a|b)/bar']
-```
-
-### [.create](index.js#L685)
-
-Parses the given glob `pattern` and returns an array of abstract syntax trees (ASTs), with the compiled `output` and optional source `map` on each AST.
-
-**Params**
-
-* `pattern` **{String}**: Glob pattern to parse and compile.
-* `options` **{Object}**: Any [options](#options) to change how parsing and compiling is performed.
-* `returns` **{Object}**: Returns an object with the parsed AST, compiled string and optional source map.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.create(pattern[, options]);
-
-console.log(mm.create('abc/*.js'));
-// [{ options: { source: 'string', sourcemap: true },
-//   state: {},
-//   compilers:
-//    { ... },
-//   output: '(\\.[\\\\\\/])?abc\\/(?!\\.)(?=.)[^\\/]*?\\.js',
-//   ast:
-//    { type: 'root',
-//      errors: [],
-//      nodes:
-//       [ ... ],
-//      dot: false,
-//      input: 'abc/*.js' },
-//   parsingErrors: [],
-//   map:
-//    { version: 3,
-//      sources: [ 'string' ],
-//      names: [],
-//      mappings: 'AAAA,GAAG,EAAC,kBAAC,EAAC,EAAE',
-//      sourcesContent: [ 'abc/*.js' ] },
-//   position: { line: 1, column: 28 },
-//   content: {},
-//   files: {},
-//   idx: 6 }]
-```
-
-### [.parse](index.js#L732)
-
-Parse the given `str` with the given `options`.
-
-**Params**
-
-* `str` **{String}**
-* `options` **{Object}**
-* `returns` **{Object}**: Returns an AST
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.parse(pattern[, options]);
-
-var ast = mm.parse('a/{b,c}/d');
-console.log(ast);
-// { type: 'root',
-//   errors: [],
-//   input: 'a/{b,c}/d',
-//   nodes:
-//    [ { type: 'bos', val: '' },
-//      { type: 'text', val: 'a/' },
-//      { type: 'brace',
-//        nodes:
-//         [ { type: 'brace.open', val: '{' },
-//           { type: 'text', val: 'b,c' },
-//           { type: 'brace.close', val: '}' } ] },
-//      { type: 'text', val: '/d' },
-//      { type: 'eos', val: '' } ] }
-```
-
-### [.compile](index.js#L780)
-
-Compile the given `ast` or string with the given `options`.
-
-**Params**
-
-* `ast` **{Object|String}**
-* `options` **{Object}**
-* `returns` **{Object}**: Returns an object that has an `output` property with the compiled string.
-
-**Example**
-
-```js
-var mm = require('micromatch');
-mm.compile(ast[, options]);
-
-var ast = mm.parse('a/{b,c}/d');
-console.log(mm.compile(ast));
-// { options: { source: 'string' },
-//   state: {},
-//   compilers:
-//    { eos: [Function],
-//      noop: [Function],
-//      bos: [Function],
-//      brace: [Function],
-//      'brace.open': [Function],
-//      text: [Function],
-//      'brace.close': [Function] },
-//   output: [ 'a/(b|c)/d' ],
-//   ast:
-//    { ... },
-//   parsingErrors: [] }
-```
-
-### [.clearCache](index.js#L801)
-
-Clear the regex cache.
-
-**Example**
-
-```js
-mm.clearCache();
+console.log(mm.braces('foo/{a,b}/bar', { expand: true }));
+//=> ['foo/a/bar', 'foo/b/bar']
 ```
 
 ## Options
@@ -616,7 +487,7 @@ Allow glob patterns without slashes to match a file path based on its basename. 
 mm(['a/b.js', 'a/c.md'], '*.js');
 //=> []
 
-mm(['a/b.js', 'a/c.md'], '*.js', { matchBase: true });
+mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
 //=> ['a/b.js']
 ```
 
@@ -768,7 +639,7 @@ If `true`, when no matches are found the actual (arrayified) glob pattern is ret
 
 ### options.snapdragon
 
-Pass your own instance of [snapdragon](https://github.com/jonschlinkert/snapdragon), to customize parsers or compilers.
+Pass your own instance of [snapdragon](https://github.com/here-be/snapdragon), to customize parsers or compilers.
 
 **Type**: `Object`
 
@@ -859,7 +730,7 @@ Micromatch also supports extended globbing features.
 
 Extended globbing, as described by the bash man page:
 
-| **pattern** | **regex equivalent** | **description** | 
+| **pattern** | **regex equivalent** | **description** |
 | --- | --- | --- |
 | `?(pattern)` | `(pattern)?` | Matches zero or one occurrence of the given patterns |
 | `*(pattern)` | `(pattern)*` | Matches zero or more occurrences of the given patterns |
@@ -921,7 +792,7 @@ mm.isMatch('a1', '[[:alpha:][:alpha:]]');
 //=> false
 ```
 
-See [expand-brackets](https://github.com/jonschlinkert/expand-brackets) for more information about bracket expressions.
+See [expand-brackets](https://github.com/micromatch/expand-brackets) for more information about bracket expressions.
 
 ***
 
@@ -968,106 +839,6 @@ Please create an issue if you encounter a bug or matching behavior that doesn't 
 
 It's important to us that micromatch work consistently on all platforms. If you encounter any platform-specific matching or path related issues, please let us know (pull requests are also greatly appreciated).
 
-## Benchmarks
-
-### Running benchmarks
-
-Install dev dependencies:
-
-```bash
-npm i -d && npm run benchmark
-```
-
-### Latest results
-
-As of February 18, 2018 (longer bars are better):
-
-```sh
-# braces-globstar-large-list (485691 bytes)
-  micromatch ██████████████████████████████████████████████████ (517 ops/sec ±0.49%)
-  minimatch  █ (18.92 ops/sec ±0.54%)
-  multimatch █ (18.94 ops/sec ±0.62%)
-
-  micromatch is faster by an avg. of 2,733%
-
-# braces-multiple (3362 bytes)
-  micromatch ██████████████████████████████████████████████████ (33,625 ops/sec ±0.45%)
-  minimatch   (2.92 ops/sec ±3.26%)
-  multimatch  (2.90 ops/sec ±2.76%)
-
-  micromatch is faster by an avg. of 1,156,935%
-
-# braces-range (727 bytes)
-  micromatch █████████████████████████████████████████████████ (155,220 ops/sec ±0.56%)
-  minimatch  ██████ (20,186 ops/sec ±1.27%)
-  multimatch ██████ (19,809 ops/sec ±0.60%)
-
-  micromatch is faster by an avg. of 776%
-
-# braces-set (2858 bytes)
-  micromatch █████████████████████████████████████████████████ (24,354 ops/sec ±0.92%)
-  minimatch  █████ (2,566 ops/sec ±0.56%)
-  multimatch ████ (2,431 ops/sec ±1.25%)
-
-  micromatch is faster by an avg. of 975%
-
-# globstar-large-list (485686 bytes)
-  micromatch █████████████████████████████████████████████████ (504 ops/sec ±0.45%)
-  minimatch  ███ (33.36 ops/sec ±1.08%)
-  multimatch ███ (33.19 ops/sec ±1.35%)
-
-  micromatch is faster by an avg. of 1,514%
-
-# globstar-long-list (90647 bytes)
-  micromatch ██████████████████████████████████████████████████ (2,694 ops/sec ±1.08%)
-  minimatch  ████████████████ (870 ops/sec ±1.09%)
-  multimatch ████████████████ (862 ops/sec ±0.84%)
-
-  micromatch is faster by an avg. of 311%
-
-# globstar-short-list (182 bytes)
-  micromatch ██████████████████████████████████████████████████ (328,921 ops/sec ±1.06%)
-  minimatch  █████████ (64,808 ops/sec ±1.42%)
-  multimatch ████████ (57,991 ops/sec ±2.11%)
-
-  micromatch is faster by an avg. of 536%
-
-# no-glob (701 bytes)
-  micromatch █████████████████████████████████████████████████ (415,935 ops/sec ±0.36%)
-  minimatch  ███████████ (92,730 ops/sec ±1.44%)
-  multimatch █████████ (81,958 ops/sec ±2.13%)
-
-  micromatch is faster by an avg. of 476%
-
-# star-basename-long (12339 bytes)
-  micromatch █████████████████████████████████████████████████ (7,963 ops/sec ±0.36%)
-  minimatch  ███████████████████████████████ (5,072 ops/sec ±0.83%)
-  multimatch ███████████████████████████████ (5,028 ops/sec ±0.40%)
-
-  micromatch is faster by an avg. of 158%
-
-# star-basename-short (349 bytes)
-  micromatch ██████████████████████████████████████████████████ (269,552 ops/sec ±0.70%)
-  minimatch  ██████████████████████ (122,457 ops/sec ±1.39%)
-  multimatch ████████████████████ (110,788 ops/sec ±1.99%)
-
-  micromatch is faster by an avg. of 231%
-
-# star-folder-long (19207 bytes)
-  micromatch █████████████████████████████████████████████████ (3,806 ops/sec ±0.38%)
-  minimatch  ████████████████████████████ (2,204 ops/sec ±0.32%)
-  multimatch ██████████████████████████ (2,020 ops/sec ±1.07%)
-
-  micromatch is faster by an avg. of 180%
-
-# star-folder-short (551 bytes)
-  micromatch ██████████████████████████████████████████████████ (249,077 ops/sec ±0.40%)
-  minimatch  ███████████ (59,431 ops/sec ±1.67%)
-  multimatch ███████████ (55,569 ops/sec ±1.43%)
-
-  micromatch is faster by an avg. of 433%
-```
-
 ## About
 
 <details>
@@ -1108,43 +879,52 @@ $ npm install -g verbose/verb#dev verb-generate-readme && verb
 You might also be interested in these projects:
 
 * [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
-* [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/jonschlinkert/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
+* [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/micromatch/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
 * [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/micromatch/extglob) | [homepage](https://github.com/micromatch/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
 * [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
 * [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
 
 ### Contributors
 
-| **Commits** | **Contributor** | 
-| --- | --- |
-| 457 | [jonschlinkert](https://github.com/jonschlinkert) |
-| 12 | [es128](https://github.com/es128) |
-| 8 | [doowb](https://github.com/doowb) |
-| 3 | [paulmillr](https://github.com/paulmillr) |
-| 2 | [TrySound](https://github.com/TrySound) |
-| 2 | [MartinKolarik](https://github.com/MartinKolarik) |
-| 2 | [charlike-old](https://github.com/charlike-old) |
-| 1 | [amilajack](https://github.com/amilajack) |
-| 1 | [mrmlnc](https://github.com/mrmlnc) |
-| 1 | [devongovett](https://github.com/devongovett) |
-| 1 | [DianeLooney](https://github.com/DianeLooney) |
-| 1 | [UltCombo](https://github.com/UltCombo) |
-| 1 | [tomByrer](https://github.com/tomByrer) |
-| 1 | [fidian](https://github.com/fidian) |
+| **Commits** | **Contributor** |  
+| --- | --- |  
+| 475 | [jonschlinkert](https://github.com/jonschlinkert) |  
+| 12  | [es128](https://github.com/es128) |  
+| 8   | [doowb](https://github.com/doowb) |  
+| 3   | [paulmillr](https://github.com/paulmillr) |  
+| 2   | [TrySound](https://github.com/TrySound) |  
+| 2   | [MartinKolarik](https://github.com/MartinKolarik) |  
+| 2   | [Tvrqvoise](https://github.com/Tvrqvoise) |  
+| 2   | [tunnckoCore](https://github.com/tunnckoCore) |  
+| 1   | [amilajack](https://github.com/amilajack) |  
+| 1   | [mrmlnc](https://github.com/mrmlnc) |  
+| 1   | [devongovett](https://github.com/devongovett) |  
+| 1   | [DianeLooney](https://github.com/DianeLooney) |  
+| 1   | [UltCombo](https://github.com/UltCombo) |  
+| 1   | [tomByrer](https://github.com/tomByrer) |  
+| 1   | [fidian](https://github.com/fidian) |  
+| 1   | [simlu](https://github.com/simlu) |  
+| 1   | [wtgtybhertgeghgtwtg](https://github.com/wtgtybhertgeghgtwtg) |  
 
 ### Author
 
 **Jon Schlinkert**
 
-* [linkedin/in/jonschlinkert](https://linkedin.com/in/jonschlinkert)
-* [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/jonschlinkert](https://twitter.com/jonschlinkert)
+* [GitHub Profile](https://github.com/jonschlinkert)
+* [Twitter Profile](https://twitter.com/jonschlinkert)
+* [LinkedIn Profile](https://linkedin.com/in/jonschlinkert)
+
+Please consider supporting me on Patreon, or [start your own Patreon page](https://patreon.com/invite/bxpbvm)!
+
+<a href="https://www.patreon.com/jonschlinkert">
+<img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" height="50">
+</a>
 
 ### License
 
-Copyright © 2018, [Jon Schlinkert](https://github.com/jonschlinkert).
+Copyright © 2019, [Jon Schlinkert](https://github.com/jonschlinkert).
 Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on February 18, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on March 29, 2019._

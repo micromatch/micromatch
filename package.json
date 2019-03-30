@@ -93,9 +93,6 @@
     "plugins": [
       "gulp-format-md"
     ],
-    "helpers": [
-      "./benchmark/helper.js"
-    ],
     "related": {
       "list": [
         "braces",
