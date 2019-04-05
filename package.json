@@ -35,8 +35,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "braces": "^2.3.2",
-    "picomatch": "^1.2.0"
+    "braces": "micromatch/braces#dev",
+    "picomatch": "micromatch/picomatch#dev"
   },
   "devDependencies": {
     "gulp-format-md": "^2.0.0",
