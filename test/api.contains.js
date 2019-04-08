@@ -214,19 +214,19 @@ describe('.contains()', () => {
       assert(mm.contains('a\\b', '?/?'));
       assert(mm.contains('a\\b\\c', 'a/*'));
 
-      assert(!mm.contains('\\ab', '*/', { unixify: false }));
-      assert(!mm.contains('\\ab', '*/*', { unixify: false }));
-      assert(!mm.contains('\\ab', '*/[a-z]*', { unixify: false }));
-      assert(!mm.contains('\\ab', '*/a', { unixify: false }));
-      assert(!mm.contains('\\ab', '/', { unixify: false }));
-      assert(!mm.contains('\\ab', '/*', { unixify: false }));
-      assert(!mm.contains('\\ab', '/?', { unixify: false }));
-      assert(!mm.contains('\\ab', '/??', { unixify: false }));
-      assert(!mm.contains('\\ab', '/?b', { unixify: false }));
-      assert(!mm.contains('\\ab', '/a', { unixify: false }));
-      assert(!mm.contains('\\cd', '/*', { unixify: false }));
-      assert(!mm.contains('a\\b', '?/?', { unixify: false }));
-      assert(!mm.contains('a\\b\\c', 'a/*', { unixify: false }));
+      assert(!mm.contains('\\ab', '*/', { windows: false }));
+      assert(!mm.contains('\\ab', '*/*', { windows: false }));
+      assert(!mm.contains('\\ab', '*/[a-z]*', { windows: false }));
+      assert(!mm.contains('\\ab', '*/a', { windows: false }));
+      assert(!mm.contains('\\ab', '/', { windows: false }));
+      assert(!mm.contains('\\ab', '/*', { windows: false }));
+      assert(!mm.contains('\\ab', '/?', { windows: false }));
+      assert(!mm.contains('\\ab', '/??', { windows: false }));
+      assert(!mm.contains('\\ab', '/?b', { windows: false }));
+      assert(!mm.contains('\\ab', '/a', { windows: false }));
+      assert(!mm.contains('\\cd', '/*', { windows: false }));
+      assert(!mm.contains('a\\b', '?/?', { windows: false }));
+      assert(!mm.contains('a\\b\\c', 'a/*', { windows: false }));
     });
 
     it('should match files that contain the given extension', () => {
@@ -238,11 +238,13 @@ describe('.contains()', () => {
     });
 
     it('should match dotfiles when `dot` is true', () => {
-      assert(mm.contains('a\\b\\c\\.xyz.md', '.*.md', { unixify: true, dot: true }));
-      assert(mm.contains('a\\b\\c\\.xyz.md', '**/*.md', { unixify: true, dot: true }));
-      assert(mm.contains('a\\b\\c\\.xyz.md', '**/.*.md', { unixify: true, dot: true }));
-      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/*.md', { unixify: true, dot: true }));
-      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md', { unixify: true, dot: true }));
+      console.log(mm.parse('**/*.md', { windows: true, dot: true }))
+      console.log(mm.makeRe('**/*.md', { windows: true, dot: true }))
+      assert(mm.contains('a\\b\\c\\.xyz.md', '.*.md', { windows: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', '**/*.md', { windows: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', '**/.*.md', { windows: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/*.md', { windows: true, dot: true }));
+      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md', { windows: true, dot: true }));
     });
 
     it('should not match dotfiles when `dot` or `dotfiles` is not set', () => {

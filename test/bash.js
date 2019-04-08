@@ -24,12 +24,12 @@ describe('bash options and features:', () => {
     });
 
     it('should use quoted characters as literals:', () => {
-      assert.deepEqual(mm(fixtures, '\\*', { unixify: false }), ['*', '\\*']);
-      assert.deepEqual(mm(fixtures, '\\^', { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, 'a\\*', { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['a\\*', '\\*'], { unixify: false }), ['*', '\\*']);
-      assert.deepEqual(mm(fixtures, ['a\\*'], { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['c*', 'a\\*', '*q*'], { unixify: false }), ['c', 'ca', 'cb']);
+      assert.deepEqual(mm(fixtures, '\\*', { windows: false }), ['*', '\\*']);
+      assert.deepEqual(mm(fixtures, '\\^', { windows: false }), []);
+      assert.deepEqual(mm(fixtures, 'a\\*', { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['a\\*', '\\*'], { windows: false }), ['*', '\\*']);
+      assert.deepEqual(mm(fixtures, ['a\\*'], { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['c*', 'a\\*', '*q*'], { windows: false }), ['c', 'ca', 'cb']);
     });
 
     it('should support quoted characters', () => {
@@ -39,18 +39,18 @@ describe('bash options and features:', () => {
     });
 
     it('should respect escaped characters', () => {
-      assert.deepEqual(mm(fixtures, '\\**', { unixify: false }), ['*', '**']);
+      assert.deepEqual(mm(fixtures, '\\**', { windows: false }), ['*', '**']);
     });
 
     it('should respect escaped paths/dots:', () => {
       let format = str => str.replace(/\\/g, '');
-      assert.deepEqual(mm(['"\\.\\./*/"'], '"\\.\\./*/"', { unixify: false }), ['"\\.\\./*/"']);
-      assert.deepEqual(mm(['"\\.\\./*/"'], '"\\.\\./*/"', { format, unixify: false }), ['"../*/"']);
-      assert.deepEqual(mm(['s/\\..*//'], 's/\\..*//', { unixify: false }), ['s/\\..*//']);
+      assert.deepEqual(mm(['"\\.\\./*/"'], '"\\.\\./*/"', { windows: false }), ['"\\.\\./*/"']);
+      assert.deepEqual(mm(['"\\.\\./*/"'], '"\\.\\./*/"', { format, windows: false }), ['"../*/"']);
+      assert.deepEqual(mm(['s/\\..*//'], 's/\\..*//', { windows: false }), ['s/\\..*//']);
     });
 
     it("Pattern from Larry Wall's Configure that caused bash to blow up:", () => {
-      assert.deepEqual(mm(['"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"'], '"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"', { unixify: false }), ['"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"']);
+      assert.deepEqual(mm(['"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"'], '"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"', { windows: false }), ['"/^root:/{s/^[^:]*:[^:]*:\\([^:]*\\).*"\'$\'"/\\1/"']);
       assert.deepEqual(mm(fixtures, '[a-c]b*'), ['abc', 'abd', 'abe', 'bb', 'cb']);
     });
 

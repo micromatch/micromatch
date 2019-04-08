@@ -157,17 +157,17 @@ describe('options', () => {
 
     it('should remove duplicate elements from the result array:', () => {
       let fixtures = ['.editorconfig', '.git', '.gitignore', '.nyc_output', '.travis.yml', '.verb.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'LICENSE', 'coverage', 'example.js', 'example.md', 'example.css', 'index.js', 'node_modules', 'package.json', 'test.js', 'utils.js'];
-      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { unixify: true }), ['/a/b/c']);
-      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', { unixify: true }), ['/a/b/c']);
-      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { unixify: true, nodupes: true }), ['/a/b/c']);
-      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', { unixify: true, nodupes: true }), ['/a/b/c']);
-      assert.deepEqual(mm(fixtures, ['example.*', '*.js'], { unixify: true, nodupes: true }), ['example.js', 'example.md', 'example.css', 'index.js', 'test.js', 'utils.js']);
+      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { windows: true }), ['/a/b/c']);
+      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', { windows: true }), ['/a/b/c']);
+      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { windows: true, nodupes: true }), ['/a/b/c']);
+      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', { windows: true, nodupes: true }), ['/a/b/c']);
+      assert.deepEqual(mm(fixtures, ['example.*', '*.js'], { windows: true, nodupes: true }), ['example.js', 'example.md', 'example.css', 'index.js', 'test.js', 'utils.js']);
     });
 
     it('should not remove duplicates', () => {
       assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c'), ['/a/b/c']);
       assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { nodupes: true }), ['/a/b/c']);
-      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { unixify: true, nodupes: true }), ['/a/b/c']);
+      assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { windows: true, nodupes: true }), ['/a/b/c']);
     });
   });
 
@@ -191,15 +191,15 @@ describe('options', () => {
     });
   });
 
-  describe('options.unixify', () => {
-    it('should unixify file paths by default', () => {
+  describe('options.windows', () => {
+    it('should windows file paths by default', () => {
       assert.deepEqual(mm(['a\\b\\c.md'], '**/*.md'), ['a/b/c.md']);
-      assert.deepEqual(mm(['a\\b\\c.md'], '**\\\\*.md', { unixify: false }), ['a\\b\\c.md']);
+      assert.deepEqual(mm(['a\\b\\c.md'], '**\\\\*.md', { windows: false }), ['a\\b\\c.md']);
     });
 
-    it('should unixify absolute paths', () => {
+    it('should windows absolute paths', () => {
       assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md'), ['E:/a/b/c.md']);
-      assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', { unixify: false }), []);
+      assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', { windows: false }), []);
     });
 
     it('should strip leading `./`', () => {
@@ -221,20 +221,20 @@ describe('options', () => {
       assert.deepEqual(mm(fixtures, 'a/*/*/*/*', opts), ['a/a/a/a/a']);
       assert.deepEqual(mm(fixtures, 'a/*/a', opts), ['a/a/a']);
 
-      assert.deepEqual(mm(fixtures, '*', { ...opts, unixify: false }), ['a', 'b']);
-      assert.deepEqual(mm(fixtures, '**/a/**', { ...opts, unixify: false }), ['a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/b', 'a/x', 'a/a', 'a/a/b', 'a/c']);
-      assert.deepEqual(mm(fixtures, '*/*', { ...opts, unixify: false }), ['a/b', 'a/x', 'z/z', 'a/a', 'a/c', 'x/y']);
-      assert.deepEqual(mm(fixtures, '*/*/*', { ...opts, unixify: false }), ['a/a/a', 'a/a/b']);
-      assert.deepEqual(mm(fixtures, '*/*/*/*', { ...opts, unixify: false }), ['a/a/a/a']);
-      assert.deepEqual(mm(fixtures, '*/*/*/*/*', { ...opts, unixify: false }), ['a/a/a/a/a']);
-      assert.deepEqual(mm(fixtures, './*', { ...opts, unixify: false }), ['a', 'b']);
-      assert.deepEqual(mm(fixtures, './**/a/**', { ...opts, unixify: false }), ['a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/b', 'a/x', 'a/a', 'a/a/b', 'a/c']);
-      assert.deepEqual(mm(fixtures, './a/*/a', { ...opts, unixify: false }), ['a/a/a']);
-      assert.deepEqual(mm(fixtures, 'a/*', { ...opts, unixify: false }), ['a/b', 'a/x', 'a/a', 'a/c']);
-      assert.deepEqual(mm(fixtures, 'a/*/*', { ...opts, unixify: false }), ['a/a/a', 'a/a/b']);
-      assert.deepEqual(mm(fixtures, 'a/*/*/*', { ...opts, unixify: false }), ['a/a/a/a']);
-      assert.deepEqual(mm(fixtures, 'a/*/*/*/*', { ...opts, unixify: false }), ['a/a/a/a/a']);
-      assert.deepEqual(mm(fixtures, 'a/*/a', { ...opts, unixify: false }), ['a/a/a']);
+      assert.deepEqual(mm(fixtures, '*', { ...opts, windows: false }), ['a', 'b']);
+      assert.deepEqual(mm(fixtures, '**/a/**', { ...opts, windows: false }), ['a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/b', 'a/x', 'a/a', 'a/a/b', 'a/c']);
+      assert.deepEqual(mm(fixtures, '*/*', { ...opts, windows: false }), ['a/b', 'a/x', 'z/z', 'a/a', 'a/c', 'x/y']);
+      assert.deepEqual(mm(fixtures, '*/*/*', { ...opts, windows: false }), ['a/a/a', 'a/a/b']);
+      assert.deepEqual(mm(fixtures, '*/*/*/*', { ...opts, windows: false }), ['a/a/a/a']);
+      assert.deepEqual(mm(fixtures, '*/*/*/*/*', { ...opts, windows: false }), ['a/a/a/a/a']);
+      assert.deepEqual(mm(fixtures, './*', { ...opts, windows: false }), ['a', 'b']);
+      assert.deepEqual(mm(fixtures, './**/a/**', { ...opts, windows: false }), ['a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/b', 'a/x', 'a/a', 'a/a/b', 'a/c']);
+      assert.deepEqual(mm(fixtures, './a/*/a', { ...opts, windows: false }), ['a/a/a']);
+      assert.deepEqual(mm(fixtures, 'a/*', { ...opts, windows: false }), ['a/b', 'a/x', 'a/a', 'a/c']);
+      assert.deepEqual(mm(fixtures, 'a/*/*', { ...opts, windows: false }), ['a/a/a', 'a/a/b']);
+      assert.deepEqual(mm(fixtures, 'a/*/*/*', { ...opts, windows: false }), ['a/a/a/a']);
+      assert.deepEqual(mm(fixtures, 'a/*/*/*/*', { ...opts, windows: false }), ['a/a/a/a/a']);
+      assert.deepEqual(mm(fixtures, 'a/*/a', { ...opts, windows: false }), ['a/a/a']);
     });
   });
 
@@ -254,8 +254,8 @@ describe('options', () => {
         assert.deepEqual(mm(['foo/bar.js'], '**/foo/**', opts), ['foo/bar.js']);
         assert.deepEqual(mm(['./foo/bar.js'], './**/foo/**', opts), ['foo/bar.js']);
         assert.deepEqual(mm(['./foo/bar.js'], '**/foo/**', opts), ['foo/bar.js']);
-        assert.deepEqual(mm(['./foo/bar.js'], './**/foo/**', { ...opts, unixify: false }), ['foo/bar.js']);
-        assert.deepEqual(mm(['./foo/bar.js'], '**/foo/**', { ...opts, unixify: false }), ['foo/bar.js']);
+        assert.deepEqual(mm(['./foo/bar.js'], './**/foo/**', { ...opts, windows: false }), ['foo/bar.js']);
+        assert.deepEqual(mm(['./foo/bar.js'], '**/foo/**', { ...opts, windows: false }), ['foo/bar.js']);
       });
 
       it('should match dotfiles when a leading dot is defined in the path:', () => {
@@ -271,15 +271,15 @@ describe('options', () => {
   });
 
   describe('windows', () => {
-    it('should unixify file paths', () => {
+    it('should windows file paths', () => {
       assert.deepEqual(mm(['a\\b\\c.md'], '**/*.md'), ['a/b/c.md']);
-      assert.deepEqual(mm(['a\\b\\c.md'], '**/*.md', { unixify: false }), ['a\\b\\c.md']);
-      assert.deepEqual(mm(['a\\b\\c.md'], '**\\\\*.md', { unixify: false }), ['a\\b\\c.md']);
+      assert.deepEqual(mm(['a\\b\\c.md'], '**/*.md', { windows: false }), ['a\\b\\c.md']);
+      assert.deepEqual(mm(['a\\b\\c.md'], '**\\\\*.md', { windows: false }), ['a\\b\\c.md']);
     });
 
-    it('should unixify absolute paths', () => {
+    it('should windows absolute paths', () => {
       assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md'), ['E:/a/b/c.md']);
-      assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', { unixify: false }), []);
+      assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', { windows: false }), []);
     });
   });
 });

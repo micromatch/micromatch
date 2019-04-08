@@ -1,9 +1,9 @@
 'use strict';
 
 const { Suite } = require('benchmark');
-const { cyan, red, green } = require('ansi-colors');
+const colors = require('ansi-colors');
 const argv = require('minimist')(process.argv.slice(2));
-const mm = require('../node_modules/minimatch');
+const mm = require('minimatch');
 const pm = require('..');
 
 /**
@@ -11,7 +11,7 @@ const pm = require('..');
  */
 
 const cycle = (e, newline) => {
-  process.stdout.write(`\u001b[G  ${e.target}${newline ? `\n` : ''}`);
+  process.stdout.write(`\u001b[G  ${e.target}${newline ? '\n' : ''}`);
 };
 
 const bench = (name, options) => {
@@ -41,32 +41,32 @@ const bench = (name, options) => {
   return suite;
 };
 
-bench(red('.makeRe') + ' star')
+bench(colors.green('.makeRe') + ' star')
   .add('micromatch', () => pm.makeRe('*'))
   .add('minimatch', () => mm.makeRe('*'))
   .run();
 
-bench(red('.makeRe') + ' star; dot=true')
+bench(colors.green('.makeRe') + ' star; dot=true')
   .add('micromatch', () => pm.makeRe('*', { dot: true }))
   .add('minimatch', () => mm.makeRe('*', { dot: true }))
   .run();
 
-bench(red('.makeRe') + ' globstar')
+bench(colors.green('.makeRe') + ' globstar')
   .add('micromatch', () => pm.makeRe('**'))
   .add('minimatch', () => mm.makeRe('**'))
   .run();
 
-bench(red('.makeRe') + ' globstars')
+bench(colors.green('.makeRe') + ' globstars')
   .add('micromatch', () => pm.makeRe('**/**/**'))
   .add('minimatch', () => mm.makeRe('**/**/**'))
   .run();
 
-bench(red('.makeRe') + ' with leading star')
+bench(colors.green('.makeRe') + ' with leading star')
   .add('micromatch', () => pm.makeRe('*.txt'))
   .add('minimatch', () => mm.makeRe('*.txt'))
   .run();
 
-bench(red('.makeRe') + ' - braces')
+bench(colors.green('.makeRe') + ' - braces')
   .add('micromatch', () => pm.makeRe('{a,b,c}*.txt'))
   .add('minimatch', () => mm.makeRe('{a,b,c}*.txt'))
   .run();

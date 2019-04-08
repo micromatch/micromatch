@@ -99,33 +99,33 @@ describe('micromatch', () => {
       let fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, '(a/b)'), ['a/b']);
       assert.deepEqual(mm(fixtures, 'a/b'), ['a/b']);
-      assert.deepEqual(mm(fixtures, '(a/b)', { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, 'a/b', { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, '(a/b)', { windows: false }), []);
+      assert.deepEqual(mm(fixtures, 'a/b', { windows: false }), []);
     });
 
     it('should return an array of matches for an array of literal strings', () => {
       let fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, ['(a/b)', 'a/c']), ['a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, ['a/b', 'b/b']), ['a/b', 'b/b']);
-      assert.deepEqual(mm(fixtures, ['(a/b)', 'a/c'], { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['a/b', 'b/b'], { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, ['(a/b)', 'a/c'], { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/b', 'b/b'], { windows: false }), []);
     });
 
     it('should support regex logical or', () => {
       let fixtures = ['a\\a', 'a\\b', 'a\\c'];
       assert.deepEqual(mm(fixtures, ['a/(a|c)']), ['a/a', 'a/c']);
       assert.deepEqual(mm(fixtures, ['a/(a|b|c)', 'a/b']), ['a/a', 'a/b', 'a/c']);
-      assert.deepEqual(mm(fixtures, ['a/(a|c)'], { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['a/(a|b|c)', 'a/b'], { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/(a|c)'], { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/(a|b|c)', 'a/b'], { windows: false }), []);
     });
 
     it('should support regex ranges', () => {
       let fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x\\y', 'a\\x'];
       assert.deepEqual(mm(fixtures, 'a/[b-c]'), ['a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, 'a/[a-z]'), ['a/a', 'a/b', 'a/c', 'a/x']);
-      assert.deepEqual(mm(fixtures, 'a/[b-c]', { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, 'a\\\\[b-c]', { unixify: false }), ['a\\b', 'a\\c']);
-      assert.deepEqual(mm(fixtures, 'a/[a-z]', { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, 'a/[b-c]', { windows: false }), []);
+      assert.deepEqual(mm(fixtures, 'a\\\\[b-c]', { windows: false }), ['a\\b', 'a\\c']);
+      assert.deepEqual(mm(fixtures, 'a/[a-z]', { windows: false }), []);
     });
 
     it('should support single globs (*)', () => {
@@ -156,7 +156,7 @@ describe('micromatch', () => {
       assert.deepEqual(mm(fixtures, ['a/*/a']), ['a/a/a']);
       assert.deepEqual(mm(fixtures, ['a/*/b']), ['a/a/b']);
 
-      let opts = { unixify: false };
+      let opts = { windows: false };
       assert.deepEqual(mm(fixtures, ['*/*'], opts), []);
       assert.deepEqual(mm(fixtures, ['*/*/*'], opts), []);
       assert.deepEqual(mm(fixtures, ['*/*/*/*'], opts), []);
@@ -176,9 +176,9 @@ describe('micromatch', () => {
       assert.deepEqual(mm(fixtures, ['a/**/*']), expected);
       assert.deepEqual(mm(fixtures, ['a/**/**/*']), expected);
 
-      assert.deepEqual(mm(fixtures, ['a/**'], { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['a/**/*'], { unixify: false }), []);
-      assert.deepEqual(mm(fixtures, ['a/**/**/*'], { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/**'], { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/**/*'], { windows: false }), []);
+      assert.deepEqual(mm(fixtures, ['a/**/**/*'], { windows: false }), []);
     });
 
     it('should work with file extensions', () => {

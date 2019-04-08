@@ -631,7 +631,7 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"a\\z" should match "a\\z"', () => {
-    assert(isMatch('a\\\\z', 'a\\\\z', { unixify: false }));
+    assert(isMatch('a\\\\z', 'a\\\\z', { windows: false }));
   });
 
   it('"a\\z" should match "a\\z"', () => {
@@ -639,11 +639,11 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"a\\b" should match "a/b"', () => {
-    assert(isMatch('a\\b', 'a/b', { unixify: true }));
+    assert(isMatch('a\\b', 'a/b', { windows: true }));
   });
 
   it('"a\\z" should match "a\\z"', () => {
-    assert(isMatch('a\\z', 'a\\\\z', { unixify: false }));
+    assert(isMatch('a\\z', 'a\\\\z', { windows: false }));
   });
 
   it('"a\\z" should not match "a\\z"', () => {
@@ -807,7 +807,7 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"ab" should not match "a/b"', () => {
-    assert(!isMatch('ab', 'a/b', { unixify: true }));
+    assert(!isMatch('ab', 'a/b', { windows: true }));
   });
 
   it('"ab" should not match "a\\(b"', () => {
@@ -1471,7 +1471,7 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"az" should not match "a\\z"', () => {
-    assert(!isMatch('az', 'a\\\\z', { unixify: false }));
+    assert(!isMatch('az', 'a\\\\z', { windows: false }));
   });
 
   it('"az" should not match "a\\z"', () => {
@@ -2143,7 +2143,7 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"foo*" should match "foo\\*"', () => {
-    assert(isMatch('foo*', 'foo\\*', { unixify: false }));
+    assert(isMatch('foo*', 'foo\\*', { windows: false }));
   });
 
   it('"foo*bar" should match "foo\\*bar"', () => {
@@ -2567,7 +2567,7 @@ describe('extglobs (minimatch)', () => {
   });
 
   it('"XXX/adobe/courier/bold/o/normal//12/120/75/75/m/70/iso8859/1" should match "XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*"', () => {
-    assert(isMatch('XXX/adobe/courier/bold/o/normal//12/120/75/75/m/70/iso8859/1', 'XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*', { unixify: false }));
+    assert(isMatch('XXX/adobe/courier/bold/o/normal//12/120/75/75/m/70/iso8859/1', 'XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*', { windows: false }));
   });
 
   it('"XXX/adobe/courier/bold/o/normal//12/120/75/75/X/70/iso8859/1" should not match "XXX/*/*/*/*/*/*/12/*/*/*/m/*/*/*"', () => {

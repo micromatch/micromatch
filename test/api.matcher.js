@@ -114,14 +114,14 @@ describe('.matcher()', () => {
       assert.deepEqual(mm(fixtures, '!(*/b)', { format }), fixtures);
       assert.deepEqual(mm(fixtures, '!(a/b)', { format }), fixtures);
 
-      assert.deepEqual(mm(fixtures, '!*/*', { unixify: true }), []);
-      assert.deepEqual(mm(fixtures, ['!*/b'], { unixify: true }), ['a/a', 'a/c', 'b/a', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!a/*'], { unixify: true }), ['b/a', 'b/b', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!a/b'], { unixify: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!a/(b)'], { unixify: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!a/(*)'], { unixify: true }), ['b/a', 'b/b', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!(*/b)'], { unixify: true }), ['a/a', 'a/c', 'b/a', 'b/c']);
-      assert.deepEqual(mm(fixtures, ['!(a/b)'], { unixify: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, '!*/*', { windows: true }), []);
+      assert.deepEqual(mm(fixtures, ['!*/b'], { windows: true }), ['a/a', 'a/c', 'b/a', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!a/*'], { windows: true }), ['b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!a/b'], { windows: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!a/(b)'], { windows: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!a/(*)'], { windows: true }), ['b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!(*/b)'], { windows: true }), ['a/a', 'a/c', 'b/a', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!(a/b)'], { windows: true }), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
     });
   });
 
@@ -137,9 +137,9 @@ describe('.matcher()', () => {
     it('should return an array of matches for a literal string', () => {
       let fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, '(a/b)'), ['a/b']);
-      assert.deepEqual(mm(fixtures, '(a/b)', { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, '(a/b)', { windows: false }), []);
       assert.deepEqual(mm(fixtures, 'a/b'), ['a/b']);
-      assert.deepEqual(mm(fixtures, 'a/b', { unixify: false }), []);
+      assert.deepEqual(mm(fixtures, 'a/b', { windows: false }), []);
     });
 
     it('should support regex logical or', () => {

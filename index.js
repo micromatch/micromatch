@@ -2,18 +2,16 @@
 
 const path = require('path');
 const util = require('util');
-const braces = require('braces');
 const picomatch = require('picomatch');
-const isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+const utils = require('picomatch/lib/utils');
 const isEmptyString = val => typeof val === 'string' && (val === '' || val === './');
-const toPosixSlashes = str => str.replace(/\\/g, '/');
 
 /**
  * Returns an array of strings that match one or more glob patterns.
  *
  * ```js
  * const mm = require('micromatch');
- * mm(list, patterns[, options]);
+ * // mm(list, patterns[, options]);
  *
  * console.log(mm(['a.js', 'a.txt'], ['*.js']));
  * //=> [ 'a.js' ]
@@ -85,7 +83,7 @@ const micromatch = (list, patterns, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.matcher(pattern[, options]);
+ * // mm.matcher(pattern[, options]);
  *
  * const isMatch = mm.matcher('*.!(*a)');
  * console.log(isMatch('a.a')); //=> false
@@ -161,7 +159,7 @@ micromatch.not = (list, patterns, options = {}) => {
  *
  * ```js
  * var mm = require('micromatch');
- * mm.contains(string, pattern[, options]);
+ * // mm.contains(string, pattern[, options]);
  *
  * console.log(mm.contains('aa/bb/cc', '*b'));
  * //=> true
@@ -204,7 +202,7 @@ micromatch.contains = (str, pattern, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.matchKeys(object, patterns[, options]);
+ * // mm.matchKeys(object, patterns[, options]);
  *
  * const obj = { aa: 'a', ab: 'b', ac: 'c' };
  * console.log(mm.matchKeys(obj, '*b'));
@@ -218,7 +216,7 @@ micromatch.contains = (str, pattern, options) => {
  */
 
 micromatch.matchKeys = (obj, patterns, options) => {
-  if (!isObject(obj)) {
+  if (!utils.isObject(obj)) {
     throw new TypeError('Expected the first argument to be an object');
   }
   let keys = micromatch(Object.keys(obj), patterns, options);
@@ -232,7 +230,7 @@ micromatch.matchKeys = (obj, patterns, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.some(list, patterns[, options]);
+ * // mm.some(list, patterns[, options]);
  *
  * console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
  * // true
@@ -264,7 +262,7 @@ micromatch.some = (list, patterns, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.every(list, patterns[, options]);
+ * // mm.every(list, patterns[, options]);
  *
  * console.log(mm.every('foo.js', ['foo.js']));
  * // true
@@ -300,7 +298,7 @@ micromatch.every = (list, patterns, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.all(string, patterns[, options]);
+ * // mm.all(string, patterns[, options]);
  *
  * console.log(mm.all('foo.js', ['foo.js']));
  * // true
@@ -334,7 +332,7 @@ micromatch.all = (str, patterns, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.capture(pattern, string[, options]);
+ * // mm.capture(pattern, string[, options]);
  *
  * console.log(mm.capture('test/*.js', 'test/foo.js'));
  * //=> ['foo']
@@ -349,9 +347,9 @@ micromatch.all = (str, patterns, options) => {
  */
 
 micromatch.capture = (glob, input, options) => {
-  let posix = isWindows(options);
+  let posix = utils.isWindows(options);
   let regex = picomatch.makeRe(glob, { ...options, capture: true });
-  let match = regex.exec(posix ? toPosixSlashes(input) : input);
+  let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
 
   if (match) {
     return match.slice(1).map(v => v === void 0 ? '' : v);
@@ -363,7 +361,7 @@ micromatch.capture = (glob, input, options) => {
  *
  * ```js
  * const mm = require('micromatch');
- * mm.makeRe(pattern[, options]);
+ * // mm.makeRe(pattern[, options]);
  *
  * console.log(mm.makeRe('*.js'));
  * //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
@@ -450,7 +448,7 @@ micromatch.braces = (pattern, options) => {
   if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
     return [pattern];
   }
-  return braces(pattern, options);
+  return require('braces')(pattern, options);
 };
 
 /**
@@ -462,14 +460,8 @@ micromatch.braceExpand = (pattern, options) => {
   return micromatch.braces(pattern, { ...options, expand: true });
 };
 
-function isWindows(options) {
-  if (options && (options.unixify === false || options.posixSlashes === false)) {
-    return false;
-  }
-  if (process.platform === 'win32' || path.sep === '\\') {
-    return true;
-  }
-  return options && (options.unixify === true || options.posixSlashes === true);
-}
+/**
+ * Expose micromatch
+ */
 
 module.exports = micromatch;

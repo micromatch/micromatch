@@ -4,7 +4,8 @@ require('mocha');
 const assert = require('assert');
 const { isMatch } = require('..');
 
-describe('stars', () => {describe('single stars', () => {
+describe('stars', () => {
+  describe('single stars', () => {
     it('should match using one consecutive star', () => {
       assert(!isMatch('a/b/c/z.js', '*.js'));
       assert(!isMatch('a/b/z.js', '*.js'));

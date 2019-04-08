@@ -1,8 +1,8 @@
 'use strict';
 
 const { Suite } = require('benchmark');
-const { cyan, red, green } = require('ansi-colors');
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const parent = require('glob-parent');
 const scan = require('../lib/scan');
 
@@ -11,7 +11,7 @@ const scan = require('../lib/scan');
  */
 
 const cycle = (e, newline) => {
-  process.stdout.write(`\u001b[G  ${e.target}${newline ? `\n` : ''}`);
+  process.stdout.write(`\u001b[G  ${e.target}${newline ? '\n' : ''}`);
 };
 
 function bench(name, options) {
@@ -42,12 +42,12 @@ function bench(name, options) {
   return suite;
 }
 
-bench(red('foo/*.js'))
+bench(colors.cyan('foo/*.js'))
   .add('  picomatch', () => scan('foo/*.js'))
   .add('glob-parent', () => parent('foo/*.js'))
   .run();
 
-bench(red('foo/{a,b}/*.js'))
+bench(colors.cyan('foo/{a,b}/*.js'))
   .add('  picomatch', () => scan('foo/{a,b}/*.js'))
   .add('glob-parent', () => parent('foo/{a,b}/*.js'))
   .run();
