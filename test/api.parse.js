@@ -12,11 +12,13 @@ describe('.parse()', () => {
       delete token.prev;
     });
 
+    const star = process.platform === 'win32' ? '[^\\\\\\/]*?' : '[^/]*?';
+
     assert.deepEqual(tokens, [
       { type: 'bos', value: '', output: '' },
       { type: 'text', value: 'a' },
       { type: 'slash', value: '/', output: '\\/(?!\\.)(?=.)' },
-      { type: 'star', value: '*', output: '[^/]*?' },
+      { type: 'star', value: '*', output: star },
       { type: 'maybe_slash', value: '', output: '\\/?' }
     ]);
   });

@@ -28,7 +28,9 @@ describe('posix classes', () => {
       assert.equal(convert('[[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:graph:][:lower:][:print:][:punct:][:space:][:upper:][:xdigit:]]'), '(?=.)[a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9\\x21-\\x7Ea-z\\x20-\\x7E \\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~ \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(convert('[^[:alnum:][:alpha:][:blank:][:cntrl:][:digit:][:lower:][:space:][:upper:][:xdigit:]]'), '(?=.)[^a-zA-Z0-9a-zA-Z \\t\\x00-\\x1F\\x7F0-9a-z \\t\\r\\n\\v\\fA-ZA-Fa-f0-9]');
       assert.equal(convert('[a-c[:digit:]x-z]'), '(?=.)[a-c0-9x-z]');
-      assert.equal(convert('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '(?=.)[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9][^/]*?', []);
+      if (process.platform !== 'win32') {
+        assert.equal(convert('[_[:alpha:]][_[:alnum:]][_[:alnum:]]*'), '(?=.)[_a-zA-Z][_a-zA-Z0-9][_a-zA-Z0-9][^/]*?', []);
+      }
     });
   });
 
