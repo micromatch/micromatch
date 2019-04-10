@@ -35,7 +35,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "braces": "^3.0.0",
+    "braces": "^3.0.1",
     "picomatch": "^2.0.0"
   },
   "devDependencies": {
@@ -94,6 +94,9 @@
     "plugins": [
       "gulp-format-md"
     ],
+    "lint": {
+      "reflinks": true
+    },
     "related": {
       "list": [
         "braces",
@@ -103,16 +106,12 @@
         "nanomatch"
       ]
     },
-    "lint": {
-      "reflinks": true
-    },
     "reflinks": [
-      "expand-brackets",
       "extglob",
+      "fill-range",
       "glob-object",
       "minimatch",
-      "multimatch",
-      "snapdragon"
+      "multimatch"
     ]
   }
 }

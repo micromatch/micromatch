@@ -1,6 +1,6 @@
 # micromatch [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W8YFZ425KND68) [![NPM version](https://img.shields.io/npm/v/micromatch.svg?style=flat)](https://www.npmjs.com/package/micromatch) [![NPM monthly downloads](https://img.shields.io/npm/dm/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![NPM total downloads](https://img.shields.io/npm/dt/micromatch.svg?style=flat)](https://npmjs.org/package/micromatch) [![Linux Build Status](https://img.shields.io/travis/micromatch/micromatch.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/micromatch)
 
-> Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.
+> Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.
 
 Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
@@ -18,34 +18,35 @@ Please consider following this project's author, [Jon Schlinkert](https://github
   * [From multimatch](#from-multimatch)
 - [API](#api)
 - [Options](#options)
+- [Options Examples](#options-examples)
   * [options.basename](#optionsbasename)
   * [options.bash](#optionsbash)
-  * [options.cache](#optionscache)
-  * [options.dot](#optionsdot)
-  * [options.failglob](#optionsfailglob)
+  * [options.expandRange](#optionsexpandrange)
+  * [options.format](#optionsformat)
   * [options.ignore](#optionsignore)
   * [options.matchBase](#optionsmatchbase)
-  * [options.nobrace](#optionsnobrace)
-  * [options.nocase](#optionsnocase)
-  * [options.nodupes](#optionsnodupes)
-  * [options.noext](#optionsnoext)
+  * [options.noextglob](#optionsnoextglob)
   * [options.nonegate](#optionsnonegate)
   * [options.noglobstar](#optionsnoglobstar)
   * [options.nonull](#optionsnonull)
   * [options.nullglob](#optionsnullglob)
-  * [options.snapdragon](#optionssnapdragon)
-  * [options.sourcemap](#optionssourcemap)
+  * [options.onIgnore](#optionsonignore)
+  * [options.onMatch](#optionsonmatch)
+  * [options.onResult](#optionsonresult)
+  * [options.posixSlashes](#optionsposixslashes)
   * [options.unescape](#optionsunescape)
-  * [options.unixify](#optionsunixify)
 - [Extended globbing](#extended-globbing)
-  * [extglobs](#extglobs)
-  * [braces](#braces)
-  * [regex character classes](#regex-character-classes)
-  * [regex groups](#regex-groups)
+  * [Extglobs](#extglobs)
+  * [Braces](#braces)
+  * [Regex character classes](#regex-character-classes)
+  * [Regex groups](#regex-groups)
   * [POSIX bracket expressions](#posix-bracket-expressions)
 - [Notes](#notes)
   * [Bash 4.3 parity](#bash-43-parity)
   * [Backslashes](#backslashes)
+- [Benchmarks](#benchmarks)
+  * [Running benchmarks](#running-benchmarks)
+  * [Latest results](#latest-results)
 - [Contributing](#contributing)
 - [About](#about)
 
@@ -62,45 +63,49 @@ $ npm install --save micromatch
 ## Quickstart
 
 ```js
-var mm = require('micromatch');
-mm(list, patterns[, options]);
+const micromatch = require('micromatch');
+// micromatch(list, patterns[, options]);
 ```
 
 The [main export](#micromatch) takes a list of strings and one or more glob patterns:
 
 ```js
-console.log(mm(['foo', 'bar', 'qux'], ['f*', 'b*'])); 
-//=> ['foo', 'bar']
+console.log(micromatch(['foo', 'bar', 'baz', 'qux'], ['f*', 'b*'])) //=> ['foo', 'bar', 'baz']
+console.log(micromatch(['foo', 'bar', 'baz', 'qux'], ['*', '!b*'])) //=> ['foo', 'qux']
 ```
 
-Use [.isMatch()](#ismatch) to get true/false:
+Use [.isMatch()](#ismatch) to for boolean matching:
 
 ```js
-console.log(mm.isMatch('foo', 'f*'));  
-//=> true
+console.log(micromatch.isMatch('foo', 'f*')) //=> true
+console.log(micromatch.isMatch('foo', ['b*', 'f*'])) //=> true
 ```
 
 [Switching](#switching-to-micromatch) from minimatch and multimatch is easy!
 
+<br>
+
 ## Why use micromatch?
 
-> micromatch is a [drop-in replacement](#switching-to-micromatch) for minimatch and multimatch
+> micromatch is a [replacement](#switching-to-micromatch) for minimatch and multimatch
 
 * Supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch)
-* Micromatch uses [snapdragon](https://github.com/here-be/snapdragon) for parsing and compiling globs, which provides granular control over the entire conversion process in a way that is easy to understand, reason about, and maintain.
-* More consistently accurate matching [than minimatch](https://github.com/yarnpkg/yarn/pull/3339), with more than 36,000 [test assertions](./test) to prove it.
-* More complete support for the Bash 4.3 specification than minimatch and multimatch. In fact, micromatch passes _all of the spec tests_ from bash, including some that bash still fails.
-* [Faster matching](#benchmarks), from a combination of optimized glob patterns, faster algorithms, and regex caching.
-* [Micromatch is safer](https://github.com/micromatch/braces#braces-is-safe), and is not subject to DoS with brace patterns, like minimatch and multimatch.
-* More reliable windows support than minimatch and multimatch.
+* More complete support for the Bash 4.3 specification than minimatch and multimatch. Micromatch passes _all of the spec tests_ from bash, including some that bash still fails.
+* **Fast & Performant** - Loads in about 5ms and performs [fast matches](#benchmarks).
+* **Glob matching** - Using wildcards (`*` and `?`), globstars (`**`) for nested directories
+* **[Advanced globbing](#advanced-globbing)** - Supports [extglobs](#extglobs), [braces](#braces), and [POSIX brackets](#posix-bracket-expressions), and support for escaping special characters with `\` or quotes.
+* **Accurate** - Covers more scenarios [than minimatch](https://github.com/yarnpkg/yarn/pull/3339)
+* **Well tested** - More than 5,000 [test assertions](./test)
+* **Windows support** - More reliable windows support than minimatch and multimatch.
+* **[Safe](https://github.com/micromatch/braces#braces-is-safe)** - Micromatch is not subject to DoS with brace patterns like minimatch and multimatch.
 
 ### Matching features
 
 * Support for multiple glob patterns (no need for wrappers like multimatch)
 * Wildcards (`**`, `*.js`)
 * Negation (`'!a/*.js'`, `'*!(b).js']`)
-* [extglobs](https://github.com/micromatch/extglob) (`+(x|y)`, `!(a|b)`)
-* [POSIX character classes](https://github.com/micromatch/expand-brackets) (`[[:alpha:][:digit:]]`)
+* [extglobs](#extglobs) (`+(x|y)`, `!(a|b)`)
+* [POSIX character classes](#posix-bracket-expressions) (`[[:alpha:][:digit:]]`)
 * [brace expansion](https://github.com/micromatch/braces) (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
 * regex character classes (`foo-[1-5].js`)
 * regex logical "or" (`foo/(abc|xyz).js`)
@@ -109,22 +114,20 @@ You can mix and match these features to create whatever patterns you need!
 
 ## Switching to micromatch
 
-There is one notable difference between micromatch and minimatch in regards to how backslashes are handled. See [the notes about backslashes](#backslashes) for more information.
+_(There is one notable difference between micromatch and minimatch in regards to how backslashes are handled. See [the notes about backslashes](#backslashes) for more information.)_
 
 ### From minimatch
 
-Use [mm.isMatch()](#ismatch) instead of `minimatch()`:
+Use [micromatch.isMatch()](#ismatch) instead of `minimatch()`:
 
 ```js
-mm.isMatch('foo', 'b*');
-//=> false
+console.log(micromatch.isMatch('foo', 'b*')); //=> false
 ```
 
-Use [mm.match()](#match) instead of `minimatch.match()`:
+Use [micromatch.match()](#match) instead of `minimatch.match()`:
 
 ```js
-mm.match(['foo', 'bar'], 'b*');
-//=> 'bar'
+console.log(micromatch.match(['foo', 'bar'], 'b*')); //=> 'bar'
 ```
 
 ### From multimatch
@@ -132,8 +135,7 @@ mm.match(['foo', 'bar'], 'b*');
 Same signature:
 
 ```js
-mm(['foo', 'bar', 'baz'], ['f*', '*z']);
-//=> ['foo', 'baz']
+console.log(micromatch(['foo', 'bar', 'baz'], ['f*', '*z'])); //=> ['foo', 'baz']
 ```
 
 ## API
@@ -149,13 +151,13 @@ mm(['foo', 'bar', 'baz'], ['f*', '*z']);
 
 ```js
 const mm = require('micromatch');
-mm(list, patterns[, options]);
+// mm(list, patterns[, options]);
 
 console.log(mm(['a.js', 'a.txt'], ['*.js']));
 //=> [ 'a.js' ]
 ```
 
-### [.matcher](index.js#L100)
+### [.matcher](index.js#L98)
 
 Returns a matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
@@ -169,14 +171,14 @@ Returns a matcher function from the given glob `pattern` and `options`. The retu
 
 ```js
 const mm = require('micromatch');
-mm.matcher(pattern[, options]);
+// mm.matcher(pattern[, options]);
 
 const isMatch = mm.matcher('*.!(*a)');
 console.log(isMatch('a.a')); //=> false
 console.log(isMatch('a.b')); //=> true
 ```
 
-### [.isMatch](index.js#L119)
+### [.isMatch](index.js#L117)
 
 Returns true if **any** of the given glob `patterns` match the specified `string`.
 
@@ -197,7 +199,7 @@ console.log(mm.isMatch('a.a', ['b.*', '*.a'])); //=> true
 console.log(mm.isMatch('a.a', 'b.*')); //=> false
 ```
 
-### [.not](index.js#L138)
+### [.not](index.js#L136)
 
 Returns a list of strings that _**do not match any**_ of the given `patterns`.
 
@@ -218,7 +220,7 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L178)
+### [.contains](index.js#L176)
 
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
@@ -233,7 +235,7 @@ Returns true if the given `string` contains the given pattern. Similar to [.isMa
 
 ```js
 var mm = require('micromatch');
-mm.contains(string, pattern[, options]);
+// mm.contains(string, pattern[, options]);
 
 console.log(mm.contains('aa/bb/cc', '*b'));
 //=> true
@@ -241,7 +243,7 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L220)
+### [.matchKeys](index.js#L218)
 
 Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
@@ -256,14 +258,14 @@ Filter the keys of the given object with the given `glob` pattern and `options`.
 
 ```js
 const mm = require('micromatch');
-mm.matchKeys(object, patterns[, options]);
+// mm.matchKeys(object, patterns[, options]);
 
 const obj = { aa: 'a', ab: 'b', ac: 'c' };
 console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.some](index.js#L249)
+### [.some](index.js#L247)
 
 Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
 
@@ -278,7 +280,7 @@ Returns true if some of the strings in the given `list` match any of the given g
 
 ```js
 const mm = require('micromatch');
-mm.some(list, patterns[, options]);
+// mm.some(list, patterns[, options]);
 
 console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
 // true
@@ -286,7 +288,7 @@ console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.every](index.js#L285)
+### [.every](index.js#L283)
 
 Returns true if every string in the given `list` matches any of the given glob `patterns`.
 
@@ -301,7 +303,7 @@ Returns true if every string in the given `list` matches any of the given glob `
 
 ```js
 const mm = require('micromatch');
-mm.every(list, patterns[, options]);
+// mm.every(list, patterns[, options]);
 
 console.log(mm.every('foo.js', ['foo.js']));
 // true
@@ -313,7 +315,7 @@ console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.all](index.js#L324)
+### [.all](index.js#L322)
 
 Returns true if **all** of the given `patterns` match the specified string.
 
@@ -328,7 +330,7 @@ Returns true if **all** of the given `patterns` match the specified string.
 
 ```js
 const mm = require('micromatch');
-mm.all(string, patterns[, options]);
+// mm.all(string, patterns[, options]);
 
 console.log(mm.all('foo.js', ['foo.js']));
 // true
@@ -343,7 +345,7 @@ console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
 // true
 ```
 
-### [.capture](index.js#L351)
+### [.capture](index.js#L349)
 
 Returns an array of matches captured by `pattern` in `string, or`null` if the pattern did not match.
 
@@ -358,7 +360,7 @@ Returns an array of matches captured by `pattern` in `string, or`null` if the pa
 
 ```js
 const mm = require('micromatch');
-mm.capture(pattern, string[, options]);
+// mm.capture(pattern, string[, options]);
 
 console.log(mm.capture('test/*.js', 'test/foo.js'));
 //=> ['foo']
@@ -366,7 +368,7 @@ console.log(mm.capture('test/*.js', 'foo/bar.css'));
 //=> null
 ```
 
-### [.makeRe](index.js#L377)
+### [.makeRe](index.js#L375)
 
 Create a regular expression from the given glob `pattern`.
 
@@ -380,13 +382,13 @@ Create a regular expression from the given glob `pattern`.
 
 ```js
 const mm = require('micromatch');
-mm.makeRe(pattern[, options]);
+// mm.makeRe(pattern[, options]);
 
 console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.scan](index.js#L393)
+### [.scan](index.js#L391)
 
 Scan a glob pattern to separate the pattern into segments. Used by the [split](#split) method.
 
@@ -403,18 +405,7 @@ const mm = require('micromatch');
 const state = mm.scan(pattern[, options]);
 ```
 
-### [.split](index.js#L405)
-
-Split a glob pattern into two parts: the directory part of the glob,
-and the matching part.
-
-**Params**
-
-* `pattern` **{String}**
-* `options` **{Object}**
-* `returns` **{Array}**
-
-### [.parse](index.js#L421)
+### [.parse](index.js#L407)
 
 Parse a glob pattern to create the source string for a regular expression.
 
@@ -431,47 +422,71 @@ const mm = require('micromatch');
 const state = mm(pattern[, options]);
 ```
 
-### [.braces](index.js#L448)
+### [.braces](index.js#L434)
 
-Expand the given brace `pattern`.
+Process the given brace `pattern`.
 
 **Params**
 
-* `pattern` **{String}**: String with brace pattern to expand.
+* `pattern` **{String}**: String with brace pattern to process.
 * `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces](https://github.com/micromatch/braces) library for all available options.
 * `returns` **{Array}**
 
 **Example**
 
 ```js
-const mm = require('micromatch');
-console.log(mm.braces('foo/{a,b}/bar'));
-//=> ['foo/(a|b)/bar']
+const { braces } = require('micromatch');
+console.log(braces('foo/{a,b,c}/bar'));
+//=> [ 'foo/(a|b|c)/bar' ]
 
-console.log(mm.braces('foo/{a,b}/bar', { expand: true }));
-//=> ['foo/a/bar', 'foo/b/bar']
+console.log(braces('foo/{a,b,c}/bar', { expand: true }));
+//=> [ 'foo/a/bar', 'foo/b/bar', 'foo/c/bar' ]
 ```
 
 ## Options
 
-* [basename](#optionsbasename)
-* [bash](#optionsbash)
-* [cache](#optionscache)
-* [dot](#optionsdot)
-* [failglob](#optionsfailglob)
-* [ignore](#optionsignore)
-* [matchBase](#optionsmatchBase)
-* [nobrace](#optionsnobrace)
-* [nocase](#optionsnocase)
-* [nodupes](#optionsnodupes)
-* [noext](#optionsnoext)
-* [noglobstar](#optionsnoglobstar)
-* [nonull](#optionsnonull)
-* [nullglob](#optionsnullglob)
-* [snapdragon](#optionssnapdragon)
-* [sourcemap](#optionssourcemap)
-* [unescape](#optionsunescape)
-* [unixify](#optionsunixify)
+| **Option** | **Type** | **Default value** | **Description** |
+| --- | --- | --- | --- |
+| `basename`            | `boolean`      | `false`     | If set, then patterns without slashes will be matched against the basename of the path if it contains slashes.  For example, `a?b` would match the path `/xyz/123/acb`, but not `/xyz/acb/123`. |
+| `bash`                | `boolean`      | `false`     | Follow bash matching rules more strictly - disallows backslashes as escape characters, and treats single stars as globstars (`**`). |
+| `capture`             | `boolean`      | `undefined` | Return regex matches in supporting methods. |
+| `contains`            | `boolean`      | `undefined` | Allows glob to match any part of the given string(s). |
+| `cwd`                 | `string`       | `process.cwd()` | Current working directory. Used by `picomatch.split()` |
+| `debug`               | `boolean`      | `undefined` | Debug regular expressions when an error is thrown. |
+| `dot`                 | `boolean`      | `false`     | Match dotfiles. Otherwise dotfiles are ignored unless a `.` is explicitly defined in the pattern. |
+| `expandRange`         | `function`     | `undefined` | Custom function for expanding ranges in brace patterns, such as `{a..z}`. The function receives the range values as two arguments, and it must return a string to be used in the generated regex. It's recommended that returned strings be wrapped in parentheses. This option is overridden by the `expandBrace` option. |
+| `failglob`            | `boolean`      | `false`     | Similar to the `failglob` behavior in Bash, throws an error when no matches are found. Based on the bash option of the same name. |
+| `fastpaths`           | `boolean`      | `true`      | To speed up processing, full parsing is skipped for a handful common glob patterns. Disable this behavior by setting this option to `false`. |
+| `flags`               | `boolean`      | `undefined` | Regex flags to use in the generated regex. If defined, the `nocase` option will be overridden. |
+| [format](#optionsformat) | `function` | `undefined` | Custom function for formatting the returned string. This is useful for removing leading slashes, converting Windows paths to Posix paths, etc. |
+| `ignore`              | `array\|string` | `undefined` | One or more glob patterns for excluding strings that should not be matched from the result. |
+| `keepQuotes`          | `boolean`      | `false`     | Retain quotes in the generated regex, since quotes may also be used as an alternative to backslashes.  |
+| `literalBrackets`     | `boolean`      | `undefined` | When `true`, brackets in the glob pattern will be escaped so that only literal brackets will be matched. |
+| `lookbehinds`         | `boolean`      | `true`      | Support regex positive and negative lookbehinds. Note that you must be using Node 8.1.10 or higher to enable regex lookbehinds. |
+| `matchBase`           | `boolean`      | `false`     | Alias for `basename` |
+| `maxLength`           | `boolean`      | `65536`     | Limit the max length of the input string. An error is thrown if the input string is longer than this value. |
+| `nobrace`             | `boolean`      | `false`     | Disable brace matching, so that `{a,b}` and `{1..3}` would be treated as literal characters. |
+| `nobracket`           | `boolean`      | `undefined` | Disable matching with regex brackets. |
+| `nocase`              | `boolean`      | `false`     | Perform case-insensitive matching. Equivalent to the regex `i` flag. Note that this option is ignored when the `flags` option is defined. |
+| `nodupes`             | `boolean`      | `true`      | Deprecated, use `nounique` instead. This option will be removed in a future major release. By default duplicates are removed. Disable uniquification by setting this option to false. |
+| `noext`               | `boolean`      | `false`     | Alias for `noextglob` |
+| `noextglob`           | `boolean`      | `false`     | Disable support for matching with [extglobs](#extglobs) (like `+(a\|b)`) |
+| `noglobstar`          | `boolean`      | `false`     | Disable support for matching nested directories with globstars (`**`) |
+| `nonegate`            | `boolean`      | `false`     | Disable support for negating with leading `!` |
+| `noquantifiers`       | `boolean`      | `false`     | Disable support for regex quantifiers (like `a{1,2}`) and treat them as brace patterns to be expanded. |
+| [onIgnore](#optionsonIgnore) | `function` | `undefined` | Function to be called on ignored items. |
+| [onMatch](#optionsonMatch) | `function` | `undefined` | Function to be called on matched items. |
+| [onResult](#optionsonResult) | `function` | `undefined` | Function to be called on all items, regardless of whether or not they are matched or ignored. |
+| `posix`               | `boolean`      | `false`     | Support [POSIX character classes](#posix-bracket-expressions) ("posix brackets"). |
+| `posixSlashes`        | `boolean`      | `undefined` | Convert all slashes in file paths to forward slashes. This does not convert slashes in the glob pattern itself |
+| `prepend`             | `boolean`      | `undefined` | String to prepend to the generated regex used for matching. |
+| `regex`               | `boolean`      | `false`     | Use regular expression rules for `+` (instead of matching literal `+`), and for stars that follow closing parentheses or brackets (as in `)*` and `]*`). |
+| `strictBrackets`      | `boolean`      | `undefined` | Throw an error if brackets, braces, or parens are imbalanced. |
+| `strictSlashes`       | `boolean`      | `undefined` | When true, picomatch won't match trailing slashes with single stars. |
+| `unescape`            | `boolean`      | `undefined` | Remove preceding backslashes from escaped glob characters before creating the regular expression to perform matches. |
+| `unixify`             | `boolean`      | `undefined` | Alias for `posixSlashes`, for backwards compatitibility. |
+
+## Options Examples
 
 ### options.basename
 
@@ -484,16 +499,16 @@ Allow glob patterns without slashes to match a file path based on its basename. 
 **Example**
 
 ```js
-mm(['a/b.js', 'a/c.md'], '*.js');
+micromatch(['a/b.js', 'a/c.md'], '*.js');
 //=> []
 
-mm(['a/b.js', 'a/c.md'], '*.js', {matchBase: true});
+micromatch(['a/b.js', 'a/c.md'], '*.js', { basename: true });
 //=> ['a/b.js']
 ```
 
 ### options.bash
 
-Enabled by default, this option enforces bash-like behavior with stars immediately following a bracket expression. Bash bracket expressions are similar to regex character classes, but unlike regex, a star following a bracket expression **does not repeat the bracketed characters**. Instead, the star is treated the same as an other star.
+Enabled by default, this option enforces bash-like behavior with stars immediately following a bracket expression. Bash bracket expressions are similar to regex character classes, but unlike regex, a star following a bracket expression **does not repeat the bracketed characters**. Instead, the star is treated the same as any other star.
 
 **Type**: `Boolean`
 
@@ -502,36 +517,60 @@ Enabled by default, this option enforces bash-like behavior with stars immediate
 **Example**
 
 ```js
-var files = ['abc', 'ajz'];
-console.log(mm(files, '[a-c]*'));
+const files = ['abc', 'ajz'];
+console.log(micromatch(files, '[a-c]*'));
 //=> ['abc', 'ajz']
 
-console.log(mm(files, '[a-c]*', {bash: false}));
+console.log(micromatch(files, '[a-c]*', { bash: false }));
 ```
 
-### options.cache
+### options.expandRange
 
-Disable regex and function memoization.
-
-**Type**: `Boolean`
+**Type**: `function`
 
 **Default**: `undefined`
 
-### options.dot
+Custom function for expanding ranges in brace patterns. The [fill-range](https://github.com/jonschlinkert/fill-range) library is ideal for this purpose, or you can use custom code to do whatever you need.
 
-Match dotfiles. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `dot`.
+**Example**
 
-**Type**: `Boolean`
+The following example shows how to create a glob that matches a numeric folder name between `01` and `25`, with leading zeros.
 
-**Default**: `false`
+```js
+const fill = require('fill-range');
+const regex = micromatch.makeRe('foo/{01..25}/bar', {
+  expandRange(a, b) {
+    return `(${fill(a, b, { toRegex: true })})`;
+  }
+});
 
-### options.failglob
+console.log(regex)
+//=> /^(?:foo\/((?:0[1-9]|1[0-9]|2[0-5]))\/bar)$/
 
-Similar to the `--failglob` behavior in Bash, throws an error when no matches are found.
+console.log(regex.test('foo/00/bar')) // false
+console.log(regex.test('foo/01/bar')) // true
+console.log(regex.test('foo/10/bar')) // true
+console.log(regex.test('foo/22/bar')) // true
+console.log(regex.test('foo/25/bar')) // true
+console.log(regex.test('foo/26/bar')) // false
+```
 
-**Type**: `Boolean`
+### options.format
+
+**Type**: `function`
 
 **Default**: `undefined`
+
+Custom function for formatting strings before they're matched.
+
+**Example**
+
+```js
+// strip leading './' from strings
+const format = str => str.replace(/^\.\//, '');
+const isMatch = picomatch('foo/*.js', { format });
+console.log(isMatch('./foo/bar.js')) //=> true
+```
 
 ### options.ignore
 
@@ -541,51 +580,20 @@ String or array of glob patterns to match files to ignore.
 
 **Default**: `undefined`
 
+```js
+const isMatch = micromatch.matcher('*', { ignore: 'f*' });
+console.log(isMatch('foo')) //=> false
+console.log(isMatch('bar')) //=> true
+console.log(isMatch('baz')) //=> true
+```
+
 ### options.matchBase
 
 Alias for [options.basename](#options-basename).
 
-### options.nobrace
+### options.noextglob
 
-Disable expansion of brace patterns. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `nobrace`.
-
-**Type**: `Boolean`
-
-**Default**: `undefined`
-
-See [braces](https://github.com/micromatch/braces) for more information about extended brace expansion.
-
-### options.nocase
-
-Use a case-insensitive regex for matching files. Same behavior as [minimatch](https://github.com/isaacs/minimatch).
-
-**Type**: `Boolean`
-
-**Default**: `undefined`
-
-### options.nodupes
-
-Remove duplicate elements from the result array.
-
-**Type**: `Boolean`
-
-**Default**: `undefined`
-
-**Example**
-
-Example of using the `unescape` and `nodupes` options together:
-
-```js
-mm.match(['a/b/c', 'a/b/c'], 'a/b/c');
-//=> ['a/b/c', 'a/b/c']
-
-mm.match(['a/b/c', 'a/b/c'], 'a/b/c', {nodupes: true});
-//=> ['abc']
-```
-
-### options.noext
-
-Disable extglob support, so that extglobs are regarded as literal characters.
+Disable extglob support, so that [extglobs](#extglobs) are regarded as literal characters.
 
 **Type**: `Boolean`
 
@@ -594,10 +602,10 @@ Disable extglob support, so that extglobs are regarded as literal characters.
 **Examples**
 
 ```js
-mm(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)');
+console.log(micromatch(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)'));
 //=> ['a/b', 'a/!(z)']
 
-mm(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)', {noext: true});
+console.log(micromatch(['a/z', 'a/b', 'a/!(z)'], 'a/!(z)', { noextglob: true }));
 //=> ['a/!(z)'] (matches only as literal characters)
 ```
 
@@ -618,10 +626,10 @@ Disable matching with globstars (`**`).
 **Default**: `undefined`
 
 ```js
-mm(['a/b', 'a/b/c', 'a/b/c/d'], 'a/**');
+micromatch(['a/b', 'a/b/c', 'a/b/c/d'], 'a/**');
 //=> ['a/b', 'a/b/c', 'a/b/c/d']
 
-mm(['a/b', 'a/b/c', 'a/b/c/d'], 'a/**', {noglobstar: true});
+micromatch(['a/b', 'a/b/c', 'a/b/c/d'], 'a/**', {noglobstar: true});
 //=> ['a/b']
 ```
 
@@ -637,56 +645,70 @@ If `true`, when no matches are found the actual (arrayified) glob pattern is ret
 
 **Default**: `undefined`
 
-### options.snapdragon
+### options.onIgnore
 
-Pass your own instance of [snapdragon](https://github.com/here-be/snapdragon), to customize parsers or compilers.
+```js
+const onIgnore = ({ glob, regex, input, output }) => {
+  console.log({ glob, regex, input, output });
+  // { glob: '*', regex: /^(?:(?!\.)(?=.)[^\/]*?\/?)$/, input: 'foo', output: 'foo' }
+};
 
-**Type**: `Object`
+const isMatch = micromatch.matcher('*', { onIgnore, ignore: 'f*' });
+isMatch('foo');
+isMatch('bar');
+isMatch('baz');
+```
 
-**Default**: `undefined`
+### options.onMatch
 
-### options.sourcemap
+```js
+const onMatch = ({ glob, regex, input, output }) => {
+  console.log({ input, output });
+  // { input: 'some\\path', output: 'some/path' }
+  // { input: 'some\\path', output: 'some/path' }
+  // { input: 'some\\path', output: 'some/path' }
+};
 
-Generate a source map by enabling the `sourcemap` option with the `.parse`, `.compile`, or `.create` methods.
+const isMatch = micromatch.matcher('**', { onMatch, posixSlashes: true });
+isMatch('some\\path');
+isMatch('some\\path');
+isMatch('some\\path');
+```
 
-_(Note that sourcemaps are currently not enabled for brace patterns)_
+### options.onResult
 
-**Examples**
+```js
+const onResult = ({ glob, regex, input, output }) => {
+  console.log({ glob, regex, input, output });
+};
 
-``` js
-var mm = require('micromatch');
-var pattern = '*(*(of*(a)x)z)';
+const isMatch = micromatch('*', { onResult, ignore: 'f*' });
+isMatch('foo');
+isMatch('bar');
+isMatch('baz');
+```
 
-var res = mm.create('abc/*.js', {sourcemap: true});
-console.log(res.map);
-// { version: 3,
-//   sources: [ 'string' ],
-//   names: [],
-//   mappings: 'AAAA,GAAG,EAAC,iBAAC,EAAC,EAAE',
-//   sourcesContent: [ 'abc/*.js' ] }
+### options.posixSlashes
 
-var ast = mm.parse('abc/**/*.js');
-var res = mm.compile(ast, {sourcemap: true});
-console.log(res.map);
-// { version: 3,
-//   sources: [ 'string' ],
-//   names: [],
-//   mappings: 'AAAA,GAAG,EAAC,2BAAE,EAAC,iBAAC,EAAC,EAAE',
-//   sourcesContent: [ 'abc/**/*.js' ] }
+Convert path separators on returned files to posix/unix-style forward slashes. Aliased as `unixify` for backwards compatibility.
 
-var ast = mm.parse(pattern);
-var res = mm.compile(ast, {sourcemap: true});
-console.log(res.map);
-// { version: 3,
-//   sources: [ 'string' ],
-//   names: [],
-//   mappings: 'AAAA,CAAE,CAAE,EAAE,CAAE,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC',
-//   sourcesContent: [ '*(*(of*(a)x)z)' ] }
+**Type**: `Boolean`
+
+**Default**: `true` on windows, `false` everywhere else.
+
+**Example**
+
+```js
+console.log(micromatch.match(['a\\b\\c'], 'a/**'));
+//=> ['a/b/c']
+
+console.log(micromatch.match(['a\\b\\c'], { posixSlashes: false }));
+//=> ['a\\b\\c']
 ```
 
 ### options.unescape
 
-Remove backslashes from returned matches.
+Remove backslashes from escaped glob characters before creating the regular expression to perform matches.
 
 **Type**: `Boolean`
 
@@ -697,36 +719,21 @@ Remove backslashes from returned matches.
 In this example we want to match a literal `*`:
 
 ```js
-mm.match(['abc', 'a\\*c'], 'a\\*c');
+console.log(micromatch.match(['abc', 'a\\*c'], 'a\\*c'));
 //=> ['a\\*c']
 
-mm.match(['abc', 'a\\*c'], 'a\\*c', {unescape: true});
+console.log(micromatch.match(['abc', 'a\\*c'], 'a\\*c', { unescape: true }));
 //=> ['a*c']
 ```
 
-### options.unixify
-
-Convert path separators on returned files to posix/unix-style forward slashes.
-
-**Type**: `Boolean`
-
-**Default**: `true` on windows, `false` everywhere else
-
-**Example**
-
-```js
-mm.match(['a\\b\\c'], 'a/**');
-//=> ['a/b/c']
-
-mm.match(['a\\b\\c'], {unixify: false});
-//=> ['a\\b\\c']
-```
+<br>
+<br>
 
 ## Extended globbing
 
-Micromatch also supports extended globbing features.
+Micromatch supports the following extended globbing features.
 
-### extglobs
+### Extglobs
 
 Extended globbing, as described by the bash man page:
 
@@ -738,13 +745,15 @@ Extended globbing, as described by the bash man page:
 | `@(pattern)` | `(pattern)` <sup>*</sup> | Matches one of the given patterns |
 | `!(pattern)` | N/A (equivalent regex is much more complicated) | Matches anything except one of the given patterns |
 
-<sup><strong>*</strong></sup> Note that `@` isn't a RegEx character.
+<sup><strong>*</strong></sup> Note that `@` isn't a regex character.
 
-Powered by [extglob](https://github.com/micromatch/extglob). Visit that library for the full range of options or to report extglob related issues.
+### Braces
 
-### braces
+Brace patterns can be used to match specific ranges or sets of characters.
 
-Brace patterns can be used to match specific ranges or sets of characters. For example, the pattern `*/{1..3}/*` would match any of following strings:
+**Example**
+
+The pattern `{f,b}*/{1..3}/{b,q}*` would match any of following strings:
 
 ```
 foo/1/bar
@@ -757,7 +766,7 @@ baz/3/qux
 
 Visit [braces](https://github.com/micromatch/braces) to see the full range of features and options related to brace expansion, or to create brace matching or expansion related issues.
 
-### regex character classes
+### Regex character classes
 
 Given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
@@ -768,7 +777,7 @@ Given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
 Learn about [regex character classes](http://www.regular-expressions.info/charclass.html).
 
-### regex groups
+### Regex groups
 
 Given `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
@@ -785,14 +794,9 @@ POSIX brackets are intended to be more user-friendly than regex character classe
 **Example**
 
 ```js
-mm.isMatch('a1', '[[:alpha:][:digit:]]');
-//=> true
-
-mm.isMatch('a1', '[[:alpha:][:alpha:]]');
-//=> false
+console.log(micromatch.isMatch('a1', '[[:alpha:][:digit:]]')) //=> true
+console.log(micromatch.isMatch('a1', '[[:alpha:][:alpha:]]')) //=> false
 ```
-
-See [expand-brackets](https://github.com/micromatch/expand-brackets) for more information about bracket expressions.
 
 ***
 
@@ -808,19 +812,91 @@ However, it's suprising how many edge cases and rabbit holes there are with glob
 
 There is an important, notable difference between minimatch and micromatch _in regards to how backslashes are handled_ in glob patterns.
 
-* Micromatch exclusively and explicitly reserves backslashes for escaping characters in a glob pattern, even on windows. This is consistent with bash behavior.
+* Micromatch exclusively and explicitly reserves backslashes for escaping characters in a glob pattern, even on windows, which is consistent with bash behavior. _More importantly, unescaping globs can result in unsafe regular expressions_.
 * Minimatch converts all backslashes to forward slashes, which means you can't use backslashes to escape any characters in your glob patterns.
 
 We made this decision for micromatch for a couple of reasons:
 
-* consistency with bash conventions.
-* glob patterns are not filepaths. They are a type of [regular language](https://en.wikipedia.org/wiki/Regular_language) that is converted to a JavaScript regular expression. Thus, when forward slashes are defined in a glob pattern, the resulting regular expression will match windows or POSIX path separators just fine.
+* Consistency with bash conventions.
+* Glob patterns are not filepaths. They are a type of [regular language](https://en.wikipedia.org/wiki/Regular_language) that is converted to a JavaScript regular expression. Thus, when forward slashes are defined in a glob pattern, the resulting regular expression will match windows or POSIX path separators just fine.
 
 **A note about joining paths to globs**
 
 Note that when you pass something like `path.join('foo', '*')` to micromatch, you are creating a filepath and expecting it to still work as a glob pattern. This causes problems on windows, since the `path.sep` is `\\`.
 
 In other words, since `\\` is reserved as an escape character in globs, on windows `path.join('foo', '*')` would result in `foo\\*`, which tells micromatch to match `*` as a literal character. This is the same behavior as bash.
+
+To solve this, you might be inspired to do something like `'foo\\*'.replace(/\\/g, '/')`, but this causes another, potentially much more serious, problem.
+
+## Benchmarks
+
+### Running benchmarks
+
+Install dependencies for running benchmarks:
+
+```sh
+$ cd bench && npm install 
+```
+
+Run the benchmarks:
+
+```sh
+$ npm run bench
+```
+
+### Latest results
+
+As of April 10, 2019 (longer bars are better):
+
+```sh
+# .makeRe star
+  micromatch x 1,724,735 ops/sec ±1.69% (87 runs sampled))
+  minimatch x 649,565 ops/sec ±1.93% (91 runs sampled)
+
+# .makeRe star; dot=true
+  micromatch x 1,302,127 ops/sec ±1.43% (92 runs sampled)
+  minimatch x 556,242 ops/sec ±0.71% (86 runs sampled)
+
+# .makeRe globstar
+  micromatch x 1,393,992 ops/sec ±0.71% (89 runs sampled)
+  minimatch x 1,112,801 ops/sec ±2.02% (91 runs sampled)
+
+# .makeRe globstars
+  micromatch x 1,419,097 ops/sec ±0.34% (94 runs sampled)
+  minimatch x 541,207 ops/sec ±1.66% (93 runs sampled)
+
+# .makeRe with leading star
+  micromatch x 1,247,825 ops/sec ±0.97% (94 runs sampled)
+  minimatch x 489,660 ops/sec ±0.63% (94 runs sampled)
+
+# .makeRe - braces
+  micromatch x 206,301 ops/sec ±1.62% (81 runs sampled))
+  minimatch x 115,986 ops/sec ±0.59% (94 runs sampled)
+
+# .makeRe braces - range (expanded)
+  micromatch x 27,782 ops/sec ±0.79% (88 runs sampled)
+  minimatch x 4,683 ops/sec ±1.20% (92 runs sampled)
+
+# .makeRe braces - range (compiled)
+  micromatch x 134,056 ops/sec ±2.73% (77 runs sampled))
+  minimatch x 977 ops/sec ±0.85% (91 runs sampled)d)
+
+# .makeRe braces - nested ranges (expanded)
+  micromatch x 18,353 ops/sec ±0.95% (91 runs sampled)
+  minimatch x 4,514 ops/sec ±1.04% (93 runs sampled)
+
+# .makeRe braces - nested ranges (compiled)
+  micromatch x 38,916 ops/sec ±1.85% (82 runs sampled)
+  minimatch x 980 ops/sec ±0.54% (93 runs sampled)d)
+
+# .makeRe braces - set (compiled)
+  micromatch x 141,088 ops/sec ±1.70% (70 runs sampled))
+  minimatch x 43,385 ops/sec ±0.87% (93 runs sampled)
+
+# .makeRe braces - nested sets (compiled)
+  micromatch x 87,272 ops/sec ±2.85% (71 runs sampled))
+  minimatch x 25,327 ops/sec ±1.59% (86 runs sampled)
+```
 
 ## Contributing
 
@@ -914,12 +990,6 @@ You might also be interested in these projects:
 * [Twitter Profile](https://twitter.com/jonschlinkert)
 * [LinkedIn Profile](https://linkedin.com/in/jonschlinkert)
 
-Please consider supporting me on Patreon, or [start your own Patreon page](https://patreon.com/invite/bxpbvm)!
-
-<a href="https://www.patreon.com/jonschlinkert">
-<img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" height="50">
-</a>
-
 ### License
 
 Copyright © 2019, [Jon Schlinkert](https://github.com/jonschlinkert).
@@ -927,4 +997,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on March 29, 2019._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on April 10, 2019._
