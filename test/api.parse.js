@@ -4,7 +4,9 @@ const assert = require('assert');
 const mm = require('..');
 
 describe('.parse()', () => {
-  it('should parse a glob', () => {
+  it('should parse a glob', function() {
+    if (process.platform === 'win32') return this.skip();
+
     let results = mm.parse('a/*');
     let { tokens } = results[0];
 
@@ -12,13 +14,11 @@ describe('.parse()', () => {
       delete token.prev;
     });
 
-    const star = process.platform === 'win32' ? '[^\\\\\\/]*?' : '[^/]*?';
-
     assert.deepEqual(tokens, [
       { type: 'bos', value: '', output: '' },
       { type: 'text', value: 'a' },
       { type: 'slash', value: '/', output: '\\/(?!\\.)(?=.)' },
-      { type: 'star', value: '*', output: star },
+      { type: 'star', value: '*', output: '[^/]*?' },
       { type: 'maybe_slash', value: '', output: '\\/?' }
     ]);
   });
