@@ -1,54 +1,25 @@
 'use strict';
 
-var assert = require('assert');
-var mm = require('..');
+const assert = require('assert');
+const mm = require('..');
 
-describe('.parse()', function() {
-  it('should throw an error when arguments are invalid', function() {
-    assert.throws(function() {
-      mm.parse();
-    });
-  });
+describe('.parse()', () => {
+  it('should parse a glob', function() {
+    if (process.platform === 'win32') return this.skip();
 
-  it('should return an AST for a glob', function() {
-    var ast = mm.parse('a/*');
-    delete ast.state;
-    assert.deepEqual(ast, {
-      type: 'root',
-      errors: [],
-      nodes: [
-        { type: 'bos', val: '' },
-        { type: 'text', val: 'a' },
-        { type: 'slash', val: '/' },
-        { type: 'star', val: '*' },
-        { type: 'eos', val: '' }
-      ],
-      input: 'a/*'
+    let results = mm.parse('a/*');
+    let { tokens } = results[0];
+
+    tokens.forEach(token => {
+      delete token.prev;
     });
 
-    ast = mm.parse('a/**/*');
-    delete ast.state;
-
-    assert.deepEqual(ast, {
-      type: 'root',
-      errors: [],
-      nodes: [
-        { type: 'bos', val: '' },
-        { type: 'text', val: 'a' },
-        { type: 'slash', val: '/' },
-        {
-          type: 'globstar',
-          val: '**',
-          isInside: {
-            brace: false,
-            paren: false
-          }
-        },
-        { type: 'slash', val: '/' },
-        { type: 'star', val: '*' },
-        { type: 'eos', val: '' }
-      ],
-      input: 'a/**/*'
-    });
+    assert.deepEqual(tokens, [
+      { type: 'bos', value: '', output: '' },
+      { type: 'text', value: 'a' },
+      { type: 'slash', value: '/', output: '\\/(?!\\.)(?=.)' },
+      { type: 'star', value: '*', output: '[^/]*?' },
+      { type: 'maybe_slash', value: '', output: '\\/?' }
+    ]);
   });
 });

@@ -1,10 +1,11 @@
 {
   "name": "micromatch",
-  "description": "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.",
+  "description": "Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.",
   "version": "3.1.10",
   "homepage": "https://github.com/micromatch/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
+    "(https://github.com/DianeLooney)",
     "Amila Welihinda (amilajack.com)",
     "Bogdan Chadkin (https://github.com/TrySound)",
     "Brian Woodward (https://twitter.com/doowb)",
@@ -16,10 +17,7 @@
     "Olsten Larck (https://i.am.charlike.online)",
     "Paul Miller (paulmillr.com)",
     "Tom Byrer (https://github.com/tomByrer)",
-    "Tyler Akins (http://rumkin.com)",
-    "(https://github.com/DianeLooney)",
-    "Tvrqvoise (https://github.com/tvrqvoise)",
-    "Luke Glazebrook (https://github.com/Glazy)"
+    "Tyler Akins (http://rumkin.com)"
   ],
   "repository": "micromatch/micromatch",
   "bugs": {
@@ -27,50 +25,35 @@
   },
   "license": "MIT",
   "files": [
-    "index.js",
-    "lib"
+    "index.js"
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=8"
   },
   "scripts": {
     "test": "mocha"
   },
   "dependencies": {
-    "arr-diff": "^4.0.0",
-    "array-unique": "^0.3.2",
-    "braces": "^2.3.1",
-    "define-property": "^2.0.2",
-    "extend-shallow": "^3.0.2",
-    "extglob": "^2.0.4",
-    "fragment-cache": "^0.2.1",
-    "kind-of": "^6.0.2",
-    "nanomatch": "^1.2.9",
-    "object.pick": "^1.3.0",
-    "regex-not": "^1.0.0",
-    "snapdragon": "^0.8.1",
-    "to-regex": "^3.0.2"
+    "braces": "^3.0.1",
+    "picomatch": "^2.0.3"
   },
   "devDependencies": {
-    "bash-match": "^1.0.2",
-    "for-own": "^1.0.0",
-    "gulp": "^3.9.1",
-    "gulp-format-md": "^1.0.0",
-    "gulp-istanbul": "^1.1.3",
-    "gulp-mocha": "^5.0.0",
-    "gulp-unused": "^0.2.1",
-    "is-windows": "^1.0.2",
+    "fill-range": "^7.0.1",
+    "gulp-format-md": "^2.0.0",
     "minimatch": "^3.0.4",
-    "minimist": "^1.2.0",
-    "mocha": "^3.5.3",
-    "multimatch": "^2.1.0"
+    "mocha": "^5.2.0",
+    "time-require": "github:jonschlinkert/time-require"
   },
   "keywords": [
     "bash",
+    "bracket",
+    "character-class",
     "expand",
     "expansion",
     "expression",
+    "extglob",
+    "extglobs",
     "file",
     "files",
     "filter",
@@ -79,6 +62,9 @@
     "globbing",
     "globs",
     "globstar",
+    "lookahead",
+    "lookaround",
+    "lookbehind",
     "match",
     "matcher",
     "matches",
@@ -86,33 +72,19 @@
     "micromatch",
     "minimatch",
     "multimatch",
+    "negate",
+    "negation",
     "path",
     "pattern",
     "patterns",
+    "posix",
     "regex",
     "regexp",
     "regular",
     "shell",
+    "star",
     "wildcard"
   ],
-  "lintDeps": {
-    "dependencies": {
-      "options": {
-        "lock": {
-          "snapdragon": "^0.8.1"
-        }
-      }
-    },
-    "devDependencies": {
-      "files": {
-        "options": {
-          "ignore": [
-            "benchmark/**"
-          ]
-        }
-      }
-    }
-  },
   "verb": {
     "toc": "collapsible",
     "layout": "default",
@@ -122,9 +94,9 @@
     "plugins": [
       "gulp-format-md"
     ],
-    "helpers": [
-      "./benchmark/helper.js"
-    ],
+    "lint": {
+      "reflinks": true
+    },
     "related": {
       "list": [
         "braces",
@@ -134,16 +106,12 @@
         "nanomatch"
       ]
     },
-    "lint": {
-      "reflinks": true
-    },
     "reflinks": [
-      "expand-brackets",
       "extglob",
+      "fill-range",
       "glob-object",
       "minimatch",
-      "multimatch",
-      "snapdragon"
+      "multimatch"
     ]
   }
 }

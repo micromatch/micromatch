@@ -1,20 +1,22 @@
 'use strict';
 
-var assert = require('assert');
-var mm = require('..');
+const assert = require('assert');
+const mm = require('..');
 
-describe('.every()', function() {
-  it('should return true if every string matches', function() {
-    var fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
-    assert(mm.every(fixtures, ['z', '*/*']));
+describe('.every()', () => {
+
+  it('should return true if every string matches', () => {
+    let fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
+    assert(!mm.every(fixtures, ['z', '*/*']));
   });
 
-  it('should return false when not all strings match', function() {
-    var fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
+  it('should return false when not all strings match', () => {
+    let fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
     assert(!mm.every(fixtures, ['a/*', 'x/*']));
+    assert(mm.every(fixtures, ['(a|b)/*', '*/*']));
   });
 
-  it('should arrayify a string value', function() {
-    assert(mm.every('a', ['*']));
+  it('should arrayify a string value', () => {
+    assert(mm.every('a', '*'));
   });
 });

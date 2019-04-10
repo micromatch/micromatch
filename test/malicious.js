@@ -1,28 +1,29 @@
 'use strict';
 
-var assert = require('assert');
-var mm = require('./support/match');
+const assert = require('assert');
+const mm = require('..');
+const generate = n => '\\'.repeat(n);
 
 /**
  * These tests are based on minimatch unit tests
  */
 
-function generate(len, ch) {
-  var pattern = '';
-  while (--len) pattern += ch;
-  return pattern;
-}
+describe('handling of potential regex exploits', () => {
 
-describe('handling of potential regex exploits', function() {
-  it('should support long escape sequences', function() {
-    assert(mm.isMatch('A', '!(' + generate(1024 * 2, '\\') + 'A)'), 'within the limits, and valid match');
-    assert(!mm.isMatch('A', '[!(' + generate(1024 * 2, '\\') + 'A'), 'within the limits, but invalid regex');
+  it('should support long escape sequences', () => {
+    assert(mm.isMatch('A', `!(${generate(65500)}A)`), 'within the limits, and valid match');
+    assert(!mm.isMatch('A', `[!(${generate(65500)}A`), 'within the limits, but invalid regex');
   });
 
-  it('should throw an error when the pattern is too long', function() {
-    assert.throws(function() {
-      var exploit = '!(' + generate(1024 * 64, '\\') + 'A)';
-      assert(!mm.isMatch('A', exploit));
-    }, /expected pattern to be less than 65536 characters/);
+  it('should throw an error when the pattern is too long', () => {
+    assert.throws(() => {
+      assert(!mm.isMatch('A', `!(${generate(65536)}A)`));
+    }, /Input length: 65540, exceeds maximum allowed length: 65536/);
+  });
+
+  it('should allow max bytes to be customized', () => {
+    assert.throws(() => {
+      assert(!mm.isMatch('A', `!(${generate(500)}A)`, { maxLength: 499 }));
+    }, /Input length: 504, exceeds maximum allowed length: 499/);
   });
 });
