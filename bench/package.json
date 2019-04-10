@@ -3,14 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "scripts": {
+    "bench": "node ."
+  },
   "dependencies": {
-    "ansi-colors": "^3.0.3",
+    "ansi-colors": "^3.2.4",
     "benchmark": "^2.1.4",
+    "minimatch": "^3.0.4",
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "glob-parent": "^3.1.0",
-    "minimatch": "^3.0.4"
+    "glob-parent": "^5.0.0"
   },
   "lintDeps": {
     "devDependencies": {

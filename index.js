@@ -1,7 +1,7 @@
 'use strict';
 
-const path = require('path');
 const util = require('util');
+const braces = require('braces');
 const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
 const isEmptyString = val => typeof val === 'string' && (val === '' || val === './');
@@ -372,7 +372,7 @@ micromatch.capture = (glob, input, options) => {
  * @api public
  */
 
-micromatch.makeRe = picomatch.makeRe;
+micromatch.makeRe = (...args) => picomatch.makeRe(...args);
 
 /**
  * Scan a glob pattern to separate the pattern into segments. Used
@@ -388,19 +388,7 @@ micromatch.makeRe = picomatch.makeRe;
  * @api public
  */
 
-micromatch.scan = (input, options = {}) => picomatch.scan(input, options);
-
-/**
- * Split a glob pattern into two parts: the directory part of the glob,
- * and the matching part.
- *
- * @param {String} `pattern`
- * @param {Object} `options`
- * @return {Array}
- * @api public
- */
-
-micromatch.split = (input, options = {}) => picomatch.split(input, options);
+micromatch.scan = (...args) => picomatch.scan(...args);
 
 /**
  * Parse a glob pattern to create the source string for a regular
@@ -419,7 +407,7 @@ micromatch.split = (input, options = {}) => picomatch.split(input, options);
 micromatch.parse = (patterns, options) => {
   let res = [];
   for (let pattern of [].concat(patterns || [])) {
-    for (let str of micromatch.braces(pattern, options)) {
+    for (let str of braces(pattern, options)) {
       res.push(picomatch.parse(str, options));
     }
   }
@@ -427,17 +415,17 @@ micromatch.parse = (patterns, options) => {
 };
 
 /**
- * Expand the given brace `pattern`.
+ * Process the given brace `pattern`.
  *
  * ```js
- * const mm = require('micromatch');
- * console.log(mm.braces('foo/{a,b}/bar'));
- * //=> ['foo/(a|b)/bar']
+ * const { braces } = require('micromatch');
+ * console.log(braces('foo/{a,b,c}/bar'));
+ * //=> [ 'foo/(a|b|c)/bar' ]
  *
- * console.log(mm.braces('foo/{a,b}/bar', { expand: true }));
- * //=> ['foo/a/bar', 'foo/b/bar']
+ * console.log(braces('foo/{a,b,c}/bar', { expand: true }));
+ * //=> [ 'foo/a/bar', 'foo/b/bar', 'foo/c/bar' ]
  * ```
- * @param {String} `pattern` String with brace pattern to expand.
+ * @param {String} `pattern` String with brace pattern to process.
  * @param {Object} `options` Any [options](#options) to change how expansion is performed. See the [braces][] library for all available options.
  * @return {Array}
  * @api public
@@ -448,7 +436,7 @@ micromatch.braces = (pattern, options) => {
   if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
     return [pattern];
   }
-  return require('braces')(pattern, options);
+  return braces(pattern, options);
 };
 
 /**

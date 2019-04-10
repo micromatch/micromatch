@@ -8,6 +8,10 @@ describe('.parse()', () => {
     let results = mm.parse('a/*');
     let { tokens } = results[0];
 
+    tokens.forEach(token => {
+      delete token.prev;
+    });
+
     assert.deepEqual(tokens, [
       { type: 'bos', value: '', output: '' },
       { type: 'text', value: 'a' },
