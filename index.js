@@ -77,6 +77,12 @@ const micromatch = (list, patterns, options) => {
 };
 
 /**
+ * Backwards compatibility
+ */
+
+micromatch.match = micromatch;
+
+/**
  * Returns a matcher function from the given glob `pattern` and `options`.
  * The returned function takes a string to match as its only argument and returns
  * true if the string is a match.
