@@ -1,10 +1,10 @@
 'use strict';
 
 const { Suite } = require('benchmark');
-const colors = require('ansi-colors');
+const { green } = require('ansi-colors');
 const argv = require('minimist')(process.argv.slice(2));
 const mm = require('minimatch');
-const pm = require('..');
+const mi = require('..');
 
 /**
  * Setup
@@ -41,32 +41,62 @@ const bench = (name, options) => {
   return suite;
 };
 
-bench(colors.green('.makeRe') + ' star')
-  .add('micromatch', () => pm.makeRe('*'))
+bench(green('.makeRe') + ' star')
+  .add('micromatch', () => mi.makeRe('*'))
   .add('minimatch', () => mm.makeRe('*'))
   .run();
 
-bench(colors.green('.makeRe') + ' star; dot=true')
-  .add('micromatch', () => pm.makeRe('*', { dot: true }))
+bench(green('.makeRe') + ' star; dot=true')
+  .add('micromatch', () => mi.makeRe('*', { dot: true }))
   .add('minimatch', () => mm.makeRe('*', { dot: true }))
   .run();
 
-bench(colors.green('.makeRe') + ' globstar')
-  .add('micromatch', () => pm.makeRe('**'))
+bench(green('.makeRe') + ' globstar')
+  .add('micromatch', () => mi.makeRe('**'))
   .add('minimatch', () => mm.makeRe('**'))
   .run();
 
-bench(colors.green('.makeRe') + ' globstars')
-  .add('micromatch', () => pm.makeRe('**/**/**'))
+bench(green('.makeRe') + ' globstars')
+  .add('micromatch', () => mi.makeRe('**/**/**'))
   .add('minimatch', () => mm.makeRe('**/**/**'))
   .run();
 
-bench(colors.green('.makeRe') + ' with leading star')
-  .add('micromatch', () => pm.makeRe('*.txt'))
+bench(green('.makeRe') + ' with leading star')
+  .add('micromatch', () => mi.makeRe('*.txt'))
   .add('minimatch', () => mm.makeRe('*.txt'))
   .run();
 
-bench(colors.green('.makeRe') + ' - braces')
-  .add('micromatch', () => pm.makeRe('{a,b,c}*.txt'))
+bench(green('.makeRe') + ' - braces')
+  .add('micromatch', () => mi.makeRe('{a,b,c}*.txt'))
   .add('minimatch', () => mm.makeRe('{a,b,c}*.txt'))
+  .run();
+
+bench(green('.makeRe') + ' braces - range (expanded)')
+  .add('micromatch', () => mi.braces('foo/{1..250}/bar', { expand: true }))
+  .add('minimatch', () => mm.braceExpand('foo/{1..250}/bar'))
+  .run();
+
+bench(green('.makeRe') + ' braces - range (compiled)')
+  .add('micromatch', () => mi.makeRe('foo/{1..250}/bar'))
+  .add('minimatch', () => mm.makeRe('foo/{1..250}/bar'))
+  .run();
+
+bench(green('.makeRe') + ' braces - nested ranges (expanded)')
+  .add('micromatch', () => mi.braces('foo/{a,b,{1..250}}/bar', { expand: true }))
+  .add('minimatch', () => mm.braceExpand('foo/{a,b,{1..250}}/bar'))
+  .run();
+
+bench(green('.makeRe') + ' braces - nested ranges (compiled)')
+  .add('micromatch', () => mi.makeRe('foo/{a,b,{1..250}}/bar'))
+  .add('minimatch', () => mm.makeRe('foo/{a,b,{1..250}}/bar'))
+  .run();
+
+bench(green('.makeRe') + ' braces - set (compiled)')
+  .add('micromatch', () => mi.makeRe('foo/{a,b,c,d,e}/bar'))
+  .add('minimatch', () => mm.makeRe('foo/{a,b,c,d,e}/bar'))
+  .run();
+
+bench(green('.makeRe') + ' braces - nested sets (compiled)')
+  .add('micromatch', () => mi.makeRe('foo/{a,b,c,d,e,{x,y,z}}/bar'))
+  .add('minimatch', () => mm.makeRe('foo/{a,b,c,d,e,{x,y,z}}/bar'))
   .run();
