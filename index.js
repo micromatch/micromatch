@@ -41,7 +41,7 @@ const micromatch = (list, patterns, options) => {
   };
 
   for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(patterns[i], { ...options, onResult }, true);
+    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
     let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
     if (negated) negatives++;
 
@@ -134,7 +134,7 @@ micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(st
  */
 
 micromatch.not = (list, patterns, options = {}) => {
-  patterns = [].concat(patterns);
+  patterns = [].concat(patterns).map(String);
   let result = new Set();
   let items = [];
 
@@ -248,7 +248,7 @@ micromatch.some = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(pattern, options);
+    let isMatch = picomatch(String(pattern), options);
     if (items.some(item => isMatch(item))) {
       return true;
     }
@@ -284,7 +284,7 @@ micromatch.every = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(pattern, options);
+    let isMatch = picomatch(String(pattern), options);
     if (!items.every(item => isMatch(item))) {
       return false;
     }
@@ -348,7 +348,7 @@ micromatch.all = (str, patterns, options) => {
 
 micromatch.capture = (glob, input, options) => {
   let posix = utils.isWindows(options);
-  let regex = picomatch.makeRe(glob, { ...options, capture: true });
+  let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
   let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
 
   if (match) {
@@ -407,7 +407,7 @@ micromatch.scan = (...args) => picomatch.scan(...args);
 micromatch.parse = (patterns, options) => {
   let res = [];
   for (let pattern of [].concat(patterns || [])) {
-    for (let str of braces(pattern, options)) {
+    for (let str of braces(String(pattern), options)) {
       res.push(picomatch.parse(str, options));
     }
   }
