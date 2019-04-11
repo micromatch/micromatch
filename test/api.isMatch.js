@@ -1,12 +1,18 @@
 'use strict';
 
 const assert = require('assert');
-const { isMatch } = require('..');
+const { isMatch, any } = require('..');
 
 describe('.isMatch():', () => {
   describe('error handling:', () => {
     it('should throw on bad args', () => {
       assert.throws(() => isMatch({}), /Expected/i);
+    });
+  });
+
+  describe('alias:', () => {
+    it('should have the alias .any(...)', () => {
+      assert.strictEqual(isMatch, any);
     });
   });
 
