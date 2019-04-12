@@ -123,6 +123,12 @@ micromatch.matcher = (pattern, options) => picomatch(pattern, options);
 micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
 
 /**
+ * Backwards compatibility
+ */
+
+micromatch.any = micromatch.isMatch;
+
+/**
  * Returns a list of strings that _**do not match any**_ of the given `patterns`.
  *
  * ```js
