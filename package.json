@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.",
   "version": "4.0.1",
@@ -17,7 +17,8 @@
     "Olsten Larck (https://i.am.charlike.online)",
     "Paul Miller (paulmillr.com)",
     "Tom Byrer (https://github.com/tomByrer)",
-    "Tyler Akins (http://rumkin.com)"
+    "Tyler Akins (http://rumkin.com)",
+    "Peter Bright <drpizza@quiscalusmexicanus.org> (https://github.com/drpizza)"
   ],
   "repository": "micromatch/micromatch",
   "bugs": {

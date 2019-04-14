@@ -24,6 +24,7 @@ describe('.capture()', () => {
     assert.deepEqual(capture('test/**/*.js', 'test/a.js'), ['', 'a']);
     assert.deepEqual(capture('test/**/*.js', 'test/dir/a.js'), ['dir', 'a']);
     assert.deepEqual(capture('test/**/*.js', 'test/dir/test/a.js'), ['dir/test', 'a']);
+    assert.deepEqual(capture('**/*.js', 'test/dir/a.js'), ['test/dir', 'a']);
   });
 
   it('should capture extglobs', () => {
