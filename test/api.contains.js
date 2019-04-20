@@ -238,8 +238,6 @@ describe('.contains()', () => {
     });
 
     it('should match dotfiles when `dot` is true', () => {
-      console.log(mm.parse('**/*.md', { windows: true, dot: true }))
-      console.log(mm.makeRe('**/*.md', { windows: true, dot: true }))
       assert(mm.contains('a\\b\\c\\.xyz.md', '.*.md', { windows: true, dot: true }));
       assert(mm.contains('a\\b\\c\\.xyz.md', '**/*.md', { windows: true, dot: true }));
       assert(mm.contains('a\\b\\c\\.xyz.md', '**/.*.md', { windows: true, dot: true }));
