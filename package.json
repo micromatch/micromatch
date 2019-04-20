@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.",
   "version": "4.0.1",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "braces": "^3.0.1",
-    "picomatch": "^2.0.3"
+    "picomatch": "^2.0.5"
   },
   "devDependencies": {
     "fill-range": "^7.0.1",
