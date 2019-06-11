@@ -67,4 +67,12 @@ describe('.capture()', () => {
     assert.deepEqual(capture('test/!(a|b)/x.js', 'test/x/x.js'), ['x']);
     assert.deepEqual(capture('test/!(a|b)/x.js', 'test/y/x.js'), ['y']);
   });
+
+  it('should capture brace range expressions', () => {
+    assert.deepEqual(capture('test/{10..90}/x.js', 'test/25/x.js'), ['25']);
+  });
+
+  it('should capture multiple brace ranges', () => {
+    assert.deepEqual(capture('test/{10..90}/x/{100..200}/x.js', 'test/20/x/150/x.js'), ['20','150']);
+  });
 });
