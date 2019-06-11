@@ -41,7 +41,7 @@ const micromatch = (list, patterns, options) => {
   };
 
   for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+    let isMatch = picomatch(String(patterns[i]), { ...options, onResult, expandRange }, true);
     let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
     if (negated) negatives++;
 
@@ -360,7 +360,7 @@ micromatch.all = (str, patterns, options) => {
 
 micromatch.capture = (glob, input, options) => {
   let posix = utils.isWindows(options);
-  let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
+  let regex = micromatch.makeRe(String(glob), { ...options, capture: true });
   let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
 
   if (match) {
@@ -384,7 +384,10 @@ micromatch.capture = (glob, input, options) => {
  * @api public
  */
 
-micromatch.makeRe = (...args) => picomatch.makeRe(...args);
+micromatch.makeRe = ( pattern, options ) => {
+  let result = picomatch.makeRe( pattern, { ...options, expandRange } );
+  return result
+}
 
 /**
  * Scan a glob pattern to separate the pattern into segments. Used
@@ -459,6 +462,27 @@ micromatch.braceExpand = (pattern, options) => {
   if (typeof pattern !== 'string') throw new TypeError('Expected a string');
   return micromatch.braces(pattern, { ...options, expand: true });
 };
+
+/**
+ * Helpers
+ */
+
+// Replacement for picomatch.parse.expandRange
+function expandRange( start, end, incr, options ) {
+  if ( arguments.length == 3 ) {
+    options = incr;
+    incr = '';
+  } else {
+    incr = '..'+incr;
+  }
+  let source = braces.compile( `{${start}..${end}${incr}}`, options );
+
+  // Convert to non-capturing group
+  source = '(?:' + source.substr( 1 );
+
+  return source 
+}
+
 
 /**
  * Expose micromatch
