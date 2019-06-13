@@ -91,7 +91,6 @@ describe('micromatch', () => {
       // assert.deepEqual(mm(fixtures, ['{000..999}']), ['100','010']);
       assert.deepEqual(mm(fixtures, ['{0..9}']), ['0','1']);
       assert.deepEqual(mm(fixtures, ['{11..120}']), ['100','110']);
-
     });
 
   });
