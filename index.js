@@ -120,7 +120,9 @@ micromatch.matcher = (pattern, options) => picomatch(pattern, options);
  * @api public
  */
 
-micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+micromatch.isMatch = (str, patterns, options) => {
+  return picomatch(patterns, { ...options, expandRange })(str);
+}
 
 /**
  * Backwards compatibility

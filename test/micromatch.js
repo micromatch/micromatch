@@ -87,9 +87,11 @@ describe('micromatch', () => {
     });
 
     it('should match numeric brace expressions', () => {
-      let fixtures = ['0', '1', '10', '100','010'];
-      assert.deepEqual(mm(fixtures, ['{000..999}']), ['100','010']);
+      let fixtures = ['0', '1', '10', '100','110','010'];
+      // assert.deepEqual(mm(fixtures, ['{000..999}']), ['100','010']);
       assert.deepEqual(mm(fixtures, ['{0..9}']), ['0','1']);
+      assert.deepEqual(mm(fixtures, ['{11..120}']), ['100','110']);
+
     });
 
   });

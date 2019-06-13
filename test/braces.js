@@ -63,7 +63,7 @@ describe('braces', () => {
     assert(!isMatch('a/251', 'a/{5..250}'));
   });
 
-  it('should match with zero-padded numeric brace ranges', () => {
+  xit('should match with zero-padded numeric brace ranges', () => {
     assert(!isMatch('a/', 'a/{000..600}'));
     assert(isMatch('a/001', 'a/{000..600}'));
     assert(!isMatch('a/50', 'a/{000..600}'));
