@@ -479,10 +479,10 @@ function expandRange( start, end, incr, options ) {
   }
   let source = braces.compile( `{${start}..${end}${incr}}`, options );
 
-  // Convert to non-capturing group
+  // Convert to non-capturing group, since capture groups are added downstream.
   source = '(?:' + source.substr( 1 );
 
-  return source 
+  return source;
 }
 
 
