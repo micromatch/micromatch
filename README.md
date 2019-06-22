@@ -772,7 +772,6 @@ Given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 
 * `[ac].js`: matches both `a` and `c`, returning `['a.js', 'c.js']`
 * `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
-* `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
 * `a/[A-Z].js`: matches and uppercase letter, returning `['a/E.md']`
 
 Learn about [regex character classes](http://www.regular-expressions.info/charclass.html).
