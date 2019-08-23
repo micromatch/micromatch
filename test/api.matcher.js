@@ -82,7 +82,7 @@ describe(".matcher()", () => {
     });
   });
 
-  if (process.platform !== process.platform) {
+  if (process.platform !== "win32") {
     describe("backlashes for path separators, on posix", () => {
       let format = (str) => str;
 
@@ -127,7 +127,7 @@ describe(".matcher()", () => {
     });
   }
 
-  if (process.platform === process.platform) {
+  if (process.platform === "win32") {
     describe("windows paths", () => {
       beforeEach(() => {
         path.sep = "\\";
