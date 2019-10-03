@@ -45,7 +45,7 @@ Changelog entries are classified using the following labels _(from [keep-a-chang
 
 - Require Node.js >= 8
 - Removed support for passing an array of brace patterns to `micromatch.braces()`.
-- To strictly enforce closing brackets (for `{`, `[`, and `(`), you must now use `strictBrackets=true` instead of `strictErrors`.   
+- To strictly enforce closing brackets (for `{`, `[`, and `(`), you must now use `strictBrackets=true` instead of `strictErrors`.
 - `cache` - caching and all related options and methods have been removed
 - `options.unixify` was renamed to `options.windows`
 - `options.nodupes` Was removed. Duplicates are always removed by default. You can override this with custom behavior by using the `onMatch`, `onResult` and `onIgnore` functions.
