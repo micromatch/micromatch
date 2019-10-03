@@ -30,7 +30,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=8"
+    "node": ">=8.6"
   },
   "scripts": {
     "test": "mocha"
