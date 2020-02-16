@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "braces": "^3.0.1",
-    "picomatch": "^2.0.5"
+    "picomatch": "^2.2.1"
   },
   "devDependencies": {
     "fill-range": "^7.0.1",
