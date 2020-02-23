@@ -4,7 +4,7 @@ const util = require('util');
 const braces = require('braces');
 const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
-const isEmptyString = val => typeof val === 'string' && (val === '' || val === './');
+const isEmptyString = val => val === '' || val === './';
 
 /**
  * Returns an array of strings that match one or more glob patterns.
