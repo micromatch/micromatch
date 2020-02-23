@@ -85,6 +85,14 @@ describe('micromatch', () => {
       assert.deepEqual(mm(['a [bc]'], 'a \\[bc\\]*'), ['a [bc]']);
       assert.deepEqual(mm(['a [b]', 'a [b].js'], 'a \\[b\\].*'), ['a [b].js']);
     });
+
+    it('should match numeric brace expressions', () => {
+      let fixtures = ['0', '1', '10', '100','110','010'];
+      // assert.deepEqual(mm(fixtures, ['{000..999}']), ['100','010']);
+      assert.deepEqual(mm(fixtures, ['{0..9}']), ['0','1']);
+      assert.deepEqual(mm(fixtures, ['{11..120}']), ['100','110']);
+    });
+
   });
 
   describe('windows paths', () => {

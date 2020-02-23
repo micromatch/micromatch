@@ -43,10 +43,35 @@ describe('braces', () => {
     assert(isMatch('a/c', 'a/{a,b,c}'));
   });
 
-  it('should match with brace ranges', () => {
+  it('should match with alphabetic brace ranges', () => {
     assert(isMatch('a/a', 'a/{a..c}'));
     assert(isMatch('a/b', 'a/{a..c}'));
     assert(isMatch('a/c', 'a/{a..c}'));
+    assert(!isMatch('a/d', 'a/{a..c}'));
+    assert(!isMatch('a/0', 'a/{a..c}'));
+  });
+
+  it('should match with single-digit numeric brace ranges', () => {
+    assert(isMatch('a/1', 'a/{0..8}'));
+    assert(!isMatch('a/9', 'a/{0..8}'));
+  });
+
+  it('should match with multi-digit numeric brace ranges', () => {
+    assert(!isMatch('a/4', 'a/{5..250}'));
+    assert(isMatch('a/5', 'a/{5..250}'));
+    assert(isMatch('a/250', 'a/{5..250}'));
+    assert(!isMatch('a/251', 'a/{5..250}'));
+  });
+
+  xit('should match with zero-padded numeric brace ranges', () => {
+    assert(!isMatch('a/', 'a/{000..600}'));
+    assert(isMatch('a/001', 'a/{000..600}'));
+    assert(!isMatch('a/50', 'a/{000..600}'));
+    assert(isMatch('a/050', 'a/{000..600}'));
+    assert(isMatch('a/500', 'a/{000..600}'));
+    assert(!isMatch('a/700', 'a/{000..600}'));
+    assert(!isMatch('a/5000', 'a/{000..600}'));
+    assert(!isMatch('a/251', 'a/{000..600}'));
   });
 
   it('should not convert braces inside brackets', () => {
@@ -61,7 +86,7 @@ describe('braces', () => {
     assert(isMatch('a.txt', 'a{,b}.txt'));
     assert(isMatch('a.txt', 'a{b,}.txt'));
     assert(isMatch('aa.txt', 'a{a,b,}.txt'));
-    assert(isMatch('aa.txt', 'a{a,b,}.txt'));
+    assert(!isMatch('ac.txt', 'a{a,b,}.txt'));
     assert(isMatch('ab.txt', 'a{,b}.txt'));
     assert(isMatch('ab.txt', 'a{b,}.txt'));
   });
