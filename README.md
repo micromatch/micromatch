@@ -324,7 +324,7 @@ Returns true if **all** of the given `patterns` match the specified string.
 * `str` **{String|Array}**: The string to test.
 * `patterns` **{String|Array}**: One or more glob patterns to use for matching.
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
+* `returns` **{Boolean}**: Returns true if all patterns match `str`
 
 **Example**
 

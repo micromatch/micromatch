@@ -327,7 +327,7 @@ micromatch.every = (list, patterns, options) => {
  * @param {String|Array} `str` The string to test.
  * @param {String|Array} `patterns` One or more glob patterns to use for matching.
  * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any patterns match `str`
+ * @return {Boolean} Returns true if all patterns match `str`
  * @api public
  */
 
