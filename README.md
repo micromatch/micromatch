@@ -354,7 +354,7 @@ Returns an array of matches captured by `pattern` in `string, or`null` if the pa
 * `glob` **{String}**: Glob pattern to use for matching.
 * `input` **{String}**: String to match
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns an array of captures if the input matches the glob pattern, otherwise `null`.
+* `returns` **{Array|null}**: Returns an array of captures if the input matches the glob pattern, otherwise `null`.
 
 **Example**
 
