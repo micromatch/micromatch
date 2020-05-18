@@ -181,7 +181,7 @@ micromatch.not = (list, patterns, options = {}) => {
  * @param {String} `str` The string to match.
  * @param {String|Array} `patterns` Glob pattern to use for matching.
  * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if the patter matches any part of `str`.
+ * @return {Boolean} Returns true if the pattern matches any part of `str`.
  * @api public
  */
 

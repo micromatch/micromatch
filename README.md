@@ -229,7 +229,7 @@ Returns true if the given `string` contains the given pattern. Similar to [.isMa
 * `str` **{String}**: The string to match.
 * `patterns` **{String|Array}**: Glob pattern to use for matching.
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if the patter matches any part of `str`.
+* `returns` **{Boolean}**: Returns true if the pattern matches any part of `str`.
 
 **Example**
 
