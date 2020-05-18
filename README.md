@@ -290,14 +290,14 @@ console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
 
 ### [.every](index.js#L283)
 
-Returns true if every string in the given `list` matches any of the given glob `patterns`.
+Returns true if every string in the given `list` matches all of the given glob `patterns`.
 
 **Params**
 
 * `list` **{String|Array}**: The string or array of strings to test.
 * `patterns` **{String|Array}**: One or more glob patterns to use for matching.
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
+* `returns` **{Boolean}**: Returns true if all patterns match all in `list`.
 
 **Example**
 

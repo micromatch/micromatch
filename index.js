@@ -270,7 +270,7 @@ micromatch.some = (list, patterns, options) => {
 
 /**
  * Returns true if every string in the given `list` matches
- * any of the given glob `patterns`.
+ * all of the given glob `patterns`.
  *
  * ```js
  * const mm = require('micromatch');
@@ -288,7 +288,7 @@ micromatch.some = (list, patterns, options) => {
  * @param {String|Array} `list` The string or array of strings to test.
  * @param {String|Array} `patterns` One or more glob patterns to use for matching.
  * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any patterns match `str`
+ * @return {Boolean} Returns true if all patterns match all in `list`.
  * @api public
  */
 
