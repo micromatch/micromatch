@@ -267,14 +267,14 @@ console.log(mm.matchKeys(obj, '*b'));
 
 ### [.some](index.js#L247)
 
-Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
+Returns true if some of the strings in the given `list` match all of the given glob `patterns`.
 
 **Params**
 
 * `list` **{String|Array}**: The string or array of strings to test. Returns as soon as the first match is found.
 * `patterns` **{String|Array}**: One or more glob patterns to use for matching.
 * `options` **{Object}**: See available [options](#options) for changing how matches are performed
-* `returns` **{Boolean}**: Returns true if any patterns match `str`
+* `returns` **{Boolean}**: Returns true if all `patterns` match any in `list`.
 
 **Example**
 

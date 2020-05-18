@@ -238,7 +238,7 @@ micromatch.matchKeys = (obj, patterns, options) => {
 };
 
 /**
- * Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
+ * Returns true if some of the strings in the given `list` match all of the given glob `patterns`.
  *
  * ```js
  * const mm = require('micromatch');
@@ -252,7 +252,7 @@ micromatch.matchKeys = (obj, patterns, options) => {
  * @param {String|Array} `list` The string or array of strings to test. Returns as soon as the first match is found.
  * @param {String|Array} `patterns` One or more glob patterns to use for matching.
  * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any patterns match `str`
+ * @return {Boolean} Returns true if all `patterns` match any in `list`.
  * @api public
  */
 
