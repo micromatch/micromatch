@@ -3,7 +3,9 @@
 require('mocha');
 const path = require('path');
 const assert = require('assert');
-const mm = require('..');
+const _mm = require('..');
+const mm = (l, p, o) => _mm(l, p, { ...o, bash: true });
+mm.isMatch = (l, p, o) => _mm.isMatch(l, p, { ...o, bash: true });
 
 const isWindows = () => process.platform === 'win32' || path.sep === '\\';
 const format = str => str.replace(/\\/g, '/').replace(/^\.\//, '');
