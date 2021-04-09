@@ -28,7 +28,8 @@ describe('options', () => {
       let opts = { ignore: ['a/**'], strictSlashes: true };
       let dotOpts = { ...opts, dot: true };
 
-      assert.deepEqual(mm(globs, '*', opts), ['b']);
+      assert.deepEqual(mm(globs, '*', opts), ['a', 'b']);
+      assert.deepEqual(mm(globs, '*', { ...opts, strictSlashes: false }), ['b']);
       assert.deepEqual(mm(globs, '*', { ignore: '**/a' }), ['b']);
       assert.deepEqual(mm(globs, '*/*', opts), ['x/y', 'z/z']);
       assert.deepEqual(mm(globs, '*/*/*', opts), ['b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'z/z/z']);
@@ -39,7 +40,7 @@ describe('options', () => {
       assert.deepEqual(mm(globs, '**/*/[b-z]', opts), ['b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'x/x/x', 'x/y', 'z/z', 'z/z/z']);
 
       assert.deepEqual(mm(globs, '*', { ignore: '**/a', dot: true }), ['.a', 'b']);
-      assert.deepEqual(mm(globs, '*', dotOpts), ['.a', 'b']);
+      assert.deepEqual(mm(globs, '*', dotOpts), ['.a', 'a', 'b']);
       assert.deepEqual(mm(globs, '*/*', dotOpts), ['.a/a', 'x/y', 'z/z']);
       assert.deepEqual(mm(globs, '*/*/*', dotOpts), ['.a/a/a', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'z/z/z']);
       assert.deepEqual(mm(globs, '*/*/*/*', dotOpts), ['.a/a/a/a']);
@@ -185,9 +186,9 @@ describe('options', () => {
 
   describe('options.nonull', () => {
     it('should support the `nonull` option:', () => {
-      assert.deepEqual(mm(['*', '\\*'], '\\*', { nonull: true }), ['*', '/*']);
-      assert.deepEqual(mm(['*', '\\^'], '\\^', { nonull: true }), ['/^']);
-      assert.deepEqual(mm(['*', 'a\\*'], 'a\\*', { nonull: true }), ['a/*']);
+      assert.deepEqual(mm(['*', '\\*'], '\\*', { nonull: true }), ['*', '\\*']);
+      assert.deepEqual(mm(['*', '\\^'], '\\^', { nonull: true }), ['\\^']);
+      assert.deepEqual(mm(['*', 'a\\*'], 'a\\*', { nonull: true }), ['a\\*']);
     });
   });
 
