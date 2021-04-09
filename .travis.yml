@@ -10,3 +10,6 @@ node_js:
   - '12'
   - '10'
   - '8'
+jobs:
+  allow_failures:
+  - os: windows
