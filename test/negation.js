@@ -125,6 +125,8 @@ describe('negation', () => {
       assert.deepEqual(mm(fixtures, ['**', '!a/b', '!a/c']), ['a', 'a/a', 'b/a', 'b/b', 'b/c']);
       assert.deepEqual(mm(fixtures, ['!a/(b)']), ['a', 'a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
       assert.deepEqual(mm(fixtures, ['!(a/b)']), ['a', 'a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['!(a)**']), ['b/a', 'b/b', 'b/c']);
+      assert.deepEqual(mm(fixtures, ['**', '!(a)**']), ['b/a', 'b/b', 'b/c']);
 
       assert.deepEqual(mm(fixtures, ['!a/b'], { windows: false }), ['a', 'a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c']);
       assert.deepEqual(mm(fixtures, ['!a\\\\b'], { windows: false }), ['a', 'a\\a', 'a\\c', 'b\\a', 'b\\b', 'b\\c']);
