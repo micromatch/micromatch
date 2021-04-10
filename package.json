@@ -44,7 +44,7 @@
     "fill-range": "^7.0.1",
     "gulp-format-md": "^2.0.0",
     "minimatch": "^3.0.4",
-    "mocha": "^5.2.0",
+    "mocha": "^7.2.0",
     "time-require": "github:jonschlinkert/time-require"
   },
   "keywords": [
