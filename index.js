@@ -54,7 +54,6 @@ const micromatch = (list, patterns, options) => {
       if (negated) {
         omit.add(matched.output);
       } else {
-        omit.delete(matched.output);
         keep.add(matched.output);
       }
     }

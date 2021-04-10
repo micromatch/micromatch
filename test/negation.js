@@ -25,7 +25,7 @@ describe('negation', () => {
       assert.deepEqual(mm(fixtures1, ['*/*', '!a/b', '!*/c']), ['a/a', 'b/a', 'b/b']);
       assert.deepEqual(mm(fixtures1, ['*/*', '!a/b', '!a/c']), ['a/a', 'b/a', 'b/b', 'b/c']);
       assert.deepEqual(mm(fixtures1, ['!a/(b)']), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
-      assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!bar', '*']), ['bar', 'baz', 'foo']);
+      assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!bar', '*']), ['baz', 'foo']);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['*', '!bar']), ['baz', 'foo']);
 
       let fixtures2 = ['foo', 'bar', 'baz', 'main', 'other', 'foo/a/b/c', 'bar/a/b/d', 'baz/a/b/e', 'a/a/a', 'a/a/b', 'a/a/c', 'a/a/file'];
@@ -40,7 +40,7 @@ describe('negation', () => {
 
       // assert.deepEqual(mm(fixtures, ['!a/a', '!a']), []);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], '!foo'), ['bar', 'baz']);
-      assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!bar', 'bar']), ['bar']);
+      assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!bar', 'bar']), []);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!foo', 'bar']), ['bar']);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!foo']), ['bar', 'baz']);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['bar', '!foo', '!bar']), []);
