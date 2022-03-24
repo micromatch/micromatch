@@ -7,13 +7,13 @@
     "bench": "node ."
   },
   "dependencies": {
-    "ansi-colors": "^3.2.4",
+    "ansi-colors": "^4.1.1",
     "benchmark": "^2.1.4",
-    "minimatch": "^3.0.4",
-    "minimist": "^1.2.0"
+    "minimatch": "^5.0.1",
+    "minimist": "^1.2.6"
   },
   "devDependencies": {
-    "glob-parent": "^5.0.0"
+    "glob-parent": "^6.0.2"
   },
   "lintDeps": {
     "devDependencies": {
