@@ -83,6 +83,7 @@ describe('.matcher()', () => {
   });
 
   describe('backlashes for path separators, on posix', () => {
+    if (process.platform === 'win32') return;
     let format = str => str;
 
     it('should return an array of matches for a literal string', () => {

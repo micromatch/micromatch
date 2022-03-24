@@ -9,7 +9,7 @@ const isWindows = () => process.platform === 'win32' || path.sep === '\\';
 const format = str => str.replace(/\\/g, '/').replace(/^\.\//, '');
 
 // from the Bash 4.3 specification/unit tests
-const fixtures = ['*', '**', '\\*', 'a', 'a/*', 'abc', 'abd', 'abe', 'b', 'bb', 'bcd', 'bdir/', 'Beware', 'c', 'ca', 'cb', 'd', 'dd', 'de'];
+const fixtures = ['\\\\', '*', '**', '\\*', 'a', 'a/*', 'abc', 'abd', 'abe', 'b', 'bb', 'bcd', 'bdir/', 'Beware', 'c', 'ca', 'cb', 'd', 'dd', 'de'];
 
 describe('bash options and features:', () => {
   // $echo a/{1..3}/b
@@ -77,13 +77,13 @@ describe('bash options and features:', () => {
         // should not match backslashes on windows, since backslashes are path
         // separators and negation character classes should not match path separators
         // unless it's explicitly defined in the character class
-        assert.deepEqual(mm(f, '[^a-c]*'), ['d', 'dd', 'de', 'Beware', 'BewAre', 'BZZ', '*', '**'].sort());
-        assert.deepEqual(mm(f, '[^a-c]*', { bash: false }), ['d', 'dd', 'de', 'BewAre', 'Beware', 'BZZ', '*', '**'].sort());
-        assert.deepEqual(mm(f, '[^a-c]*', { nocase: true }), ['d', 'dd', 'de', '*', '**'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*'), ['d', 'dd', 'de', 'Beware', 'BewAre', 'BZZ', '*', '**', '\\*'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*', { bash: false }), ['d', 'dd', 'de', 'BewAre', 'Beware', 'BZZ', '*', '**', '\\*'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*', { nocase: true }), ['d', 'dd', 'de', '*', '**', '\\*'].sort());
       } else {
-        assert.deepEqual(mm(f, '[^a-c]*'), ['*', '**', 'BZZ', 'BewAre', 'Beware', '\\*', 'd', 'dd', 'de'].sort());
-        assert.deepEqual(mm(f, '[^a-c]*', { bash: false }), ['*', '**', 'BZZ', 'BewAre', 'Beware', '\\*', 'd', 'dd', 'de'].sort());
-        assert.deepEqual(mm(f, '[^a-c]*', { nocase: true }), ['*', '**', '\\*', 'd', 'dd', 'de'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*'), ['*', '**', 'BZZ', 'BewAre', 'Beware', '\\*', 'd', 'dd', 'de', '\\\\'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*', { bash: false }), ['*', '**', 'BZZ', 'BewAre', 'Beware', '\\*', 'd', 'dd', 'de', '\\\\'].sort());
+        assert.deepEqual(mm(f, '[^a-c]*', { nocase: true }), ['*', '**', '\\*', 'd', 'dd', 'de', '\\\\'].sort());
       }
     });
 
