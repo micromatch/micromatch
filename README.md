@@ -163,7 +163,7 @@ Returns a matcher function from the given glob `pattern` and `options`. The retu
 
 **Params**
 
-* `pattern` **{String}**: Glob pattern
+* `pattern` **{String|Array}**: One or more glob patterns to use for matching.
 * `options` **{Object}**
 * `returns` **{Function}**: Returns a matcher function.
 
@@ -176,6 +176,9 @@ const mm = require('micromatch');
 const isMatch = mm.matcher('*.!(*a)');
 console.log(isMatch('a.a')); //=> false
 console.log(isMatch('a.b')); //=> true
+
+const isMatch = mm.matcher(['b.*', '*.a']);
+console.log(isMatch('a.a')); //=> true
 ```
 
 ### [.isMatch](index.js#L123)

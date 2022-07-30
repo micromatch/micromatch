@@ -94,8 +94,11 @@ micromatch.match = micromatch;
  * const isMatch = mm.matcher('*.!(*a)');
  * console.log(isMatch('a.a')); //=> false
  * console.log(isMatch('a.b')); //=> true
+ *
+ * const isMatch = mm.matcher(['b.*', '*.a']);
+ * console.log(isMatch('a.a')); //=> true
  * ```
- * @param {String} `pattern` Glob pattern
+ * @param {String|Array} `pattern` One or more glob patterns to use for matching.
  * @param {Object} `options`
  * @return {Function} Returns a matcher function.
  * @api public
