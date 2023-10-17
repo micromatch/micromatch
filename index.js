@@ -340,7 +340,7 @@ micromatch.all = (str, patterns, options) => {
 };
 
 /**
- * Returns an array of matches captured by `pattern` in `string, or `null` if the pattern did not match.
+ * Returns an array of matches captured by `pattern` in `string`, or `null` if the pattern did not match.
  *
  * ```js
  * const mm = require('micromatch');
