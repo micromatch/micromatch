@@ -122,6 +122,13 @@ console.log(micromatch.isMatch('foo', ['b*', 'f*'])) //=> true
 
 You can mix and match these features to create whatever patterns you need!
 
+## When you SHOULD NOT use micromatch?
+If you are trying to accomplish the same filtering that the `.gitIgnore` `git` does, this library is NOT going to accomplish 1-1 javascript transposition of the matching algorithm.
+
+This library is meant to be a functionally drop-in replacement for minimatch and multimatch and neither of them are conforming to https://man7.org/linux/man-pages/man7/glob.7.html.
+
+If you need something specifically for supporting the `fnmatch` implementation of string-matching (the one used by .gitIgnore), you may wish to check out other alternatives (E.G. [ignore](https://www.npmjs.com/package/ignore))  
+
 ## Switching to micromatch
 
 _(There is one notable difference between micromatch and minimatch in regards to how backslashes are handled. See [the notes about backslashes](#backslashes) for more information.)_
