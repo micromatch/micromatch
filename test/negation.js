@@ -1,9 +1,6 @@
 'use strict';
 
-const path = require('path');
-const sep = path.sep;
 const assert = require('assert');
-const isWindows = () => process.platform === 'win32' || path.sep === '\\';
 const mm = require('..');
 
 describe('negation', () => {
@@ -18,7 +15,7 @@ describe('negation', () => {
     });
 
     it('should support negation patterns', () => {
-      let fixtures1 = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
+      const fixtures1 = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
 
       assert.deepEqual(mm(fixtures1, ['!a/b']), ['a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
       assert.deepEqual(mm(fixtures1, ['*/*', '!a/b', '!*/c']), ['a/a', 'b/a', 'b/b']);
@@ -28,7 +25,7 @@ describe('negation', () => {
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['!bar', '*']), ['bar', 'baz', 'foo']);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], ['*', '!bar']), ['baz', 'foo']);
 
-      let fixtures2 = ['foo', 'bar', 'baz', 'main', 'other', 'foo/a/b/c', 'bar/a/b/d', 'baz/a/b/e', 'a/a/a', 'a/a/b', 'a/a/c', 'a/a/file'];
+      const fixtures2 = ['foo', 'bar', 'baz', 'main', 'other', 'foo/a/b/c', 'bar/a/b/d', 'baz/a/b/e', 'a/a/a', 'a/a/b', 'a/a/c', 'a/a/file'];
 
       assert.deepEqual(mm(fixtures2, ['a/**', '!a/a/file', 'main']), ['a/a/a', 'a/a/b', 'a/a/c', 'main']);
       assert.deepEqual(mm('foo', ['a/**', '!a/a/file', 'main']), []);
@@ -36,7 +33,7 @@ describe('negation', () => {
     });
 
     it('should support negating with literal non-globs', () => {
-      let fixtures = ['a', 'b', 'a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
+      const fixtures = ['a', 'b', 'a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
 
       // assert.deepEqual(mm(fixtures, ['!a/a', '!a']), []);
       assert.deepEqual(mm(['bar', 'baz', 'foo'], '!foo'), ['bar', 'baz']);
@@ -109,15 +106,8 @@ describe('negation', () => {
   });
 
   describe('windows paths', () => {
-    beforeEach(() => {
-      path.sep = '\\';
-    });
-    afterEach(() => {
-      path.sep = sep;
-    });
-
     it('should support negation patterns', () => {
-      let fixtures = ['a', 'a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
+      const fixtures = ['a', 'a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, ['!a/b']), ['a', 'a/a', 'a/c', 'b/a', 'b/b', 'b/c']);
       assert.deepEqual(mm(fixtures, ['*/*', '!a/b', '!*/c']), ['a/a', 'b/a', 'b/b']);
       assert.deepEqual(mm(fixtures, ['!*/c']), ['a', 'a/a', 'a/b', 'b/a', 'b/b']);

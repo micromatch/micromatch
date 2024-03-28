@@ -1,11 +1,5 @@
 'use strict';
 
-const path = require('path');
-
-if (!process.env.ORIGINAL_PATH_SEP) {
-  process.env.ORIGINAL_PATH_SEP = path.sep
-}
-
 module.exports = [
   'a',
   'a.md',

@@ -1,11 +1,7 @@
 'use strict';
 
-require('mocha');
-const path = require('path');
-const util = require('util');
 const assert = require('assert');
 const { isMatch } = require('..');
-let units = [];
 
 describe('bash.spec', () => {
   describe('dotglob', () => {
@@ -355,7 +351,6 @@ describe('bash.spec', () => {
       assert(isMatch('abd', '**/*', { bash: true }));
     });
   });
-
 
   describe('globstar', () => {
     it('"a.js" should match "**/*.js"', () => {

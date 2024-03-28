@@ -1,19 +1,9 @@
 'use strict';
 
-const path = require('path');
 const assert = require('assert');
 const mm = require('..');
-const mi = require('minimatch');
-
-if (!process.env.ORIGINAL_PATH_SEP) {
-  process.env.ORIGINAL_PATH_SEP = path.sep
-}
 
 describe('options', () => {
-  beforeEach(() => (path.sep = '\\'));
-  afterEach(() => (path.sep = process.env.ORIGINAL_PATH_SEP));
-  after(() => (path.sep = process.env.ORIGINAL_PATH_SEP));
-
   describe('options.failglob (from Bash 4.3 tests)', () => {
     it('should throw an error when no matches are found:', () => {
       assert.throws(() => mm(['foo'], '\\^', { failglob: true }), /No matches found for/);
@@ -21,12 +11,12 @@ describe('options', () => {
   });
 
   describe('options.ignore', () => {
-    let negations = ['a/a', 'a/b', 'a/c', 'a/d', 'a/e', 'b/a', 'b/b', 'b/c'];
-    let globs = ['.a', '.a/a', '.a/a/a', '.a/a/a/a', 'a', 'a/.a', 'a/a', 'a/a/.a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/a/b', 'a/b', 'a/b/c', 'a/c', 'a/x', 'b', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'x/y', 'z/z', 'z/z/z'];
+    const negations = ['a/a', 'a/b', 'a/c', 'a/d', 'a/e', 'b/a', 'b/b', 'b/c'];
+    const globs = ['.a', '.a/a', '.a/a/a', '.a/a/a/a', 'a', 'a/.a', 'a/a', 'a/a/.a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/a/b', 'a/b', 'a/b/c', 'a/c', 'a/x', 'b', 'b/b/b', 'b/b/c', 'c/c/c', 'e/f/g', 'h/i/a', 'x/x/x', 'x/y', 'z/z', 'z/z/z'];
 
     it('should filter out ignored patterns', () => {
-      let opts = { ignore: ['a/**'], strictSlashes: true };
-      let dotOpts = { ...opts, dot: true };
+      const opts = { ignore: ['a/**'], strictSlashes: true };
+      const dotOpts = { ...opts, dot: true };
 
       assert.deepEqual(mm(globs, '*', opts), ['a', 'b']);
       assert.deepEqual(mm(globs, '*', { ...opts, strictSlashes: false }), ['b']);
@@ -112,7 +102,7 @@ describe('options', () => {
     });
 
     it('should not double-set `i` when both `nocase` and the `i` flag are set', () => {
-      let opts = { nocase: true, flags: 'i' };
+      const opts = { nocase: true, flags: 'i' };
       assert.deepEqual(mm(['a/b/d/e.md'], 'a/b/D/*.md', opts), ['a/b/d/e.md']);
       assert.deepEqual(mm(['a/b/c/e.md'], 'A/b/*/E.md', opts), ['a/b/c/e.md']);
       assert.deepEqual(mm(['a/b/c/e.md'], 'A/b/C/*.MD', opts), ['a/b/c/e.md']);
@@ -149,15 +139,8 @@ describe('options', () => {
   });
 
   describe('options.nodupes', () => {
-    beforeEach(() => {
-      path.sep = '\\';
-    });
-    afterEach(() => {
-      path.sep = process.env.ORIGINAL_PATH_SEP;
-    });
-
     it('should remove duplicate elements from the result array:', () => {
-      let fixtures = ['.editorconfig', '.git', '.gitignore', '.nyc_output', '.travis.yml', '.verb.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'LICENSE', 'coverage', 'example.js', 'example.md', 'example.css', 'index.js', 'node_modules', 'package.json', 'test.js', 'utils.js'];
+      const fixtures = ['.editorconfig', '.git', '.gitignore', '.nyc_output', '.travis.yml', '.verb.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'LICENSE', 'coverage', 'example.js', 'example.md', 'example.css', 'index.js', 'node_modules', 'package.json', 'test.js', 'utils.js'];
       assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { windows: true }), ['/a/b/c']);
       assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '\\a\\b\\c', { windows: true }), ['/a/b/c']);
       assert.deepEqual(mm(['abc', '/a/b/c', '\\a\\b\\c'], '/a/b/c', { windows: true, nodupes: true }), ['/a/b/c']);
@@ -193,20 +176,20 @@ describe('options', () => {
   });
 
   describe('options.windows', () => {
-    it('should windows file paths by default', () => {
+    it('should support windows file paths by default', () => {
       assert.deepEqual(mm(['a\\b\\c.md'], '**/*.md'), ['a/b/c.md']);
       assert.deepEqual(mm(['a\\b\\c.md'], '**\\\\*.md', { windows: false }), ['a\\b\\c.md']);
     });
 
-    it('should windows absolute paths', () => {
+    it('should support windows absolute paths', () => {
       assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md'), ['E:/a/b/c.md']);
       assert.deepEqual(mm(['E:\\a\\b\\c.md'], 'E:/**/*.md', { windows: false }), []);
     });
 
     it('should strip leading `./`', () => {
-      let fixtures = ['./a', './a/a/a', './a/a/a/a', './a/a/a/a/a', './a/b', './a/x', './z/z', 'a', 'a/a', 'a/a/b', 'a/c', 'b', 'x/y'].sort();
-      let format = str => str.replace(/^\.\//, '');
-      let opts = { format };
+      const fixtures = ['./a', './a/a/a', './a/a/a/a', './a/a/a/a/a', './a/b', './a/x', './z/z', 'a', 'a/a', 'a/a/b', 'a/c', 'b', 'x/y'].sort();
+      const format = str => str.replace(/^\.\//, '');
+      const opts = { format };
       assert.deepEqual(mm(fixtures, '*', opts), ['a', 'b']);
       assert.deepEqual(mm(fixtures, '**/a/**', opts), ['a', 'a/a/a', 'a/a/a/a', 'a/a/a/a/a', 'a/b', 'a/x', 'a/a', 'a/a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, '*/*', opts), ['a/b', 'a/x', 'z/z', 'a/a', 'a/c', 'x/y']);
@@ -242,8 +225,8 @@ describe('options', () => {
   describe('options.dot', () => {
     describe('when `dot` or `dotfile` is NOT true:', () => {
       it('should not match dotfiles by default:', () => {
-        let format = str => str.replace(/^\.\//, '');
-        let opts = { format, result: format };
+        const format = str => str.replace(/^\.\//, '');
+        const opts = { format, result: format };
 
         assert.deepEqual(mm(['.dotfile'], '*'), []);
         assert.deepEqual(mm(['.dotfile'], '**'), []);

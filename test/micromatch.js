@@ -1,14 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const path = require('path');
 const mm = require('..');
-const sep = path.sep;
 
 describe('micromatch', () => {
-  afterEach(() => (path.sep = sep));
-  after(() => (path.sep = sep));
-
   describe('empty list', () => {
     it('should return an empty array', () => {
       assert.deepEqual(mm([], '*'), []);
@@ -41,7 +36,7 @@ describe('micromatch', () => {
     });
 
     it('should support single globs (*)', () => {
-      let fixtures = ['a', 'b', 'a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a', 'x/y', 'z/z'];
+      const fixtures = ['a', 'b', 'a/a', 'a/b', 'a/c', 'a/x', 'a/a/a', 'a/a/b', 'a/a/a/a', 'a/a/a/a/a', 'x/y', 'z/z'];
       assert.deepEqual(mm(fixtures, ['*']), ['a', 'b']);
       assert.deepEqual(mm(fixtures, ['*/*']), ['a/a', 'a/b', 'a/c', 'a/x', 'x/y', 'z/z']);
       assert.deepEqual(mm(fixtures, ['*/*/*']), ['a/a/a', 'a/a/b']);
@@ -56,7 +51,7 @@ describe('micromatch', () => {
     });
 
     it('should support globstars (**)', () => {
-      let fixtures = ['a', 'a/', 'a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z'];
+      const fixtures = ['a', 'a/', 'a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z'];
       assert.deepEqual(mm(fixtures, ['*{,/}']), ['a', 'a/']);
       assert.deepEqual(mm(fixtures, ['*/']), ['a/']);
       assert.deepEqual(mm(fixtures, ['*/*']), ['a/a', 'a/b', 'a/c', 'a/x']);
@@ -71,7 +66,7 @@ describe('micromatch', () => {
     });
 
     it('should work with file extensions', () => {
-      let fixtures = ['a.txt', 'a/b.txt', 'a/x/y.txt', 'a/x/y/z'];
+      const fixtures = ['a.txt', 'a/b.txt', 'a/x/y.txt', 'a/x/y/z'];
       assert.deepEqual(mm(fixtures, ['a/**/*.txt']), ['a/b.txt', 'a/x/y.txt']);
       assert.deepEqual(mm(fixtures, ['a/*.txt']), ['a/b.txt']);
       assert.deepEqual(mm(fixtures, ['a*.txt']), ['a.txt']);
@@ -88,15 +83,8 @@ describe('micromatch', () => {
   });
 
   describe('windows paths', () => {
-    beforeEach(() => {
-      path.sep = '\\';
-    });
-    afterEach(() => {
-      path.sep = sep;
-    });
-
     it('should return an array of matches for a literal string', () => {
-      let fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
+      const fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, '(a/b)'), ['a/b']);
       assert.deepEqual(mm(fixtures, 'a/b'), ['a/b']);
       assert.deepEqual(mm(fixtures, '(a/b)', { windows: false }), []);
@@ -104,7 +92,7 @@ describe('micromatch', () => {
     });
 
     it('should return an array of matches for an array of literal strings', () => {
-      let fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
+      const fixtures = ['a\\a', 'a\\b', 'a\\c', 'b\\a', 'b\\b', 'b\\c'];
       assert.deepEqual(mm(fixtures, ['(a/b)', 'a/c']), ['a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, ['a/b', 'b/b']), ['a/b', 'b/b']);
       assert.deepEqual(mm(fixtures, ['(a/b)', 'a/c'], { windows: false }), []);
@@ -112,7 +100,7 @@ describe('micromatch', () => {
     });
 
     it('should support regex logical or', () => {
-      let fixtures = ['a\\a', 'a\\b', 'a\\c'];
+      const fixtures = ['a\\a', 'a\\b', 'a\\c'];
       assert.deepEqual(mm(fixtures, ['a/(a|c)']), ['a/a', 'a/c']);
       assert.deepEqual(mm(fixtures, ['a/(a|b|c)', 'a/b']), ['a/a', 'a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, ['a/(a|c)'], { windows: false }), []);
@@ -120,7 +108,7 @@ describe('micromatch', () => {
     });
 
     it('should support regex ranges', () => {
-      let fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x\\y', 'a\\x'];
+      const fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x\\y', 'a\\x'];
       assert.deepEqual(mm(fixtures, 'a/[b-c]'), ['a/b', 'a/c']);
       assert.deepEqual(mm(fixtures, 'a/[a-z]'), ['a/a', 'a/b', 'a/c', 'a/x']);
       assert.deepEqual(mm(fixtures, 'a/[b-c]', { windows: false }), []);
@@ -129,7 +117,7 @@ describe('micromatch', () => {
     });
 
     it('should support single globs (*)', () => {
-      let fixtures = [
+      const fixtures = [
         'a',
         'b',
         'a\\a',
@@ -156,7 +144,7 @@ describe('micromatch', () => {
       assert.deepEqual(mm(fixtures, ['a/*/a']), ['a/a/a']);
       assert.deepEqual(mm(fixtures, ['a/*/b']), ['a/a/b']);
 
-      let opts = { windows: false };
+      const opts = { windows: false };
       assert.deepEqual(mm(fixtures, ['*/*'], opts), []);
       assert.deepEqual(mm(fixtures, ['*/*/*'], opts), []);
       assert.deepEqual(mm(fixtures, ['*/*/*/*'], opts), []);
@@ -170,8 +158,8 @@ describe('micromatch', () => {
     });
 
     it('should support globstars (**)', () => {
-      let fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x', 'a\\x\\y', 'a\\x\\y\\z'];
-      let expected = ['a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z'];
+      const fixtures = ['a\\a', 'a\\b', 'a\\c', 'a\\x', 'a\\x\\y', 'a\\x\\y\\z'];
+      const expected = ['a/a', 'a/b', 'a/c', 'a/x', 'a/x/y', 'a/x/y/z'];
       assert.deepEqual(mm(fixtures, ['a/**']), expected);
       assert.deepEqual(mm(fixtures, ['a/**/*']), expected);
       assert.deepEqual(mm(fixtures, ['a/**/**/*']), expected);
@@ -182,7 +170,7 @@ describe('micromatch', () => {
     });
 
     it('should work with file extensions', () => {
-      let fixtures = ['a.txt', 'a\\b.txt', 'a\\x\\y.txt', 'a\\x\\y\\z'];
+      const fixtures = ['a.txt', 'a\\b.txt', 'a\\x\\y.txt', 'a\\x\\y\\z'];
       assert.deepEqual(mm(fixtures, ['a\\\\**\\\\*.txt']), []);
       assert.deepEqual(mm(fixtures, ['a\\\\*\\\\*.txt']), []);
       assert.deepEqual(mm(fixtures, ['a\\\\*.txt']), []);

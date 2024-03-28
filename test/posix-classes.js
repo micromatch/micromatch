@@ -1,6 +1,5 @@
 'use strict';
 
-require('mocha');
 const assert = require('assert');
 const mm = require('..');
 const opts = { strictSlashes: true, posix: true };
@@ -9,7 +8,7 @@ const isMatch = (...args) => {
   return mm.isMatch(...args, opts);
 };
 const convert = (...args) => {
-  let res = mm.parse(...args, opts);
+  const res = mm.parse(...args, opts);
   let str = '';
   res.forEach(state => (str += state.output));
   return str;
@@ -36,7 +35,7 @@ describe('posix classes', () => {
 
   describe('integration: posix classes with globs', () => {
     it('should work with globs', () => {
-      let fixtures = ['a.b', 'a,b', 'a:b', 'a-b', 'a;b', 'a b', 'a_b'];
+      const fixtures = ['a.b', 'a,b', 'a:b', 'a-b', 'a;b', 'a b', 'a_b'];
       assert.deepEqual(mm(fixtures, 'a[^[:alnum:]]b', { posix: true }), fixtures);
       assert.deepEqual(mm(fixtures, 'a@([^[:alnum:]])b', { posix: true }), fixtures);
       assert.deepEqual(mm(fixtures, 'a@([-.,:; _])b', { posix: true }), fixtures);
@@ -435,6 +434,7 @@ describe('posix classes', () => {
       assert(isMatch('A', '[[:graph:]]'));
       assert(!isMatch('\b', '[[:graph:]]'));
       assert(!isMatch('\n', '[[:graph:]]'));
+      // eslint-disable-next-line no-useless-escape
       assert(isMatch('\s', '[[:graph:]]'));
     });
   });

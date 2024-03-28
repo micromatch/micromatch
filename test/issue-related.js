@@ -5,10 +5,10 @@ const mm = require('..');
 
 describe('issue-related tests', () => {
   it('micromatch issue #140', () => {
-    let a = ['a/b/some/c.md', 'a/b/c.md', 'a/b-b/c.md', 'a/bb/c.md', 'a/bbc/c.md'];
+    const a = ['a/b/some/c.md', 'a/b/c.md', 'a/b-b/c.md', 'a/bb/c.md', 'a/bbc/c.md'];
     assert.deepEqual(mm(a, '**/b/**/c.md'), ['a/b/some/c.md', 'a/b/c.md']);
 
-    let b = ['packages/foo-foo/package.json', 'packages/foo/package.json'];
+    const b = ['packages/foo-foo/package.json', 'packages/foo/package.json'];
     assert.deepEqual(mm(b, '**/foo/**/package.json'), ['packages/foo/package.json']);
   });
 

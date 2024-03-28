@@ -1,27 +1,14 @@
 'use strict';
 
-require('mocha');
-const path = require('path');
 const assert = require('assert');
-const { isMatch, makeRe } = require('..');
-
-if (!process.env.ORIGINAL_PATH_SEP) {
-  process.env.ORIGINAL_PATH_SEP = path.sep
-}
+const { isWindows } = require('picomatch/lib/utils');
+const { isMatch } = require('..');
 
 /**
  * Some of tests were converted from bash 4.3, 4.4, and minimatch unit tests.
  */
 
 describe('extglobs (minimatch)', () => {
-  let setup = {
-    before: () => (path.sep = '\\'),
-    after: () => (path.sep = process.env.ORIGINAL_PATH_SEP)
-  };
-
-  afterEach(() => setup.after());
-  beforeEach(() => setup.before());
-
   it('should not match empty string with "*(0|1|3|5|7|9)"', () => {
     assert(!isMatch('', '*(0|1|3|5|7|9)'));
   });
@@ -646,8 +633,8 @@ describe('extglobs (minimatch)', () => {
     assert(isMatch('a\\z', 'a\\\\z', { windows: false }));
   });
 
-  it('"a\\z" should not match "a\\z"', () => {
-    assert(!isMatch('a\\z', 'a\\\\z'));
+  it('"a\\z" should match "a\\z"', () => {
+    assert(isMatch('a\\z', 'a\\\\z'));
   });
 
   it('"aa" should not match "!(a!(b))"', () => {

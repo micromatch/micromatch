@@ -2,7 +2,8 @@
 
 const assert = require('assert');
 const mm = require('..');
-const { isMatch } = mm;
+
+const { isMatch, makeRe } = mm;
 
 /**
  * Most of these tests were converted directly from bash 4.3 and 4.4 unit tests.
@@ -10,8 +11,8 @@ const { isMatch } = mm;
 
 describe('extglobs', () => {
   it('should throw on imbalanced sets when `options.strictBrackets` is true', () => {
-    assert.throws(() => mm.makeRe('a(b', { strictBrackets: true }), /missing closing: "\)"/i);
-    assert.throws(() => mm.makeRe('a)b', { strictBrackets: true }), /missing opening: "\("/i);
+    assert.throws(() => makeRe('a(b', { strictBrackets: true }), /missing closing: "\)"/i);
+    assert.throws(() => makeRe('a)b', { strictBrackets: true }), /missing opening: "\("/i);
   });
 
   it('should match extglobs ending with statechar', () => {
@@ -620,7 +621,7 @@ describe('extglobs', () => {
   // these are not extglobs, and do not need to pass, but they are included
   // to test integration with other features
   it('should support regex characters', () => {
-    let fixtures = ['a c', 'a.c', 'a.xy.zc', 'a.zc', 'a123c', 'a1c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc'];
+    const fixtures = ['a c', 'a.c', 'a.xy.zc', 'a.zc', 'a123c', 'a1c', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc'];
 
     if (process.platform !== 'win32') {
       assert.deepEqual(mm(['a\\b', 'a/b', 'ab'], 'a/b'), ['a/b']);
@@ -1688,7 +1689,7 @@ describe('extglobs from the bash spec', () => {
   });
 
   it('should work with character classes', () => {
-    let opts = { posix: true };
+    const opts = { posix: true };
     assert(isMatch('a.b', 'a[^[:alnum:]]b', opts));
     assert(isMatch('a,b', 'a[^[:alnum:]]b', opts));
     assert(isMatch('a:b', 'a[^[:alnum:]]b', opts));
@@ -1763,7 +1764,7 @@ describe('extglobs from the bash spec', () => {
   });
 
   it('should support POSIX character classes in extglobs', () => {
-    let opts = { posix: true };
+    const opts = { posix: true };
     assert(isMatch('a.c', '+([[:alpha:].])', opts));
     assert(isMatch('a.c', '+([[:alpha:].])+([[:alpha:].])', opts));
     assert(isMatch('a.c', '*([[:alpha:].])', opts));

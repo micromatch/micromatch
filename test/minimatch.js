@@ -1,22 +1,17 @@
 'use strict';
 
-const path = require('path');
 const assert = require('assert');
-const isWindows = () => process.platform === 'win32' || path.sep === '\\';
+const { isWindows } = require('picomatch/lib/utils');
 const patterns = require('./fixtures/patterns');
 const mm = require('..');
-let sep = path.sep;
 
 /**
  * Minimatch comparison tests
  */
 
 describe('basic tests', () => {
-  afterEach(() => (path.sep = sep));
-  after(() => (path.sep = sep));
-
   describe('minimatch parity', () => {
-    patterns.forEach(function(unit, i) {
+    patterns.forEach((unit, i) => {
       it(i + ': ' + unit[0], () => {
         if (typeof unit === 'string') {
           console.log();
@@ -30,10 +25,10 @@ describe('basic tests', () => {
           return;
         }
 
-        let pattern = unit[0];
-        let expected = (unit[1] || []).sort(compare);
-        let options = Object.assign({}, unit[2]);
-        let fixtures = unit[3] || patterns.fixtures;
+        const pattern = unit[0];
+        const expected = (unit[1] || []).sort(compare);
+        const options = Object.assign({}, unit[2]);
+        const fixtures = unit[3] || patterns.fixtures;
         mm(fixtures, pattern, expected, options);
       });
     });
@@ -62,7 +57,7 @@ describe('basic tests', () => {
     });
 
     it('https://github.com/isaacs/minimatch/issues/30', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
 
       assert(mm.isMatch('foo/bar.js', '**/foo/**'));
       assert(mm.isMatch('./foo/bar.js', './**/foo/**', { format }));
@@ -104,14 +99,12 @@ describe('basic tests', () => {
     });
 
     it('https://github.com/isaacs/minimatch/issues/78', () => {
-      path.sep = '\\';
-      assert(mm.isMatch('a\\b\\c.txt', 'a/**/*.txt'));
+      assert.equal(mm.isMatch('a\\b\\c.txt', 'a/**/*.txt'), isWindows());
       assert(mm.isMatch('a/b/c.txt', 'a/**/*.txt'));
-      path.sep = sep;
     });
 
     it('https://github.com/isaacs/minimatch/issues/82', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
       assert(mm.isMatch('./src/test/a.js', '**/test/**', { format }));
       assert(mm.isMatch('src/test/a.js', '**/test/**'));
     });

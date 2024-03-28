@@ -1,0 +1,14 @@
+{
+	"folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../picomatch-4.0.0"
+    },
+    {
+      "path": "../picomatch-2.3.1"
+    }
+  ],
+  "settings": {}
+}

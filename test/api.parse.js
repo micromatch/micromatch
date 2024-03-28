@@ -4,11 +4,11 @@ const assert = require('assert');
 const mm = require('..');
 
 describe('.parse()', () => {
-  it('should parse a glob', function() {
+  it('should parse a glob', () => {
     if (process.platform === 'win32') return this.skip();
 
-    let results = mm.parse('a/*');
-    let { tokens } = results[0];
+    const results = mm.parse('a/*');
+    const { tokens } = results[0];
 
     tokens.forEach(token => {
       delete token.prev;

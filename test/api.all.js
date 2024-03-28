@@ -2,16 +2,11 @@
 
 process.env.PICOMATCH_NO_CACHE = 'true';
 
-require('mocha');
-const path = require('path');
 const assert = require('assert');
 const { all } = require('..');
 
-if (!process.env.ORIGINAL_PATH_SEP) {
-  process.env.ORIGINAL_PATH_SEP = path.sep;
-}
-
-describe('.all()', () => {it('should throw an error when value is not a string', () => {
+describe('.all()', () => {
+  it('should throw an error when value is not a string', () => {
     assert.throws(() => all());
   });
 

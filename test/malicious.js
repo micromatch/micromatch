@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const mm = require('..');
+
 const generate = n => '\\'.repeat(n);
 
 /**
@@ -9,7 +10,6 @@ const generate = n => '\\'.repeat(n);
  */
 
 describe('handling of potential regex exploits', () => {
-
   it('should support long escape sequences', () => {
     assert(mm.isMatch('A', `!(${generate(65500)}A)`), 'within the limits, and valid match');
     assert(!mm.isMatch('A', `[!(${generate(65500)}A`), 'within the limits, but invalid regex');

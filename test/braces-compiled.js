@@ -10,12 +10,12 @@ const optimize = (pattern, options) => {
 describe('braces - compiled', () => {
   describe('extglob characters', () => {
     it('should expand braces (in extglobs) when preceded by an extglob character', () => {
-      let actual = mm.braces('abc/*!(-v@{1,2}.0).js');
+      const actual = mm.braces('abc/*!(-v@{1,2}.0).js');
       assert.deepEqual(actual, ['abc/*!(-v@(1|2).0).js']);
     });
 
     it('should expand braces when preceded by an extglob character', () => {
-      let actual = mm.braces('abc/*-v@{1,2}.0.js');
+      const actual = mm.braces('abc/*-v@{1,2}.0.js');
       assert.deepEqual(actual, ['abc/*-v@(1|2).0.js']);
     });
   });

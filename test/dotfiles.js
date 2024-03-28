@@ -1,9 +1,8 @@
 'use strict';
 
-require('mocha');
 const assert = require('assert');
-const mi = require('minimatch');
 const mm = require('..');
+
 const { isMatch } = mm;
 
 describe('dotfiles', () => {
@@ -20,15 +19,15 @@ describe('dotfiles', () => {
     });
 
     it('should match double dots with double dots', () => {
-      let fixtures = ['a/../a', 'ab/../ac', '../a', 'a', '../../b', '../c', '../c/d'];
+      const fixtures = ['a/../a', 'ab/../ac', '../a', 'a', '../../b', '../c', '../c/d'];
       assert.deepEqual(mm(fixtures, '../*'), ['../a', '../c']);
       assert.deepEqual(mm(fixtures, '*/../*'), ['a/../a', 'ab/../ac']);
       assert.deepEqual(mm(fixtures, '**/../*'), ['a/../a', 'ab/../ac', '../a', '../c']);
     });
 
     it('should not match exclusive double or single dots', () => {
-      let fixtures = ['a/./b', 'a/../b', 'a/c/b', 'a/.d/b'];
-      let opts = { dot: true };
+      const fixtures = ['a/./b', 'a/../b', 'a/c/b', 'a/.d/b'];
+      const opts = { dot: true };
       assert.deepEqual(mm(fixtures, 'a/.*/b'), ['a/.d/b']);
       assert.deepEqual(mm(fixtures, 'a/.*/b', opts), ['a/.d/b']);
       assert.deepEqual(mm(fixtures, 'a/*/b', opts), ['a/c/b', 'a/.d/b']);
@@ -37,9 +36,9 @@ describe('dotfiles', () => {
     });
 
     it('should match dotfiles when there is a leading dot:', () => {
-      let files = ['a/b', 'a/.b', '.a/b', '.a/.b'];
-      let dotfiles = ['.dotfile', '.dotfile.md'];
-      let opts = { dot: true };
+      const files = ['a/b', 'a/.b', '.a/b', '.a/.b'];
+      const dotfiles = ['.dotfile', '.dotfile.md'];
+      const opts = { dot: true };
       assert.deepEqual(mm(dotfiles, '.*.md', opts), ['.dotfile.md']);
       assert.deepEqual(mm(dotfiles, '.dotfile', opts), ['.dotfile']);
       assert.deepEqual(mm(dotfiles, '.dotfile*', opts), dotfiles);
@@ -49,8 +48,8 @@ describe('dotfiles', () => {
     });
 
     it('should match dotfiles when there is not a leading dot:', () => {
-      let files = ['.a', 'a', 'a/b', 'a/.b', '.a/b', '.a/.b'];
-      let opts = { dot: true };
+      const files = ['.a', 'a', 'a/b', 'a/.b', '.a/b', '.a/.b'];
+      const opts = { dot: true };
 
       assert.deepEqual(mm(files, '*', opts), ['.a', 'a']);
       assert.deepEqual(mm(files, '*/*', opts), ['a/b', 'a/.b', '.a/b', '.a/.b']);
@@ -92,14 +91,14 @@ describe('dotfiles', () => {
     });
 
     it('should not match a dot when the dot is not explicitly defined', () => {
-      let fixtures = ['a/b/.x', '.x', '.x/', '.x/a', '.x/a/b', '.x/.x', 'a/.x', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e', 'a/b/.x/', 'a/.x/b', 'a/.x/b/.x/c'];
+      const fixtures = ['a/b/.x', '.x', '.x/', '.x/a', '.x/a/b', '.x/.x', 'a/.x', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e', 'a/b/.x/', 'a/.x/b', 'a/.x/b/.x/c'];
       assert.deepEqual(mm(fixtures, '**'), []);
       assert.deepEqual(mm(fixtures, 'a/**/c'), []);
     });
 
     it('should match a dot when the dot is explicitly defined', () => {
-      let fixtures = ['.x', '.x/', '.x/.x', '.x/a', '.x/a/b', 'a/.x/.x/c', 'a/.x/.x/.x/c', 'a/.x/b', 'a/.x/b/.x/c', 'a/b/.x', 'a/b/.x/', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e'];
-      let expected = ['.x', '.x/', '.x/.x', '.x/a', '.x/a/b', 'a/.x/.x/c', 'a/.x/b', 'a/b/.x', 'a/b/.x/', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e'];
+      const fixtures = ['.x', '.x/', '.x/.x', '.x/a', '.x/a/b', 'a/.x/.x/c', 'a/.x/.x/.x/c', 'a/.x/b', 'a/.x/b/.x/c', 'a/b/.x', 'a/b/.x/', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e'];
+      const expected = ['.x', '.x/', '.x/.x', '.x/a', '.x/a/b', 'a/.x/.x/c', 'a/.x/b', 'a/b/.x', 'a/b/.x/', 'a/b/.x/c', 'a/b/.x/c/d', 'a/b/.x/c/d/e'];
 
       assert.deepEqual(mm(fixtures, '**/.x/.x/**'), ['.x/.x', 'a/.x/.x/c']);
       assert.deepEqual(mm(fixtures, '**/.x/*/.x/**'), ['a/.x/b/.x/c']);
@@ -322,7 +321,7 @@ describe('dotfiles', () => {
     });
 
     it('should work when the path has leading `./`', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
       assert(!isMatch('./b/.c', '**', { format }));
       assert(isMatch('./b/.c', '**', { format, dot: true }));
       assert(isMatch('./b/.c', '**', { format, dot: true, matchBase: true }));

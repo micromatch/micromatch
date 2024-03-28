@@ -290,7 +290,7 @@ describe('.isMatch():', () => {
     });
 
     it('should match paths with leading `./` when pattern has `./`', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
       assert(isMatch('./a/b/c/d/e/j/n/p/o/z/c.md', './a/**/j/**/z/*.md', { format }));
       assert(isMatch('./a/b/c/d/e/z/c.md', './a/**/z/*.md', { format }));
       assert(isMatch('./a/b/c/j/e/z/c.md', './a/**/j/**/z/*.md', { format }));
@@ -300,7 +300,7 @@ describe('.isMatch():', () => {
     });
 
     it('should match paths with leading `./`', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
       assert(!isMatch('./.a', '*.a', { format }));
       assert(!isMatch('./.a', './*.a', { format }));
       assert(!isMatch('./.a', 'a/**/z/*.md', { format }));
@@ -544,7 +544,7 @@ describe('.isMatch():', () => {
 
   describe('dot-slash', () => {
     it('should match paths with leading `./`', () => {
-      let format = str => str.replace(/^\.\//, '');
+      const format = str => str.replace(/^\.\//, '');
 
       assert(isMatch('./a', ['a', '?(./)*'], { format }));
       assert(isMatch('a', ['a', '?(./)*'], { format }));

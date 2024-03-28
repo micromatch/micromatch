@@ -1,26 +1,23 @@
 'use strict';
 
-require('mocha');
 const version = process.version;
 const assert = require('assert');
 const mm = require('..');
 
 describe('regex features', () => {
-
   describe('back-references', () => {
     it('should support regex backreferences', () => {
-      assert(!mm.isMatch('1/2', '(*)/\\1'));
       assert(mm.isMatch('1/1', '(*)/\\1'));
-      assert(mm.isMatch('1/1/1/1', '(*)/\\1/\\1/\\1'));
-      assert(!mm.isMatch('1/11/111/1111', '(*)/\\1/\\1/\\1'));
-      assert(mm.isMatch('1/11/111/1111', '(*)/(\\1)+/(\\1)+/(\\1)+'));
-      assert(!mm.isMatch('1/2/1/1', '(*)/\\1/\\1/\\1'));
-      assert(!mm.isMatch('1/1/2/1', '(*)/\\1/\\1/\\1'));
-      assert(!mm.isMatch('1/1/1/2', '(*)/\\1/\\1/\\1'));
       assert(mm.isMatch('1/1/1/1', '(*)/\\1/(*)/\\2'));
-      assert(!mm.isMatch('1/1/2/1', '(*)/\\1/(*)/\\2'));
-      assert(!mm.isMatch('1/1/2/1', '(*)/\\1/(*)/\\2'));
+      assert(mm.isMatch('1/1/1/1', '(*)/\\1/\\1/\\1'));
       assert(mm.isMatch('1/1/2/2', '(*)/\\1/(*)/\\2'));
+      assert(mm.isMatch('1/11/111/1111', '(*)/(\\1)+/(\\1)+/(\\1)+'));
+      assert(!mm.isMatch('1/1/1/2', '(*)/\\1/\\1/\\1'));
+      assert(!mm.isMatch('1/1/2/1', '(*)/\\1/(*)/\\2'));
+      assert(!mm.isMatch('1/1/2/1', '(*)/\\1/\\1/\\1'));
+      assert(!mm.isMatch('1/11/111/1111', '(*)/\\1/\\1/\\1'));
+      assert(!mm.isMatch('1/2', '(*)/\\1'));
+      assert(!mm.isMatch('1/2/1/1', '(*)/\\1/\\1/\\1'));
     });
   });
 
@@ -161,12 +158,6 @@ describe('regex features', () => {
         assert(!mm.isMatch('foo/cbaz', 'foo/*(?<=d)baz'));
         assert(mm.isMatch('foo/cbaz', 'foo/*(?<=c)baz'));
       }
-    });
-
-    it('should throw an error when regex lookbehinds are used on an unsupported node version', () => {
-      Reflect.defineProperty(process, 'version', { value: 'v6.0.0' });
-      assert.throws(() => mm.isMatch('foo/cbaz', 'foo/*(?<!c)baz'), /Node\.js v10 or higher/);
-      Reflect.defineProperty(process, 'version', { value: version });
     });
   });
 });

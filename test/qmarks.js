@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const assert = require('assert');
 const mm = require('..');
 const { isMatch } = mm;
@@ -17,7 +16,7 @@ describe('qmarks and stars', () => {
   });
 
   it('should support qmark matching', () => {
-    let arr = ['a', 'aa', 'ab', 'aaa', 'abcdefg'];
+    const arr = ['a', 'aa', 'ab', 'aaa', 'abcdefg'];
     assert.deepEqual(mm(arr, '?'), ['a']);
     assert.deepEqual(mm(arr, '??'), ['aa', 'ab']);
     assert.deepEqual(mm(arr, '???'), ['aaa']);

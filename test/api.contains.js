@@ -1,14 +1,10 @@
 'use strict';
 
-const path = require('path');
 const assert = require('assert');
+const { isWindows } = require('picomatch/lib/utils');
 const mm = require('..');
-const sep = path.sep;
 
 describe('.contains()', () => {
-  afterEach(() => (path.sep = sep));
-  after(() => (path.sep = sep));
-
   describe('errors', () => {
     it('should throw an error arguments are invalid', () => {
       assert.throws(() => mm.contains());
@@ -153,18 +149,18 @@ describe('.contains()', () => {
       assert(mm.contains('aaa/bba/ccc', 'aaa/*/ccc'));
       assert(mm.contains('aaa/bba/ccc', 'bb'));
       assert(mm.contains('aaa/bba/ccc', 'bb*'));
-      assert(!mm.contains('aaa/bba/ccc', 'aaa/*ccc'));
-      assert(!mm.contains('aaa/bba/ccc', 'aaa/**ccc'));
-      assert(!mm.contains('aaa/bba/ccc', 'aaa/*z'));
-      assert(!mm.contains('aaa/bba/ccc', 'aaa/**z'));
       assert(mm.contains('aaa/bbb', 'aaa[/]bbb'));
-      assert(!mm.contains('aaa', '*/*/*'));
-      assert(!mm.contains('aaa/bbb', '*/*/*'));
       assert(mm.contains('aaa/bba/ccc', '*/*/*'));
       assert(mm.contains('aaa/bb/aa/rr', '*/*/*'));
       assert(mm.contains('abzzzejklhi', '*j*i'));
       assert(mm.contains('ab/zzz/ejkl/hi', '*/*z*/*/*i'));
       assert(mm.contains('ab/zzz/ejkl/hi', '*/*jk*/*i'));
+      assert(!mm.contains('aaa/bba/ccc', 'aaa/*ccc'));
+      assert(!mm.contains('aaa/bba/ccc', 'aaa/**ccc'));
+      assert(!mm.contains('aaa/bba/ccc', 'aaa/*z'));
+      assert(!mm.contains('aaa/bba/ccc', 'aaa/**z'));
+      assert(!mm.contains('aaa', '*/*/*'));
+      assert(!mm.contains('aaa/bbb', '*/*/*'));
     });
 
     it('should return false when full file paths are not matched', () => {
@@ -176,65 +172,60 @@ describe('.contains()', () => {
     });
 
     it('should match paths with leading `./`', () => {
-      assert(!mm.contains('./.a', 'a/**/z/*.md'));
       assert(mm.contains('./a/b/z/.a', 'a/**/z/.a'));
       assert(mm.contains('./a/b/z/.a', './a/**/z/.a'));
       assert(mm.contains('./a/b/c/d/e/z/c.md', 'a/**/z/*.md'));
       assert(mm.contains('./a/b/c/d/e/z/c.md', './a/**/z/*.md'));
-      assert(!mm.contains('./a/b/c/d/e/z/c.md', './a/**/j/**/z/*.md'));
       assert(mm.contains('./a/b/c/j/e/z/c.md', './a/**/j/**/z/*.md'));
       assert(mm.contains('./a/b/c/j/e/z/c.md', 'a/**/j/**/z/*.md'));
       assert(mm.contains('./a/b/c/d/e/j/n/p/o/z/c.md', './a/**/j/**/z/*.md'));
+      assert(!mm.contains('./.a', 'a/**/z/*.md'));
+      assert(!mm.contains('./a/b/c/d/e/z/c.md', './a/**/j/**/z/*.md'));
       assert(!mm.contains('./a/b/c/j/e/z/c.txt', './a/**/j/**/z/*.md'));
     });
   });
 
   describe('windows paths', () => {
-    beforeEach(() => {
-      path.sep = '\\';
-    });
-    afterEach(() => {
-      path.sep = sep;
-    });
-
     it('should match with common glob patterns', () => {
-      assert(mm.contains('\\ab', '*/'));
-      assert(mm.contains('ab\\', '*/'));
-      assert(mm.contains('\\ab', '*/*'));
-      assert(mm.contains('\\ab', '*/[a-z]*'));
-      assert(mm.contains('\\ab', '*/*[a-z]'));
-      assert(mm.contains('\\ab', '*/a'));
-      assert(mm.contains('\\ab', '/'));
-      assert(mm.contains('\\ab', '/*'));
-      assert(mm.contains('\\ab', '/?'));
-      assert(mm.contains('\\ab', '/??'));
-      assert(mm.contains('\\ab', '/?b'));
-      assert(mm.contains('\\ab', '/a'));
-      assert(mm.contains('\\cd', '/*'));
-      assert(mm.contains('a\\b', '?/?'));
-      assert(mm.contains('a\\b\\c', 'a/*'));
+      assert.equal(mm.contains('\\ab', '*/'), isWindows());
+      assert.equal(mm.contains('ab\\', '*/'), isWindows());
+      assert.equal(mm.contains('\\ab', '*/*'), isWindows());
+      assert.equal(mm.contains('\\ab', '*/[a-z]*'), isWindows());
+      assert.equal(mm.contains('\\ab', '*/*[a-z]'), isWindows());
+      assert.equal(mm.contains('\\ab', '*/a'), isWindows());
+      assert.equal(mm.contains('\\ab', '/'), isWindows());
+      assert.equal(mm.contains('\\ab', '/*'), isWindows());
+      assert.equal(mm.contains('\\ab', '/?'), isWindows());
+      assert.equal(mm.contains('\\ab', '/??'), isWindows());
+      assert.equal(mm.contains('\\ab', '/?b'), isWindows());
+      assert.equal(mm.contains('\\ab', '/a'), isWindows());
+      assert.equal(mm.contains('\\cd', '/*'), isWindows());
+      assert.equal(mm.contains('a\\b', '?/?'), isWindows());
+      assert.equal(mm.contains('a\\b\\c', 'a/*'), isWindows());
 
-      assert(!mm.contains('\\ab', '*/', { windows: false }));
-      assert(!mm.contains('\\ab', '*/*', { windows: false }));
-      assert(!mm.contains('\\ab', '*/[a-z]*', { windows: false }));
-      assert(!mm.contains('\\ab', '*/a', { windows: false }));
-      assert(!mm.contains('\\ab', '/', { windows: false }));
-      assert(!mm.contains('\\ab', '/*', { windows: false }));
-      assert(!mm.contains('\\ab', '/?', { windows: false }));
-      assert(!mm.contains('\\ab', '/??', { windows: false }));
-      assert(!mm.contains('\\ab', '/?b', { windows: false }));
-      assert(!mm.contains('\\ab', '/a', { windows: false }));
-      assert(!mm.contains('\\cd', '/*', { windows: false }));
-      assert(!mm.contains('a\\b', '?/?', { windows: false }));
-      assert(!mm.contains('a\\b\\c', 'a/*', { windows: false }));
+      assert.equal(!mm.contains('\\ab', '*/', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '*/*', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '*/[a-z]*', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '*/a', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/*', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/?', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/??', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/?b', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\ab', '/a', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('\\cd', '/*', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('a\\b', '?/?', { windows: false }), !isWindows());
+      assert.equal(!mm.contains('a\\b\\c', 'a/*', { windows: false }), !isWindows());
     });
 
     it('should match files that contain the given extension', () => {
       assert(mm.contains('a\\b\\c.md', '**/*.md'));
       assert(mm.contains('a\\b\\c.md', '*.md'));
       assert(mm.contains('a\\b\\c.md', '.md'));
-      assert(mm.contains('a\\b\\c.md', 'a/*/*.md'));
       assert(mm.contains('a\\b\\c\\c.md', '*.md'));
+
+      // should only match on windows
+      assert.equal(mm.contains('a\\b\\c.md', 'a/*/*.md'), isWindows());
     });
 
     it('should match dotfiles when `dot` is true', () => {
@@ -246,79 +237,79 @@ describe('.contains()', () => {
     });
 
     it('should not match dotfiles when `dot` or `dotfiles` is not set', () => {
-      assert(!mm.contains('a\\b\\d\\.md', 'a/b/c/*.md'));
+      assert.equal(!mm.contains('a\\b\\d\\.md', 'a/b/c/*.md'), !isWindows());
     });
 
     it('should match file paths', () => {
-      assert(mm.contains('a\\b\\c\\xyz.md', 'a/b/c/*.md'));
-      assert(mm.contains('a\\bb\\c\\xyz.md', 'a/*/c/*.md'));
-      assert(mm.contains('a\\bbbb\\c\\xyz.md', 'a/*/c/*.md'));
-      assert(mm.contains('a\\bb.bb\\c\\xyz.md', 'a/*/c/*.md'));
-      assert(mm.contains('a\\bb.bb\\aa\\bb\\aa\\c\\xyz.md', 'a/**/c/*.md'));
-      assert(mm.contains('a\\bb.bb\\aa\\b.b\\aa\\c\\xyz.md', 'a/**/c/*.md'));
+      assert.equal(mm.contains('a\\b\\c\\xyz.md', 'a/b/c/*.md'), isWindows());
+      assert.equal(mm.contains('a\\bb\\c\\xyz.md', 'a/*/c/*.md'), isWindows());
+      assert.equal(mm.contains('a\\bbbb\\c\\xyz.md', 'a/*/c/*.md'), isWindows());
+      assert.equal(mm.contains('a\\bb.bb\\c\\xyz.md', 'a/*/c/*.md'), isWindows());
+      assert.equal(mm.contains('a\\bb.bb\\aa\\bb\\aa\\c\\xyz.md', 'a/**/c/*.md'), isWindows());
+      assert.equal(mm.contains('a\\bb.bb\\aa\\b.b\\aa\\c\\xyz.md', 'a/**/c/*.md'), isWindows());
     });
 
     it('should return true when full file paths are matched', () => {
-      assert(mm.contains('a\\.b', 'a/.*'));
-      assert(mm.contains('a\\.b', 'a/'));
-      assert(mm.contains('a\\b\\z\\.a', 'b/z'));
-      assert(mm.contains('a\\b\\z\\.a', 'a/*/z/.a'));
-      assert(mm.contains('a\\b\\c\\d\\e\\z\\c.md', 'a/**/z/*.md'));
-      assert(mm.contains('a\\b\\c\\d\\e\\z\\c.md', 'b/c/d/e'));
-      assert(mm.contains('a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', 'a/**/j/**/z/*.md'));
+      assert.equal(mm.contains('a\\.b', 'a/.*'), isWindows());
+      assert.equal(mm.contains('a\\.b', 'a/'), isWindows());
+      assert.equal(mm.contains('a\\b\\z\\.a', 'b/z'), isWindows());
+      assert.equal(mm.contains('a\\b\\z\\.a', 'a/*/z/.a'), isWindows());
+      assert.equal(mm.contains('a\\b\\c\\d\\e\\z\\c.md', 'a/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('a\\b\\c\\d\\e\\z\\c.md', 'b/c/d/e'), isWindows());
+      assert.equal(mm.contains('a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', 'a/**/j/**/z/*.md'), isWindows());
     });
 
     it('should match path segments', () => {
-      assert(mm.contains('aaa\\bbb', 'aaa/bbb'));
-      assert(mm.contains('aaa\\bbb', 'aaa/*'));
-      assert(mm.contains('aaa\\bba\\ccc', '**/*/ccc'));
-      assert(mm.contains('aaa\\bba\\ccc', '*/*a'));
       assert(mm.contains('aaa\\bba\\ccc', 'aaa*'));
       assert(mm.contains('aaa\\bba\\ccc', 'aaa**'));
-      assert(mm.contains('aaa\\bba\\ccc', 'aaa/*'));
-      assert(mm.contains('aaa\\bba\\ccc', 'aaa/**'));
-      assert(mm.contains('aaa\\bba\\ccc', 'aaa/*/ccc'));
       assert(mm.contains('aaa\\bba\\ccc', 'bb'));
       assert(mm.contains('aaa\\bba\\ccc', 'bb*'));
-      assert(mm.contains('aaa\\bbb', 'aaa[/]bbb'));
       assert(mm.contains('aaa\\bbb', 'aaa[\\\\/]bbb'));
-      assert(!mm.contains('aaa\\bba\\ccc', 'aaa/*ccc'));
-      assert(!mm.contains('aaa\\bba\\ccc', 'aaa/**ccc'));
-      assert(!mm.contains('aaa\\bba\\ccc', 'aaa/*z'));
-      assert(!mm.contains('aaa\\bba\\ccc', 'aaa/**z'));
-      assert(!mm.contains('\\aaa', '*/*/*'));
-      assert(!mm.contains('aaa\\bbb', '*/*/*'));
-      assert(mm.contains('aaa\\bba\\ccc', '*/*/*'));
-      assert(mm.contains('aaa\\bb\\aa\\rr', '*/*/*'));
-      assert(mm.contains('ab\\zzz\\ejkl\\hi', '*/*z*/*/*i'));
-      assert(mm.contains('ab\\zzz\\ejkl\\hi', '*/*jk*/*i'));
+      assert.equal(mm.contains('aaa\\bbb', 'aaa[/]bbb'), isWindows());
+      assert.equal(mm.contains('aaa\\bbb', 'aaa/bbb'), isWindows());
+      assert.equal(mm.contains('aaa\\bbb', 'aaa/*'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', '**/*/ccc'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', '*/*a'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', 'aaa/*'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', 'aaa/**'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', 'aaa/*/ccc'), isWindows());
+      assert.equal(mm.contains('aaa\\bba\\ccc', '*/*/*'), isWindows());
+      assert.equal(mm.contains('aaa\\bb\\aa\\rr', '*/*/*'), isWindows());
+      assert.equal(mm.contains('ab\\zzz\\ejkl\\hi', '*/*z*/*/*i'), isWindows());
+      assert.equal(mm.contains('ab\\zzz\\ejkl\\hi', '*/*jk*/*i'), isWindows());
+      assert.equal(!mm.contains('aaa\\bba\\ccc', 'aaa/*ccc'), !isWindows());
+      assert.equal(!mm.contains('aaa\\bba\\ccc', 'aaa/**ccc'), !isWindows());
+      assert.equal(!mm.contains('aaa\\bba\\ccc', 'aaa/*z'), !isWindows());
+      assert.equal(!mm.contains('aaa\\bba\\ccc', 'aaa/**z'), !isWindows());
+      assert.equal(!mm.contains('\\aaa', '*/*/*'), !isWindows());
+      assert.equal(!mm.contains('aaa\\bbb', '*/*/*'), !isWindows());
     });
 
     it('should return false when full file paths are not matched', () => {
-      assert(!mm.contains('a\\b\\z\\.a', 'b/a'));
-      assert(!mm.contains('a\\.b', 'a/**/z/*.md'));
-      assert(!mm.contains('a\\b\\z\\.a', 'a/**/z/*.a'));
-      assert(!mm.contains('a\\b\\z\\.a', 'a/*/z/*.a'));
-      assert(!mm.contains('a\\b\\c\\j\\e\\z\\c.txt', 'a/**/j/**/z/*.md'));
+      assert.equal(!mm.contains('a\\b\\z\\.a', 'b/a'), !isWindows());
+      assert.equal(!mm.contains('a\\.b', 'a/**/z/*.md'), !isWindows());
+      assert.equal(!mm.contains('a\\b\\z\\.a', 'a/**/z/*.a'), !isWindows());
+      assert.equal(!mm.contains('a\\b\\z\\.a', 'a/*/z/*.a'), !isWindows());
+      assert.equal(!mm.contains('a\\b\\c\\j\\e\\z\\c.txt', 'a/**/j/**/z/*.md'), !isWindows());
     });
 
     it('should match dotfiles when a dot is explicitly defined in the pattern', () => {
-      assert(mm.contains('a\\.c.md', 'a/.c.md'));
-      assert(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md'));
       assert(mm.contains('a\\.c.md', '*.md'));
-      assert(mm.contains('a\\b\\c\\d.a.md', 'a/b/c/*.md'));
+      assert.equal(mm.contains('a\\.c.md', 'a/.c.md'), isWindows());
+      assert.equal(mm.contains('a\\b\\c\\.xyz.md', 'a/b/c/.*.md'), isWindows());
+      assert.equal(mm.contains('a\\b\\c\\d.a.md', 'a/b/c/*.md'), isWindows());
     });
 
     it('should match paths with leading `./`', () => {
-      assert(!mm.contains('.\\.a', 'a/**/z/*.md'));
-      assert(!mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', './a/**/j/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', './a/**/j/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', './a/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', 'a/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\c\\j\\e\\z\\c.md', './a/**/j/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\c\\j\\e\\z\\c.md', 'a/**/j/**/z/*.md'));
-      assert(mm.contains('.\\a\\b\\z\\.a', './a/**/z/.a'));
-      assert(mm.contains('.\\a\\b\\z\\.a', 'a/**/z/.a'));
+      assert.equal(!mm.contains('.\\.a', 'a/**/z/*.md'), !isWindows());
+      assert.equal(!mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', './a/**/j/**/z/*.md'), !isWindows());
+      assert.equal(mm.contains('.\\a\\b\\c\\d\\e\\j\\n\\p\\o\\z\\c.md', './a/**/j/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', './a/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\c\\d\\e\\z\\c.md', 'a/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\c\\j\\e\\z\\c.md', './a/**/j/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\c\\j\\e\\z\\c.md', 'a/**/j/**/z/*.md'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\z\\.a', './a/**/z/.a'), isWindows());
+      assert.equal(mm.contains('.\\a\\b\\z\\.a', 'a/**/z/.a'), isWindows());
     });
   });
 });

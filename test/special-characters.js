@@ -1,11 +1,10 @@
 'use strict';
 
-require('mocha');
 const path = require('path');
 const assert = require('assert');
 const isWindows = () => process.platform === 'win32' || path.sep === '\\';
 const mm = require('..');
-const { isMatch, makeRe } = mm;
+const { isMatch } = mm;
 
 if (!process.env.ORIGINAL_PATH_SEP) {
   process.env.ORIGINAL_PATH_SEP = path.sep;
@@ -25,7 +24,7 @@ describe('special characters', () => {
 
   describe('regex', () => {
     it('should match common regex characters', () => {
-      let fixtures = ['a c', 'a1c', 'a123c', 'a.c', 'a.xy.zc', 'a.zc', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc', '^abc$'];
+      const fixtures = ['a c', 'a1c', 'a123c', 'a.c', 'a.xy.zc', 'a.zc', 'abbbbc', 'abbbc', 'abbc', 'abc', 'abq', 'axy zc', 'axy', 'axy.zc', 'axyzc', '^abc$'];
 
       assert.deepEqual(mm(fixtures, 'ab?bc'), ['abbbc']);
       assert.deepEqual(mm(fixtures, 'ab*c'), ['abbbbc', 'abbbc', 'abbc', 'abc']);
