@@ -586,7 +586,7 @@ console.log(isMatch('baz')) //=> true
 
 ### options.matchBase
 
-Alias for [options.basename](#options-basename).
+Alias for [options.basename](#optionsbasename).
 
 ### options.noextglob
 
