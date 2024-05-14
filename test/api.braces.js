@@ -19,4 +19,12 @@ describe('.braces()', () => {it('should throw an error when arguments are invali
   it('should expand a brace pattern', () => {
     assert.deepEqual(braces('{a,b}', {expand: true}), ['a', 'b']);
   });
+
+  it('should check both braces without regexp', () => {
+    const options = {
+      nobrace: true
+    }
+
+    assert.deepEqual(braces('a,b}', options), ['a,b}']);
+  });
 });
