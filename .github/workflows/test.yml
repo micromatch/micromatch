@@ -1,5 +1,7 @@
-name: Tests
-on: [push, pull_request]
+name: CI
+on:
+  - push
+  - pull_request
 
 env:
   CI: true
@@ -8,11 +10,12 @@ jobs:
   test:
     name: Node.js ${{ matrix.node-version }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [10, 12, 14, 16, 17]
+        node-version: [12, 14, 16, 18, 20, 22]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,3 +24,4 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm test
+

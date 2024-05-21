@@ -202,10 +202,10 @@ describe('.contains()', () => {
       assert.equal(mm.contains('\\cd', '/*'), isWindows());
       assert.equal(mm.contains('a\\b', '?/?'), isWindows());
       assert.equal(mm.contains('a\\b\\c', 'a/*'), isWindows());
+      assert.equal(mm.contains('\\ab', '*/', { windows: false }), isWindows());
+      assert.equal(mm.contains('\\ab', '*/*', { windows: false }), isWindows());
+      assert.equal(mm.contains('\\ab', '*/[a-z]*', { windows: false }), isWindows());
 
-      assert.equal(!mm.contains('\\ab', '*/', { windows: false }), !isWindows());
-      assert.equal(!mm.contains('\\ab', '*/*', { windows: false }), !isWindows());
-      assert.equal(!mm.contains('\\ab', '*/[a-z]*', { windows: false }), !isWindows());
       assert.equal(!mm.contains('\\ab', '*/a', { windows: false }), !isWindows());
       assert.equal(!mm.contains('\\ab', '/', { windows: false }), !isWindows());
       assert.equal(!mm.contains('\\ab', '/*', { windows: false }), !isWindows());
