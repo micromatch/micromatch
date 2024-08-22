@@ -4,8 +4,14 @@ const util = require('util');
 const braces = require('braces');
 const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
-const isEmptyString = val => val === '' || val === './';
 
+const isEmptyString = (v) => v === "" || v === "./";
+const isObject = (v) =>
+  v !== null && typeof v === "object" && !Array.isArray(v);
+const hasBraces = (v) => {
+  const index = v.indexOf("{");
+  return index > -1 && v.indexOf("}", index) > -1;
+};
 /**
  * Returns an array of strings that match one or more glob patterns.
  *
@@ -445,7 +451,7 @@ micromatch.parse = (patterns, options) => {
 
 micromatch.braces = (pattern, options) => {
   if (typeof pattern !== 'string') throw new TypeError('Expected a string');
-  if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
+  if ((options && options.nobrace === true) || !hasBraces(pattern)) {
     return [pattern];
   }
   return braces(pattern, options);
@@ -464,4 +470,6 @@ micromatch.braceExpand = (pattern, options) => {
  * Expose micromatch
  */
 
+// exposed for tests
+micromatch.hasBraces = hasBraces;
 module.exports = micromatch;

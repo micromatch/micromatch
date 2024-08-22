@@ -2,9 +2,25 @@
 
 const assert = require('assert');
 const mm = require('..');
-const { isMatch, makeRe } = mm;
+const { isMatch, hasBraces } = mm;
 
 describe('braces', () => {
+    it("should return true when braces are found", () => {
+      assert.equal(hasBraces("{foo}"), true);
+      assert.equal(hasBraces("foo}"), false);
+      assert.equal(hasBraces("{foo"), false);
+      assert.equal(hasBraces("a{}b"), true);
+      assert.equal(hasBraces("abc {foo} xyz"), true);
+      assert.equal(hasBraces("abc {foo xyz"), false);
+      assert.equal(hasBraces("abc {foo} xyz"), true);
+      assert.equal(hasBraces("abc foo} xyz"), false);
+      assert.equal(hasBraces("abc foo xyz"), false);
+      assert.equal(hasBraces("abc {foo} xyz {bar} pqr"), true);
+      assert.equal(hasBraces("abc {foo xyz {bar} pqr"), true);
+      assert.equal(hasBraces("abc foo} xyz {bar pqr"), false);
+    });
+
+
   it('should handle extglobs in braces', () => {
     let fixtures = ['a', 'b', 'c', 'd', 'ab', 'ac', 'ad', 'bc', 'cb', 'bc,d', 'c,db', 'c,d', 'd)', '(b|c', '*(b|c', 'b|c', 'b|cc', 'cb|c', 'x(a|b|c)', 'x(a|c)', '(a|b|c)', '(a|c)'];
 
