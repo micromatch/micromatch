@@ -34,18 +34,18 @@ Changelog entries are classified using the following labels _(from [keep-a-chang
 
 ## [4.0.8] - 2024-08-22
 
-- backported CVE fix (from v4.0.6) over to 4.x branch
+- backported CVE-2024-4067 fix (from v4.0.6) over to 4.x branch
 
 ## [4.0.7] - 2024-05-22
 
 - this is basically v4.0.5, with some README updates
-- **it is vulnerable to CVE-2024-4067 & CVE-2024-4068**
+- **it is vulnerable to CVE-2024-4067**
 - does NOT break API compatibility
 
 ## [4.0.6] - 2024-05-21
 
 - Added `hasBraces` to check if a pattern contains braces.
-- Fixes CVE-2024-4067 & CVE-2024-4068
+- Fixes CVE-2024-4067
 - **BREAKS API COMPATIBILITY**
 - Should be labeled as a major release, but it's not.
 
