@@ -40,6 +40,7 @@ Changelog entries are classified using the following labels _(from [keep-a-chang
 
 - this is basically v4.0.5, with some README updates
 - **it is vulnerable to CVE-2024-4067**
+- Updated braces to v3.0.3 to avoid CVE-2024-4068
 - does NOT break API compatibility
 
 ## [4.0.6] - 2024-05-21
@@ -49,7 +50,7 @@ Changelog entries are classified using the following labels _(from [keep-a-chang
 - **BREAKS API COMPATIBILITY**
 - Should be labeled as a major release, but it's not.
 
-## [4.0.1 - 4.0.4]
+## [4.0.1 - 4.0.5]
 
 ## [4.0.0] - 2019-03-20
 
