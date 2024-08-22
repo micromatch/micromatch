@@ -6,8 +6,6 @@ const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
 
 const isEmptyString = (v) => v === "" || v === "./";
-const isObject = (v) =>
-  v !== null && typeof v === "object" && !Array.isArray(v);
 const hasBraces = (v) => {
   const index = v.indexOf("{");
   return index > -1 && v.indexOf("}", index) > -1;
