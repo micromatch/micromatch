@@ -13,10 +13,24 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [10, 12, 14, 16, 17]
+        exclude:
+          - os: macos-latest
+            node-version: 10
+          - os: macos-latest
+            node-version: 12
+          - os: macos-latest
+            node-version: 14
+        include:
+          - os: macos-13
+            node-version: 10
+          - os: macos-13
+            node-version: 12
+          - os: macos-13
+            node-version: 14
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
