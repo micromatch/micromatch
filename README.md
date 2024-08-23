@@ -56,7 +56,7 @@ Please consider following this project's author, [Jon Schlinkert](https://github
 
 ## Install
 
-Install with [npm](https://www.npmjs.com/) (requires [Node.js](https://nodejs.org/en/) >=8.6):
+Install with [npm](https://www.npmjs.com/):
 
 ```sh
 $ npm install --save micromatch
@@ -99,15 +99,15 @@ console.log(micromatch.isMatch('foo', ['b*', 'f*'])) //=> true
 
 > micromatch is a [replacement](#switching-to-micromatch) for minimatch and multimatch
 
-- Supports all of the same matching features as [minimatch][] and [multimatch][]
-- More complete support for the Bash 4.3 specification than minimatch and multimatch. Micromatch passes _all of the spec tests_ from bash, including some that bash still fails.
-- **Fast & Performant** - Loads in about 5ms and performs [fast matches](#benchmarks).
-- **Glob matching** - Using wildcards (`*` and `?`), globstars (`**`) for nested directories
-- **[Advanced globbing](#extended-globbing)** - Supports [extglobs](#extglobs), [braces](#braces-1), and [POSIX brackets](#posix-bracket-expressions), and support for escaping special characters with `\` or quotes.
-- **Accurate** - Covers more scenarios [than minimatch](https://github.com/yarnpkg/yarn/pull/3339)
-- **Well tested** - More than 5,000 [test assertions](./test)
-- **Windows support** - More reliable windows support than minimatch and multimatch.
-- **[Safe][braces]{#braces-is-safe}** - Micromatch is not subject to DoS with brace patterns like minimatch and multimatch.
+* Supports all of the same matching features as [minimatch](https://github.com/isaacs/minimatch) and [multimatch](https://github.com/sindresorhus/multimatch)
+* More complete support for the Bash 4.3 specification than minimatch and multimatch. Micromatch passes _all of the spec tests_ from bash, including some that bash still fails.
+* **Fast & Performant** - Loads in about 5ms and performs [fast matches](#benchmarks).
+* **Glob matching** - Using wildcards (`*` and `?`), globstars (`**`) for nested directories
+* **[Advanced globbing](#extended-globbing)** - Supports [extglobs](#extglobs), [braces](#braces-1), and [POSIX brackets](#posix-bracket-expressions), and support for escaping special characters with `\` or quotes.
+* **Accurate** - Covers more scenarios [than minimatch](https://github.com/yarnpkg/yarn/pull/3339)
+* **Well tested** - More than 5,000 [test assertions](./test)
+* **Windows support** - More reliable windows support than minimatch and multimatch.
+* **[Safe](https://github.com/micromatch/braces#braces-is-safe)** - Micromatch is not subject to DoS with brace patterns like minimatch and multimatch.
 
 ### Matching features
 
@@ -116,7 +116,7 @@ console.log(micromatch.isMatch('foo', ['b*', 'f*'])) //=> true
 * Negation (`'!a/*.js'`, `'*!(b).js'`)
 * [extglobs](#extglobs) (`+(x|y)`, `!(a|b)`)
 * [POSIX character classes](#posix-bracket-expressions) (`[[:alpha:][:digit:]]`)
-* [brace expansion][braces] (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
+* [brace expansion](https://github.com/micromatch/braces) (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
 * regex character classes (`foo-[1-5].js`)
 * regex logical "or" (`foo/(abc|xyz).js`)
 
@@ -167,7 +167,8 @@ console.log(mm(['a.js', 'a.txt'], ['*.js']));
 //=> [ 'a.js' ]
 ```
 
-### [.matcher](index.js#L104)
+### [.matcher](index.js#L109)
+
 Returns a matcher function from the given glob `pattern` and `options`. The returned function takes a string to match as its only argument and returns true if the string is a match.
 
 **Params**
@@ -187,7 +188,8 @@ console.log(isMatch('a.a')); //=> false
 console.log(isMatch('a.b')); //=> true
 ```
 
-### [.isMatch](index.js#L123)
+### [.isMatch](index.js#L128)
+
 Returns true if **any** of the given glob `patterns` match the specified `string`.
 
 **Params**
@@ -207,7 +209,8 @@ console.log(mm.isMatch('a.a', ['b.*', '*.a'])); //=> true
 console.log(mm.isMatch('a.a', 'b.*')); //=> false
 ```
 
-### [.not](index.js#L148)
+### [.not](index.js#L153)
+
 Returns a list of strings that _**do not match any**_ of the given `patterns`.
 
 **Params**
@@ -227,7 +230,8 @@ console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
 //=> ['b.b', 'c.c']
 ```
 
-### [.contains](index.js#L188)
+### [.contains](index.js#L193)
+
 Returns true if the given `string` contains the given pattern. Similar to [.isMatch](#isMatch) but the pattern can match any part of the string.
 
 **Params**
@@ -249,8 +253,9 @@ console.log(mm.contains('aa/bb/cc', '*d'));
 //=> false
 ```
 
-### [.matchKeys](index.js#L230)
-Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object][] instead.
+### [.matchKeys](index.js#L235)
+
+Filter the keys of the given object with the given `glob` pattern and `options`. Does not attempt to match nested keys. If you need this feature, use [glob-object](https://github.com/jonschlinkert/glob-object) instead.
 
 **Params**
 
@@ -270,7 +275,8 @@ console.log(mm.matchKeys(obj, '*b'));
 //=> { ab: 'b' }
 ```
 
-### [.some](index.js#L259)
+### [.some](index.js#L264)
+
 Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
 
 **Params**
@@ -292,7 +298,8 @@ console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.every](index.js#L295)
+### [.every](index.js#L300)
+
 Returns true if every string in the given `list` matches any of the given glob `patterns`.
 
 **Params**
@@ -318,7 +325,8 @@ console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
 // false
 ```
 
-### [.all](index.js#L334)
+### [.all](index.js#L339)
+
 Returns true if **all** of the given `patterns` match the specified string.
 
 **Params**
@@ -347,8 +355,9 @@ console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
 // true
 ```
 
-### [.capture](index.js#L361)
-Returns an array of matches captured by `pattern` in `string, or `null` if the pattern did not match.
+### [.capture](index.js#L366)
+
+Returns an array of matches captured by `pattern` in `string, or`null` if the pattern did not match.
 
 **Params**
 
@@ -369,7 +378,8 @@ console.log(mm.capture('test/*.js', 'foo/bar.css'));
 //=> null
 ```
 
-### [.makeRe](index.js#L387)
+### [.makeRe](index.js#L392)
+
 Create a regular expression from the given glob `pattern`.
 
 **Params**
@@ -388,7 +398,8 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.scan](index.js#L403)
+### [.scan](index.js#L408)
+
 Scan a glob pattern to separate the pattern into segments. Used by the [split](#split) method.
 
 **Params**
@@ -404,7 +415,8 @@ const mm = require('micromatch');
 const state = mm.scan(pattern[, options]);
 ```
 
-### [.parse](index.js#L419)
+### [.parse](index.js#L424)
+
 Parse a glob pattern to create the source string for a regular expression.
 
 **Params**
@@ -420,13 +432,14 @@ const mm = require('micromatch');
 const state = mm.parse(pattern[, options]);
 ```
 
-### [.braces](index.js#L446)
+### [.braces](index.js#L451)
+
 Process the given brace `pattern`.
 
 **Params**
 
 * `pattern` **{String}**: String with brace pattern to process.
-* `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces][] library for all available options.
+* `options` **{Object}**: Any [options](#options) to change how expansion is performed. See the [braces](https://github.com/micromatch/braces) library for all available options.
 * `returns` **{Array}**
 
 **Example**
@@ -487,7 +500,7 @@ console.log(braces('foo/{a,b,c}/bar', { expand: true }));
 
 ### options.basename
 
-Allow glob patterns without slashes to match a file path based on its basename. Same behavior as [minimatch][] option `matchBase`.
+Allow glob patterns without slashes to match a file path based on its basename. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `matchBase`.
 
 **Type**: `Boolean`
 
@@ -527,7 +540,7 @@ console.log(micromatch(files, '[a-c]*', { bash: false }));
 
 **Default**: `undefined`
 
-Custom function for expanding ranges in brace patterns. The [fill-range][] library is ideal for this purpose, or you can use custom code to do whatever you need.
+Custom function for expanding ranges in brace patterns. The [fill-range](https://github.com/jonschlinkert/fill-range) library is ideal for this purpose, or you can use custom code to do whatever you need.
 
 **Example**
 
@@ -636,7 +649,7 @@ Alias for [options.nullglob](#options-nullglob).
 
 ### options.nullglob
 
-If `true`, when no matches are found the actual (arrayified) glob pattern is returned instead of an empty array. Same behavior as [minimatch][] option `nonull`.
+If `true`, when no matches are found the actual (arrayified) glob pattern is returned instead of an empty array. Same behavior as [minimatch](https://github.com/isaacs/minimatch) option `nonull`.
 
 **Type**: `Boolean`
 
@@ -761,7 +774,7 @@ baz/2/qux
 baz/3/qux
 ```
 
-Visit [braces][] to see the full range of features and options related to brace expansion, or to create brace matching or expansion related issues.
+Visit [braces](https://github.com/micromatch/braces) to see the full range of features and options related to brace expansion, or to create brace matching or expansion related issues.
 
 ### Regex character classes
 
@@ -771,7 +784,7 @@ Given the list: `['a.js', 'b.js', 'c.js', 'd.js', 'E.js']`:
 * `[b-d].js`: matches from `b` to `d`, returning `['b.js', 'c.js', 'd.js']`
 * `a/[A-Z].js`: matches and uppercase letter, returning `['a/E.md']`
 
-Learn about [regex character classes][charclass].
+Learn about [regex character classes](http://www.regular-expressions.info/charclass.html).
 
 ### Regex groups
 
@@ -808,13 +821,13 @@ However, it's suprising how many edge cases and rabbit holes there are with glob
 
 There is an important, notable difference between minimatch and micromatch _in regards to how backslashes are handled_ in glob patterns.
 
-- Micromatch exclusively and explicitly reserves backslashes for escaping characters in a glob pattern, even on windows, which is consistent with bash behavior. _More importantly, unescaping globs can result in unsafe regular expressions_.
-- Minimatch converts all backslashes to forward slashes, which means you can't use backslashes to escape any characters in your glob patterns.
+* Micromatch exclusively and explicitly reserves backslashes for escaping characters in a glob pattern, even on windows, which is consistent with bash behavior. _More importantly, unescaping globs can result in unsafe regular expressions_.
+* Minimatch converts all backslashes to forward slashes, which means you can't use backslashes to escape any characters in your glob patterns.
 
 We made this decision for micromatch for a couple of reasons:
 
-- Consistency with bash conventions.
-- Glob patterns are not filepaths. They are a type of [regular language][regular-language] that is converted to a JavaScript regular expression. Thus, when forward slashes are defined in a glob pattern, the resulting regular expression will match windows or POSIX path separators just fine.
+* Consistency with bash conventions.
+* Glob patterns are not filepaths. They are a type of [regular language](https://en.wikipedia.org/wiki/Regular_language) that is converted to a JavaScript regular expression. Thus, when forward slashes are defined in a glob pattern, the resulting regular expression will match windows or POSIX path separators just fine.
 
 **A note about joining paths to globs**
 
@@ -842,7 +855,7 @@ $ npm run bench
 
 ### Latest results
 
-As of July 12, 2023 (longer bars are better):
+As of August 23, 2024 (longer bars are better):
 
 ```sh
 # .makeRe star
@@ -902,25 +915,19 @@ All contributions are welcome! Please read [the contributing guide](.github/cont
 
 Please create an issue if you encounter a bug or matching behavior that doesn't seem correct. If you find a matching-related issue, please:
 
-- [research existing issues first](../../issues) (open and closed)
-- visit the [GNU Bash documentation][bash] to see how Bash deals with the pattern
-- visit the [minimatch][] documentation to cross-check expected behavior in node.js
-- if all else fails, since there is no real specification for globs we will probably need to discuss expected behavior and decide how to resolve it. which means any detail you can provide to help with this discussion would be greatly appreciated.
+* [research existing issues first](../../issues) (open and closed)
+* visit the [GNU Bash documentation](https://www.gnu.org/software/bash/manual/) to see how Bash deals with the pattern
+* visit the [minimatch](https://github.com/isaacs/minimatch) documentation to cross-check expected behavior in node.js
+* if all else fails, since there is no real specification for globs we will probably need to discuss expected behavior and decide how to resolve it. which means any detail you can provide to help with this discussion would be greatly appreciated.
 
 **Platform issues**
 
 It's important to us that micromatch work consistently on all platforms. If you encounter any platform-specific matching or path related issues, please let us know (pull requests are also greatly appreciated).
 
-[regular-language]: https://en.wikipedia.org/wiki/Regular_language
-[bash]: https://www.gnu.org/software/bash/manual/
-[charclass]: http://www.regular-expressions.info/charclass.html
-[extended]: http://mywiki.wooledge.org/BashGuide/Patterns#Extended_Globs
-[brackets]: https://github.com/micromatch/expand-brackets
-[braces]: https://github.com/micromatch/braces
-
 ## About
+
 <details>
-  <summary><strong>Contributing</strong></summary>
+<summary><strong>Contributing</strong></summary>
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
@@ -929,7 +936,7 @@ Please read the [contributing guide](.github/contributing.md) for advice on open
 </details>
 
 <details>
-  <summary><strong>Running Tests</strong></summary>
+<summary><strong>Running Tests</strong></summary>
 
 Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
 
@@ -940,7 +947,7 @@ $ npm install && npm test
 </details>
 
 <details>
-  <summary><strong>Building docs</strong></summary>
+<summary><strong>Building docs</strong></summary>
 
 _(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
@@ -956,62 +963,62 @@ $ npm install -g verbose/verb#dev verb-generate-readme && verb
 
 You might also be interested in these projects:
 
-- [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
-- [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/micromatch/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
-- [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/micromatch/extglob) | [homepage](https://github.com/micromatch/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
-- [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
-- [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
+* [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
+* [expand-brackets](https://www.npmjs.com/package/expand-brackets): Expand POSIX bracket expressions (character classes) in glob patterns. | [homepage](https://github.com/micromatch/expand-brackets "Expand POSIX bracket expressions (character classes) in glob patterns.")
+* [extglob](https://www.npmjs.com/package/extglob): Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob… [more](https://github.com/micromatch/extglob) | [homepage](https://github.com/micromatch/extglob "Extended glob support for JavaScript. Adds (almost) the expressive power of regular expressions to glob patterns.")
+* [fill-range](https://www.npmjs.com/package/fill-range): Fill in a range of numbers or letters, optionally passing an increment or `step` to… [more](https://github.com/jonschlinkert/fill-range) | [homepage](https://github.com/jonschlinkert/fill-range "Fill in a range of numbers or letters, optionally passing an increment or `step` to use, or create a regex-compatible range with `options.toRegex`")
+* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
 
 ### Contributors
-| **Commits** | **Contributor** |
-| --- | --- |
-| 515 | [jonschlinkert](https://github.com/jonschlinkert) |
-| 12  | [es128](https://github.com/es128) |
-| 9   | [danez](https://github.com/danez) |
-| 8   | [doowb](https://github.com/doowb) |
-| 6   | [paulmillr](https://github.com/paulmillr) |
-| 5   | [mrmlnc](https://github.com/mrmlnc) |
-| 3   | [DrPizza](https://github.com/DrPizza) |
-| 2   | [TrySound](https://github.com/TrySound) |
-| 2   | [mceIdo](https://github.com/mceIdo) |
-| 2   | [Glazy](https://github.com/Glazy) |
-| 2   | [MartinKolarik](https://github.com/MartinKolarik) |
-| 2   | [antonyk](https://github.com/antonyk) |
-| 2   | [Tvrqvoise](https://github.com/Tvrqvoise) |
-| 1   | [amilajack](https://github.com/amilajack) |
-| 1   | [Cslove](https://github.com/Cslove) |
-| 1   | [devongovett](https://github.com/devongovett) |
-| 1   | [DianeLooney](https://github.com/DianeLooney) |
-| 1   | [UltCombo](https://github.com/UltCombo) |
-| 1   | [frangio](https://github.com/frangio) |
-| 1   | [joyceerhl](https://github.com/joyceerhl) |
-| 1   | [juszczykjakub](https://github.com/juszczykjakub) |
-| 1   | [muescha](https://github.com/muescha) |
-| 1   | [sebdeckers](https://github.com/sebdeckers) |
-| 1   | [tomByrer](https://github.com/tomByrer) |
-| 1   | [fidian](https://github.com/fidian) |
-| 1   | [curbengh](https://github.com/curbengh) |
-| 1   | [simlu](https://github.com/simlu) |
-| 1   | [wtgtybhertgeghgtwtg](https://github.com/wtgtybhertgeghgtwtg) |
-| 1   | [yvele](https://github.com/yvele) |
+
+| **Commits** | **Contributor** |  
+| --- | --- |  
+| 523 | [jonschlinkert](https://github.com/jonschlinkert) |  
+| 12  | [es128](https://github.com/es128) |  
+| 9   | [danez](https://github.com/danez) |  
+| 8   | [doowb](https://github.com/doowb) |  
+| 6   | [paulmillr](https://github.com/paulmillr) |  
+| 5   | [mrmlnc](https://github.com/mrmlnc) |  
+| 3   | [DrPizza](https://github.com/DrPizza) |  
+| 2   | [Tvrqvoise](https://github.com/Tvrqvoise) |  
+| 2   | [antonyk](https://github.com/antonyk) |  
+| 2   | [MartinKolarik](https://github.com/MartinKolarik) |  
+| 2   | [Glazy](https://github.com/Glazy) |  
+| 2   | [mceIdo](https://github.com/mceIdo) |  
+| 2   | [TrySound](https://github.com/TrySound) |  
+| 1   | [yvele](https://github.com/yvele) |  
+| 1   | [wtgtybhertgeghgtwtg](https://github.com/wtgtybhertgeghgtwtg) |  
+| 1   | [simlu](https://github.com/simlu) |  
+| 1   | [curbengh](https://github.com/curbengh) |  
+| 1   | [fidian](https://github.com/fidian) |  
+| 1   | [tomByrer](https://github.com/tomByrer) |  
+| 1   | [ZoomerTedJackson](https://github.com/ZoomerTedJackson) |  
+| 1   | [styfle](https://github.com/styfle) |  
+| 1   | [sebdeckers](https://github.com/sebdeckers) |  
+| 1   | [muescha](https://github.com/muescha) |  
+| 1   | [juszczykjakub](https://github.com/juszczykjakub) |  
+| 1   | [joyceerhl](https://github.com/joyceerhl) |  
+| 1   | [donatj](https://github.com/donatj) |  
+| 1   | [frangio](https://github.com/frangio) |  
+| 1   | [UltCombo](https://github.com/UltCombo) |  
+| 1   | [DianeLooney](https://github.com/DianeLooney) |  
+| 1   | [devongovett](https://github.com/devongovett) |  
+| 1   | [Cslove](https://github.com/Cslove) |  
+| 1   | [amilajack](https://github.com/amilajack) |  
 
 ### Author
+
 **Jon Schlinkert**
-+ [GitHub Profile](https://github.com/jonschlinkert)
-+ [Twitter Profile](https://twitter.com/jonschlinkert)
-+ [LinkedIn Profile](https://linkedin.com/in/jonschlinkert)
+
+* [GitHub Profile](https://github.com/jonschlinkert)
+* [Twitter Profile](https://twitter.com/jonschlinkert)
+* [LinkedIn Profile](https://linkedin.com/in/jonschlinkert)
 
 ### License
-Copyright © 2023, [Jon Schlinkert](https://github.com/jonschlinkert).
+
+Copyright © 2024, [Jon Schlinkert](https://github.com/jonschlinkert).
 Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on July 12, 2023._
-
-[extglob]: https://github.com/micromatch/extglob
-[fill-range]: https://github.com/jonschlinkert/fill-range
-[glob-object]: https://github.com/jonschlinkert/glob-object
-[minimatch]: https://github.com/isaacs/minimatch
-[multimatch]: https://github.com/sindresorhus/multimatch
-
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on August 23, 2024._
