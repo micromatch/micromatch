@@ -1,7 +1,7 @@
 {
   "name": "micromatch",
   "description": "Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "homepage": "https://github.com/micromatch/micromatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
@@ -26,7 +26,9 @@
     "url": "https://github.com/micromatch/micromatch/issues"
   },
   "license": "MIT",
-  "files": ["index.js"],
+  "files": [
+    "index.js"
+  ],
   "main": "index.js",
   "engines": {
     "node": ">=8.6"
@@ -88,14 +90,30 @@
   "verb": {
     "toc": "collapsible",
     "layout": "default",
-    "tasks": ["readme"],
-    "plugins": ["gulp-format-md"],
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
     "lint": {
       "reflinks": true
     },
     "related": {
-      "list": ["braces", "expand-brackets", "extglob", "fill-range", "nanomatch"]
+      "list": [
+        "braces",
+        "expand-brackets",
+        "extglob",
+        "fill-range",
+        "nanomatch"
+      ]
     },
-    "reflinks": ["extglob", "fill-range", "glob-object", "minimatch", "multimatch"]
+    "reflinks": [
+      "extglob",
+      "fill-range",
+      "glob-object",
+      "minimatch",
+      "multimatch"
+    ]
   }
 }
