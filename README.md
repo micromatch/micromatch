@@ -295,7 +295,7 @@ const mm = require('micromatch');
 console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
 // true
 console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
-// false
+// true
 ```
 
 ### [.every](index.js#L300)
