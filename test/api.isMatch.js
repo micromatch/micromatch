@@ -223,7 +223,7 @@ describe('.isMatch():', () => {
       assert(isMatch('foo/b/a/z/bar', 'foo/**/bar'));
       assert(isMatch('foo/bar', 'foo/**/**/bar'));
       assert(isMatch('foo/bar', 'foo/**/bar'));
-      assert(isMatch('foo/bar', 'foo[/]bar'));
+      assert(!isMatch('foo/bar', 'foo[/]bar'));
       assert(isMatch('foo/bar/baz/x', '*/bar/**'));
       assert(isMatch('foo/baz/bar', 'foo/**/**/bar'));
       assert(isMatch('foo/baz/bar', 'foo/**/bar'));
@@ -352,7 +352,7 @@ describe('.isMatch():', () => {
       assert(isMatch('aaa', 'aaa'));
       assert(isMatch('aaa', ['aa', 'aaa']));
       assert(isMatch('aaa/bbb', 'aaa/bbb'));
-      assert(isMatch('aaa/bbb', 'aaa[/]bbb'));
+      assert(!isMatch('aaa/bbb', 'aaa[/]bbb'));
       assert(isMatch('aaa/bbb', ['aaa\\bbb', 'aaa/bbb']));
       assert(isMatch('aaa\\bbb', ['aaa\\bbb', 'aaa/bbb']));
     });

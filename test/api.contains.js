@@ -157,7 +157,7 @@ describe('.contains()', () => {
       assert(!mm.contains('aaa/bba/ccc', 'aaa/**ccc'));
       assert(!mm.contains('aaa/bba/ccc', 'aaa/*z'));
       assert(!mm.contains('aaa/bba/ccc', 'aaa/**z'));
-      assert(mm.contains('aaa/bbb', 'aaa[/]bbb'));
+      assert(!mm.contains('aaa/bbb', 'aaa[/]bbb'));
       assert(!mm.contains('aaa', '*/*/*'));
       assert(!mm.contains('aaa/bbb', '*/*/*'));
       assert(mm.contains('aaa/bba/ccc', '*/*/*'));
@@ -280,8 +280,8 @@ describe('.contains()', () => {
       assert(mm.contains('aaa\\bba\\ccc', 'aaa/*/ccc'));
       assert(mm.contains('aaa\\bba\\ccc', 'bb'));
       assert(mm.contains('aaa\\bba\\ccc', 'bb*'));
-      assert(mm.contains('aaa\\bbb', 'aaa[/]bbb'));
-      assert(mm.contains('aaa\\bbb', 'aaa[\\\\/]bbb'));
+      assert(!mm.contains('aaa\\bbb', 'aaa[/]bbb'));
+      assert(!mm.contains('aaa\\bbb', 'aaa[\\\\/]bbb'));
       assert(!mm.contains('aaa\\bba\\ccc', 'aaa/*ccc'));
       assert(!mm.contains('aaa\\bba\\ccc', 'aaa/**ccc'));
       assert(!mm.contains('aaa\\bba\\ccc', 'aaa/*z'));

@@ -48,26 +48,33 @@ describe('special characters', () => {
     });
 
     it('should match backslashes', () => {
+      // On non-Windows, backslash is literal; [\\\/] with slash stripped becomes [\\]
+      // which matches a literal backslash
       assert(mm.isMatch('\\', '[\\\\/]'));
       assert(mm.isMatch('\\', '[\\\\/]+'));
       assert(mm.isMatch('\\\\', '[\\\\/]+'));
       assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
 
       if (isWindows()) {
-        mm(['\\'], '[\\\\/]', ['/']);
-        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+        // On Windows, backslashes are converted to forward slashes.
+        // [\\\/] with slash stripped becomes [\\] which won't match /,
+        // so the result is empty (no match).
+        mm(['\\'], '[\\\\/]', []);
+        mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', []);
       } else {
         mm(['\\'], '[\\\\/]', ['\\']);
         mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['\\', '\\\\', '\\\\\\']);
       }
 
       path.sep = '\\';
-      assert(mm.isMatch('\\', '[\\\\/]'));
-      assert(mm.isMatch('\\', '[\\\\/]+'));
-      assert(mm.isMatch('\\\\', '[\\\\/]+'));
-      assert(mm.isMatch('\\\\\\', '[\\\\/]+'));
-      mm(['\\'], '[\\\\/]', ['/']);
-      mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', ['/']);
+      // When path.sep is \, backslashes in input are converted to /,
+      // and slash in bracket expression does not match /, so these should not match
+      assert(!mm.isMatch('\\', '[\\\\/]'));
+      assert(!mm.isMatch('\\', '[\\\\/]+'));
+      assert(!mm.isMatch('\\\\', '[\\\\/]+'));
+      assert(!mm.isMatch('\\\\\\', '[\\\\/]+'));
+      mm(['\\'], '[\\\\/]', []);
+      mm(['\\', '\\\\', '\\\\\\'], '[\\\\/]+', []);
       path.sep = process.env.ORIGINAL_PATH_SEP;
     });
   });

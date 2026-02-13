@@ -2194,8 +2194,8 @@ describe('extglobs (minimatch)', () => {
     assert(!isMatch('foo/bar', 'foo?bar'));
   });
 
-  it('"foo/bar" should match "foo[/]bar"', () => {
-    assert(isMatch('foo/bar', 'foo[/]bar'));
+  it('"foo/bar" should not match "foo[/]bar"', () => {
+    assert(!isMatch('foo/bar', 'foo[/]bar'));
   });
 
   it('"foo/bar/baz.jsx" should match "foo/bar/**/*.+(js|jsx)"', () => {
