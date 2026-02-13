@@ -69,4 +69,35 @@ describe('issue-related tests', () => {
     assert(mm.isMatch('a/foo.js', '**/foo.js', { dot: true }));
     assert(mm.isMatch('foo.js', '**/foo.js', { dot: true }));
   });
+
+  it('micromatch issue#283 - alternation order should not affect globstar matching', () => {
+    // Both orderings should match consistently
+    assert(mm.isMatch('feature/test/test', '(feature/**|feature*)'));
+    assert(mm.isMatch('feature/test/test', '(feature*|feature/**)'));
+
+    // Nested paths should also work
+    assert(mm.isMatch('a/b/c', '(a/**|b)'));
+    assert(mm.isMatch('a/b/c', '(b|a/**)'));
+
+    // Multiple globstar alternatives
+    assert(mm.isMatch('x/y/z', '(x/**|y/**)'));
+    assert(mm.isMatch('x/y/z', '(y/**|x/**)'));
+
+    // Alternation within a path
+    assert(mm.isMatch('foo/a/b/c/bar', 'foo/(a/**|b/*)/bar'));
+    assert(mm.isMatch('foo/a/b/c/bar', 'foo/(b/*|a/**)/bar'));
+
+    // Non-matching cases should still not match
+    assert(!mm.isMatch('other/test/test', '(feature/**|feature*)'));
+    assert(!mm.isMatch('other/test/test', '(feature*|feature/**)'));
+
+    // Extglob patterns with ** should still work
+    assert(mm.isMatch('feature/test', 'feature/**'));
+    assert(mm.isMatch('feature', 'feature*'));
+    assert(!mm.isMatch('feature/test/test', 'feature*'));
+
+    // Brace syntax should still work the same way
+    assert(mm.isMatch('feature/test/test', '{feature/**,feature*}'));
+    assert(mm.isMatch('feature/test/test', '{feature*,feature/**}'));
+  });
 });

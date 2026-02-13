@@ -10,6 +10,56 @@ const hasBraces = v => {
   const index = v.indexOf('{');
   return index > -1 && v.indexOf('}', index) > -1;
 };
+/**
+ * Work around a picomatch bug where `**` (globstar) inside parenthesized
+ * alternation groups like `(a/**|b)` gets incorrectly downgraded to a
+ * single star when the `|` character follows `**`. This converts
+ * standalone `(a|b)` groups containing globstars to `{a,b}` brace
+ * syntax which picomatch handles correctly.
+ *
+ * Extglob groups like `*(a|b)`, `+(a|b)`, etc. are left unchanged.
+ */
+const fixGlobstarAlternation = v => {
+  if (typeof v !== 'string') return v;
+  if (!v.includes('**') || !v.includes('(')) return v;
+
+  let result = '';
+  let i = 0;
+
+  while (i < v.length) {
+    if (v[i] === '(' && (i === 0 || !'*+?@!'.includes(v[i - 1]))) {
+      let depth = 1;
+      let j = i + 1;
+      while (j < v.length && depth > 0) {
+        if (v[j] === '(') depth++;
+        else if (v[j] === ')') depth--;
+        j++;
+      }
+
+      if (depth === 0) {
+        const inner = v.slice(i + 1, j - 1);
+        if (inner.includes('**') && inner.includes('|')) {
+          let converted = '';
+          let parenDepth = 0;
+          for (let k = 0; k < inner.length; k++) {
+            if (inner[k] === '(') { parenDepth++; converted += inner[k]; }
+            else if (inner[k] === ')') { parenDepth--; converted += inner[k]; }
+            else if (inner[k] === '|' && parenDepth === 0) { converted += ','; }
+            else { converted += inner[k]; }
+          }
+          result += '{' + converted + '}';
+          i = j;
+          continue;
+        }
+      }
+    }
+
+    result += v[i];
+    i++;
+  }
+
+  return result;
+};
 
 /**
  * Returns an array of strings that match one or more glob patterns.
@@ -46,7 +96,7 @@ const micromatch = (list, patterns, options) => {
   };
 
   for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+    let isMatch = picomatch(fixGlobstarAlternation(String(patterns[i])), { ...options, onResult }, true);
     let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
     if (negated) negatives++;
 
@@ -106,7 +156,7 @@ micromatch.match = micromatch;
  * @api public
  */
 
-micromatch.matcher = (pattern, options) => picomatch(pattern, options);
+micromatch.matcher = (pattern, options) => picomatch(fixGlobstarAlternation(pattern), options);
 
 /**
  * Returns true if **any** of the given glob `patterns` match the specified `string`.
@@ -125,7 +175,7 @@ micromatch.matcher = (pattern, options) => picomatch(pattern, options);
  * @api public
  */
 
-micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+micromatch.isMatch = (str, patterns, options) => picomatch(fixGlobstarAlternation(patterns), options)(str);
 
 /**
  * Backwards compatibility
@@ -265,7 +315,7 @@ micromatch.some = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
+    let isMatch = picomatch(fixGlobstarAlternation(String(pattern)), options);
     if (items.some(item => isMatch(item))) {
       return true;
     }
@@ -301,7 +351,7 @@ micromatch.every = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
+    let isMatch = picomatch(fixGlobstarAlternation(String(pattern)), options);
     if (!items.every(item => isMatch(item))) {
       return false;
     }
@@ -341,7 +391,7 @@ micromatch.all = (str, patterns, options) => {
     throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
   }
 
-  return [].concat(patterns).every(p => picomatch(p, options)(str));
+  return [].concat(patterns).every(p => picomatch(fixGlobstarAlternation(p), options)(str));
 };
 
 /**
