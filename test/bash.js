@@ -103,7 +103,7 @@ describe('bash options and features:', () => {
 
     it('should support extended slash-matching features', () => {
       assert(!mm.isMatch('foo/bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r'));
-      assert(mm.isMatch('foo/bar', 'foo[/]bar'));
+      assert(!mm.isMatch('foo/bar', 'foo[/]bar'));
       assert(mm.isMatch('foo-bar', 'f[^eiu][^eiu][^eiu][^eiu][^eiu]r'));
     });
 
@@ -212,7 +212,7 @@ describe('bash options and features:', () => {
       assert(mm.isMatch('foo', 'foo'));
       assert(mm.isMatch('foo/bar', 'foo/*'));
       assert(mm.isMatch('foo/bar', 'foo/bar'));
-      assert(mm.isMatch('foo/bar', 'foo[/]bar'));
+      assert(!mm.isMatch('foo/bar', 'foo[/]bar'));
       assert(mm.isMatch('foo/bb/aa/rr', '**/**/**'));
       assert(mm.isMatch('foo/bba/arr', '*/*/*'));
       assert(mm.isMatch('foo/bba/arr', 'foo/**'));

@@ -4,6 +4,7 @@ const util = require('util');
 const braces = require('braces');
 const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
+const stripSlashBrackets = require('./lib/strip-slash-brackets');
 
 const isEmptyString = v => v === '' || v === './';
 const hasBraces = v => {
@@ -46,7 +47,7 @@ const micromatch = (list, patterns, options) => {
   };
 
   for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+    let isMatch = picomatch(stripSlashBrackets(String(patterns[i])), { ...options, onResult }, true);
     let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
     if (negated) negatives++;
 
@@ -106,7 +107,7 @@ micromatch.match = micromatch;
  * @api public
  */
 
-micromatch.matcher = (pattern, options) => picomatch(pattern, options);
+micromatch.matcher = (pattern, options) => picomatch(stripSlashBrackets(pattern), options);
 
 /**
  * Returns true if **any** of the given glob `patterns` match the specified `string`.
@@ -125,7 +126,7 @@ micromatch.matcher = (pattern, options) => picomatch(pattern, options);
  * @api public
  */
 
-micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+micromatch.isMatch = (str, patterns, options) => picomatch(stripSlashBrackets(patterns), options)(str);
 
 /**
  * Backwards compatibility
@@ -265,7 +266,7 @@ micromatch.some = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
+    let isMatch = picomatch(stripSlashBrackets(String(pattern)), options);
     if (items.some(item => isMatch(item))) {
       return true;
     }
@@ -301,7 +302,7 @@ micromatch.every = (list, patterns, options) => {
   let items = [].concat(list);
 
   for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
+    let isMatch = picomatch(stripSlashBrackets(String(pattern)), options);
     if (!items.every(item => isMatch(item))) {
       return false;
     }
@@ -341,7 +342,7 @@ micromatch.all = (str, patterns, options) => {
     throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
   }
 
-  return [].concat(patterns).every(p => picomatch(p, options)(str));
+  return [].concat(patterns).every(p => picomatch(stripSlashBrackets(p), options)(str));
 };
 
 /**
@@ -365,7 +366,7 @@ micromatch.all = (str, patterns, options) => {
 
 micromatch.capture = (glob, input, options) => {
   let posix = utils.isWindows(options);
-  let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
+  let regex = picomatch.makeRe(stripSlashBrackets(String(glob)), { ...options, capture: true });
   let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
 
   if (match) {
@@ -389,7 +390,7 @@ micromatch.capture = (glob, input, options) => {
  * @api public
  */
 
-micromatch.makeRe = (...args) => picomatch.makeRe(...args);
+micromatch.makeRe = (pattern, ...rest) => picomatch.makeRe(stripSlashBrackets(pattern), ...rest);
 
 /**
  * Scan a glob pattern to separate the pattern into segments. Used
@@ -425,7 +426,7 @@ micromatch.parse = (patterns, options) => {
   let res = [];
   for (let pattern of [].concat(patterns || [])) {
     for (let str of braces(String(pattern), options)) {
-      res.push(picomatch.parse(str, options));
+      res.push(picomatch.parse(stripSlashBrackets(str), options));
     }
   }
   return res;

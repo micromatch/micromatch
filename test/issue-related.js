@@ -69,4 +69,40 @@ describe('issue-related tests', () => {
     assert(mm.isMatch('a/foo.js', '**/foo.js', { dot: true }));
     assert(mm.isMatch('foo.js', '**/foo.js', { dot: true }));
   });
+
+  it('micromatch issue#277 - slash in bracket expression should not match path separator', () => {
+    // [/] should not match a literal path separator
+    assert(!mm.isMatch('foo/bar', 'foo[/]bar'));
+    assert(!mm.isMatch('aaa/bbb', 'aaa[/]bbb'));
+
+    // regular bracket expressions should still work
+    assert(mm.isMatch('fooXbar', 'foo[X]bar'));
+    assert(mm.isMatch('fooabar', 'foo[abc]bar'));
+    assert(!mm.isMatch('foodbar', 'foo[abc]bar'));
+
+    // bracket expression with slash and other chars: slash is stripped
+    assert(mm.isMatch('fooabar', 'foo[a/b]bar'));
+    assert(mm.isMatch('foobbar', 'foo[a/b]bar'));
+    assert(!mm.isMatch('foo/bar', 'foo[a/b]bar'));
+
+    // negated bracket expressions with slash should still work
+    assert(mm.isMatch('fooXbar', 'foo[^/]bar'));
+    assert(!mm.isMatch('foo/bar', 'foo[^/]bar'));
+
+    // the main micromatch() function should also honor this
+    assert.deepEqual(mm(['foo/bar', 'fooXbar'], 'foo[/]bar'), []);
+    assert.deepEqual(mm(['foo/bar', 'fooXbar'], 'foo[X]bar'), ['fooXbar']);
+
+    // contains should also honor this
+    assert(!mm.contains('foo/bar', 'foo[/]bar'));
+
+    // matcher should also honor this
+    const isMatch = mm.matcher('foo[/]bar');
+    assert(!isMatch('foo/bar'));
+
+    // some/every/all should also honor this
+    assert(!mm.some(['foo/bar'], 'foo[/]bar'));
+    assert(!mm.every(['foo/bar'], 'foo[/]bar'));
+    assert(!mm.all('foo/bar', 'foo[/]bar'));
+  });
 });
