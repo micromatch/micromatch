@@ -155,6 +155,11 @@ micromatch.not = (list, patterns, options = {}) => {
   let result = new Set();
   let items = [];
 
+  // Handle empty patterns case - return all items since none can match
+  if (patterns.length === 0 || (patterns.length === 1 && patterns[0] === '')) {
+    return [].concat(list);
+  }
+
   let onResult = state => {
     if (options.onResult) options.onResult(state);
     items.push(state.output);
