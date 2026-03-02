@@ -13,6 +13,28 @@ describe('.not()', () => {
     path.sep = sep;
   });
 
+  describe('empty patterns (issue #241)', () => {
+    it('should return all items when patterns is an empty array', () => {
+      let fixtures = ['a', 'b', 'c'];
+      assert.deepEqual(not(fixtures, []), ['a', 'b', 'c']);
+    });
+
+    it('should return all items when patterns is an empty array with options', () => {
+      let fixtures = ['a', 'b', 'c'];
+      assert.deepEqual(not(fixtures, [], { bash: true, dot: true }), ['a', 'b', 'c']);
+    });
+
+    it('should return all items when patterns is an empty string', () => {
+      let fixtures = ['a', 'b', 'c'];
+      assert.deepEqual(not(fixtures, ''), ['a', 'b', 'c']);
+    });
+
+    it('should still work normally with non-empty patterns', () => {
+      let fixtures = ['a.js', 'b.js', 'c.txt'];
+      assert.deepEqual(not(fixtures, ['*.txt']), ['a.js', 'b.js']);
+    });
+  });
+
   describe('posix paths', () => {
     it('should return an array of matches for a literal string', () => {
       let fixtures = ['a/a', 'a/b', 'a/c', 'b/a', 'b/b', 'b/c'];
