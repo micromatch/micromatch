@@ -5,7 +5,7 @@ const { capture } = require('..');
 
 describe('.capture()', () => {
   it('should return null if no match', () => {
-    assert.equal(capture('test/*', 'hi/123'), null);
+    assert.strictEqual(capture('test/*', 'hi/123'), null);
   });
 
   it('should return an empty array if there are no captures', () => {
