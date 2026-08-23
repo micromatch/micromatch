@@ -371,6 +371,8 @@ micromatch.capture = (glob, input, options) => {
   if (match) {
     return match.slice(1).map(v => v === void 0 ? '' : v);
   }
+
+  return null;
 };
 
 /**
