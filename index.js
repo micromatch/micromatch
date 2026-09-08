@@ -238,7 +238,12 @@ micromatch.matchKeys = (obj, patterns, options) => {
   }
   let keys = micromatch(Object.keys(obj), patterns, options);
   let res = {};
-  for (let key of keys) res[key] = obj[key];
+  for (let key of keys) {
+    // Define own properties so __proto__ is copied as a key, not a setter.
+    Object.defineProperty(res, key, {
+      value: obj[key], enumerable: true, configurable: true, writable: true
+    });
+  }
   return res;
 };
 
