@@ -262,15 +262,16 @@ micromatch.matchKeys = (obj, patterns, options) => {
  */
 
 micromatch.some = (list, patterns, options) => {
-  let items = [].concat(list);
-
-  for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
-    if (items.some(item => isMatch(item))) {
-      return true;
-    }
-  }
-  return false;
+  // Delegate to the main matcher so negated patterns (e.g. '!foo.js')
+  // exclude matches, as documented: `mm.some(['foo.js'], ['*.js', '!foo.js'])`
+  // is false. Testing each pattern with picomatch directly cannot do this,
+  // because a negated pattern on its own matches everything except its
+  // target, so the positive pattern would win unconditionally.
+  // `failglob`/`nonull`/`nullglob` are disabled here: `some()` is a boolean
+  // predicate and must return false (not throw, or return the patterns)
+  // when nothing matches.
+  let opts = { ...options, failglob: false, nonull: false, nullglob: false };
+  return micromatch(list, patterns, opts).length > 0;
 };
 
 /**
