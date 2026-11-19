@@ -17,4 +17,15 @@ describe('.some()', () => {
   it('should arrayify a string value', () => {
     assert(mm.some('a', ['*']));
   });
+
+  it('should respect negated patterns (issue #177)', () => {
+    // Documented in the README: 'foo.js' matches '*.js' but is excluded
+    // by '!foo.js', so nothing matches.
+    assert(!mm.some(['foo.js'], ['*.js', '!foo.js']));
+    assert(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
+    assert(!mm.some(['foo.js', 'bar.js'], ['!*.js']));
+    assert(mm.some(['foo.js', 'bar.js'], ['!baz.js']));
+    assert(!mm.some([], ['*.js']));
+    assert(!mm.some(['foo.js'], ['*.txt']));
+  });
 });
