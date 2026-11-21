@@ -392,16 +392,27 @@ micromatch.capture = (glob, input, options) => {
 micromatch.makeRe = (...args) => picomatch.makeRe(...args);
 
 /**
- * Scan a glob pattern to separate the pattern into segments. Used
- * by the [split](#split) method.
+ * Scan a glob pattern to find its non-glob base, remaining glob and syntax flags,
+ * without creating a regular expression or reading the filesystem.
+ *
+ * The returned object includes `input`, `prefix`, `start`, `base`, `glob`,
+ * `isGlob` and flags such as `negated`, `isBrace` and `isExtglob`.
+ * By default, scanning can stop at the first glob. Use `scanToEnd: true` to
+ * inspect the entire pattern, or `parts: true` to also return path segments.
+ * Use `tokens: true` with `scanToEnd: true` for segment tokens and `maxDepth`.
  *
  * ```js
  * const mm = require('micromatch');
- * const state = mm.scan(pattern[, options]);
+ * const state = mm.scan('!./src/*.js', { parts: true });
+ * console.log(state.prefix); //=> '!./'
+ * console.log(state.base);   //=> 'src'
+ * console.log(state.glob);   //=> '*.js'
+ * console.log(state.isGlob); //=> true
+ * console.log(state.parts);  //=> ['src', '*.js']
  * ```
- * @param {String} `pattern`
- * @param {Object} `options`
- * @return {Object} Returns an object with
+ * @param {String} `pattern` The glob pattern to scan.
+ * @param {Object} `options` Options passed to the Picomatch scanner.
+ * @return {Object} The pattern's base, glob, prefix and syntax flags, plus any requested parts or tokens.
  * @api public
  */
 
