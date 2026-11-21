@@ -35,7 +35,7 @@ Please consider following this project's author, [Jon Schlinkert](https://github
     + [options.onIgnore](#optionsonignore)
     + [options.onMatch](#optionsonmatch)
     + [options.onResult](#optionsonresult)
-    + [options.posixSlashes](#optionsposixslashes)
+    + [options.windows](#optionswindows)
     + [options.unescape](#optionsunescape)
   * [Extended globbing](#extended-globbing)
     + [Extglobs](#extglobs)
@@ -134,10 +134,10 @@ Use [micromatch.isMatch()](#ismatch) instead of `minimatch()`:
 console.log(micromatch.isMatch('foo', 'b*')); //=> false
 ```
 
-Use [micromatch.match()](#match) instead of `minimatch.match()`:
+Use [micromatch()](#micromatch) instead of `minimatch.match()`:
 
 ```js
-console.log(micromatch.match(['foo', 'bar'], 'b*')); //=> 'bar'
+console.log(micromatch(['foo', 'bar'], 'b*')); //=> ['bar']
 ```
 
 ### From multimatch
@@ -398,24 +398,36 @@ console.log(mm.makeRe('*.js'));
 //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
 ```
 
-### [.scan](index.js#L408)
+### [.scan](index.js#L419)
 
-Scan a glob pattern to separate the pattern into segments. Used by the [split](#split) method.
+Scan a glob pattern to find its non-glob base, remaining glob and syntax flags,
+without creating a regular expression or reading the filesystem.
+
+The returned object includes `input`, `prefix`, `start`, `base`, `glob`,
+`isGlob` and flags such as `negated`, `isBrace` and `isExtglob`.
+By default, scanning can stop at the first glob. Use `scanToEnd: true` to
+inspect the entire pattern, or `parts: true` to also return path segments.
+Use `tokens: true` with `scanToEnd: true` for segment tokens and `maxDepth`.
 
 **Params**
 
-* `pattern` **{String}**
-* `options` **{Object}**
-* `returns` **{Object}**: Returns an object with
+* `pattern` **{String}**: The glob pattern to scan.
+* `options` **{Object}**: Options passed to the Picomatch scanner.
+* `returns` **{Object}**: The pattern's base, glob, prefix and syntax flags, plus any requested parts or tokens.
 
 **Example**
 
 ```js
 const mm = require('micromatch');
-const state = mm.scan(pattern[, options]);
+const state = mm.scan('!./src/*.js', { parts: true });
+console.log(state.prefix); //=> '!./'
+console.log(state.base);   //=> 'src'
+console.log(state.glob);   //=> '*.js'
+console.log(state.isGlob); //=> true
+console.log(state.parts);  //=> ['src', '*.js']
 ```
 
-### [.parse](index.js#L424)
+### [.parse](index.js#L435)
 
 Parse a glob pattern to create the source string for a regular expression.
 
@@ -432,7 +444,7 @@ const mm = require('micromatch');
 const state = mm.parse(pattern[, options]);
 ```
 
-### [.braces](index.js#L451)
+### [.braces](index.js#L462)
 
 Process the given brace `pattern`.
 
@@ -488,13 +500,12 @@ console.log(braces('foo/{a,b,c}/bar', { expand: true }));
 | [onMatch](#optionsonMatch) | `function` | `undefined` | Function to be called on matched items. |
 | [onResult](#optionsonResult) | `function` | `undefined` | Function to be called on all items, regardless of whether or not they are matched or ignored. |
 | `posix`               | `boolean`      | `false`     | Support [POSIX character classes](#posix-bracket-expressions) ("posix brackets"). |
-| `posixSlashes`        | `boolean`      | `undefined` | Convert all slashes in file paths to forward slashes. This does not convert slashes in the glob pattern itself |
+| [windows](#optionswindows) | `boolean` | platform-dependent | Use Windows path-separator matching and convert backslashes in input paths to forward slashes. Glob patterns still use forward slashes. |
 | `prepend`             | `string`       | `undefined` | String to prepend to the generated regex used for matching. |
 | `regex`               | `boolean`      | `false`     | Use regular expression rules for `+` (instead of matching literal `+`), and for stars that follow closing parentheses or brackets (as in `)*` and `]*`). |
 | `strictBrackets`      | `boolean`      | `undefined` | Throw an error if brackets, braces, or parens are imbalanced. |
 | `strictSlashes`       | `boolean`      | `undefined` | When true, picomatch won't match trailing slashes with single stars. |
 | `unescape`            | `boolean`      | `undefined` | Remove preceding backslashes from escaped glob characters before creating the regular expression to perform matches. |
-| `unixify`             | `boolean`      | `undefined` | Alias for `posixSlashes`, for backwards compatitibility. |
 
 ## Options Examples
 
@@ -679,7 +690,7 @@ const onMatch = ({ glob, regex, input, output }) => {
   // { input: 'some\\path', output: 'some/path' }
 };
 
-const isMatch = micromatch.matcher('**', { onMatch, posixSlashes: true });
+const isMatch = micromatch.matcher('**', { onMatch, windows: true });
 isMatch('some\\path');
 isMatch('some\\path');
 isMatch('some\\path');
@@ -698,9 +709,9 @@ isMatch('bar');
 isMatch('baz');
 ```
 
-### options.posixSlashes
+### options.windows
 
-Convert path separators on returned files to posix/unix-style forward slashes. Aliased as `unixify` for backwards compatibility.
+Use Windows path-separator matching and convert backslashes in input paths to forward slashes. Set this explicitly when matching Windows paths on another platform, or set it to `false` to preserve backslashes in the input. This does not turn backslashes in glob patterns into path separators: patterns should still use `/`, since `\` escapes glob characters.
 
 **Type**: `Boolean`
 
@@ -709,10 +720,13 @@ Convert path separators on returned files to posix/unix-style forward slashes. A
 **Example**
 
 ```js
-console.log(micromatch.match(['a\\b\\c'], 'a/**'));
+console.log(micromatch(['a\\b\\c'], 'a/**', { windows: true }));
 //=> ['a/b/c']
 
-console.log(micromatch.match(['a\\b\\c'], { posixSlashes: false }));
+console.log(micromatch(['a\\b\\c'], 'a/**', { windows: false }));
+//=> []
+
+console.log(micromatch(['a\\b\\c'], '**', { windows: false }));
 //=> ['a\\b\\c']
 ```
 
@@ -729,11 +743,11 @@ Remove backslashes from escaped glob characters before creating the regular expr
 In this example we want to match a literal `*`:
 
 ```js
-console.log(micromatch.match(['abc', 'a\\*c'], 'a\\*c'));
+console.log(micromatch(['abc', 'a\\*c'], 'a\\*c'));
 //=> ['a\\*c']
 
-console.log(micromatch.match(['abc', 'a\\*c'], 'a\\*c', { unescape: true }));
-//=> ['a*c']
+console.log(micromatch(['abc', 'a\\*c'], 'a\\*c', { unescape: true }));
+//=> ['a\\*c']
 ```
 
 <br>
